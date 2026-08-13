@@ -1292,48 +1292,6 @@
       .lb-products .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 6px; }
     }
 
-    /* Editorial gallery under the shop band. Same full-bleed break-out as
-       .lb-products (grid-column 1/-1 + margin-inline: 50% - 50vw), but back on
-       the dark page: a two-up portrait split, then one wide image below, with a
-       thin gutter so the frames read as a single edge-to-edge block. */
-    .lb-gallery {
-      grid-column: 1 / -1;
-      margin-inline: calc(50% - 50vw);
-      margin-block: 0;
-      display: flex;
-      flex-direction: column;
-      gap: clamp(12px, 1.6vw, 24px);
-      /* White band bleeds full-width (continues the shop band above with no
-         dark slivers), but images re-inset to match the navbar exactly: the
-         header runs full-width with 20px side padding at >=761px, so image
-         edges line up with "Shop by team" and the cart. */
-      background: var(--idl-white);
-      padding-inline: 20px;
-      /* Generous white spacer so the last look breathes before the dark
-         newsletter section instead of butting straight against it. */
-      padding-bottom: clamp(48px, 6vw, 96px);
-    }
-    .lb-gallery-pair {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(12px, 1.6vw, 24px);
-    }
-    .lb-gallery-figure { margin: 0; overflow: hidden; background: var(--idl-white); }
-    .lb-gallery-figure img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .lb-gallery-pair .lb-gallery-figure { aspect-ratio: 4 / 5; }
-    .lb-gallery-wide { aspect-ratio: 16 / 9; }
-    @media (max-width: 760px) {
-      /* Mobile navbar drops to 12px side padding (--gutter), so match it. */
-      .lb-gallery { padding-inline: 12px; }
-      .lb-gallery-pair { grid-template-columns: 1fr; }
-      .lb-gallery-wide { aspect-ratio: 4 / 5; }
-    }
-
     /* ==================================================================
        Lookbook storytelling: the detail page reads as a documented shoot,
        not a catalogue. A shared mono kicker labels each beat; numbered
@@ -1422,8 +1380,9 @@
       grid-template-columns: 1fr 1fr;
       gap: clamp(12px, 1.6vw, 24px);
     }
-    .lb-gallery-figure { margin: 0; overflow: hidden; background: var(--idl-white); }
-    .lb-gallery-figure img {
+    .lb-gallery-figure { margin: 0; position: relative; overflow: hidden; background: var(--idl-white); }
+    .lb-gallery-figure img,
+    .lb-gallery-figure video {
       display: block;
       width: 100%;
       height: 100%;
@@ -1431,11 +1390,40 @@
     }
     .lb-gallery-pair .lb-gallery-figure { aspect-ratio: 4 / 5; }
     .lb-gallery-wide { aspect-ratio: 16 / 9; }
+    /* Mute toggle over the gallery video. The clip autoplays muted (browsers
+       require it), so this is the one control that opts the viewer into sound —
+       clicking it counts as the user gesture that lets audio start. */
+    .lb-gallery-mute {
+      position: absolute;
+      z-index: 2;
+      bottom: 16px;
+      right: 16px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(6, 16, 21, 0.55);
+      color: var(--idl-white);
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      transition: background-color 160ms ease, transform 160ms ease;
+    }
+    .lb-gallery-mute:hover { background: rgba(6, 16, 21, 0.8); transform: scale(1.05); }
+    .lb-gallery-mute svg { width: 20px; height: 20px; display: block; }
+    /* Two icons in the button; the is-on class (sound enabled) swaps which shows. */
+    .lb-gallery-mute .icon-on { display: none; }
+    .lb-gallery-mute.is-on .icon-on { display: block; }
+    .lb-gallery-mute.is-on .icon-off { display: none; }
     @media (max-width: 760px) {
       /* Mobile navbar drops to 12px side padding (--gutter), so match it. */
       .lb-gallery { padding-inline: 12px; }
       .lb-gallery-pair { grid-template-columns: 1fr; }
       .lb-gallery-wide { aspect-ratio: 4 / 5; }
+      .lb-gallery-mute { width: 40px; height: 40px; bottom: 12px; right: 12px; }
     }
 
     @media (max-width: 760px) {
@@ -1481,6 +1469,13 @@
       gap: clamp(16px, 2vw, 32px);
       height: 100%;
       padding-inline: max(var(--gutter), calc(50vw - var(--content) / 2));
+      /* The pinned viewport starts at y=0, behind the fixed header, so centring
+         the cards in the full height parks them behind that band — the gap to
+         the header reads smaller than the gap down to the scale. Reserving the
+         header's height at the top moves the centring axis into the visible
+         area so both gaps match. Neutralised in the touch/reduced-motion
+         carousels below, where the reel is not pinned under the header. */
+      padding-top: var(--header-height);
       will-change: transform;
     }
     /* Two equal 480px squares side by side: media left, copy right. */
@@ -1535,6 +1530,20 @@
       background: var(--idl-go-gold);
       will-change: transform;
     }
+    /* Pin/flag cap: the classic CSS-triangle trick, not an image — a 0×0 box
+       with transparent side borders and a coloured top border becomes a solid
+       downward-pointing triangle. -4px each side centres its 10px width over
+       the 2px line: (10 − 2) / 2 = 4. Matched to Crust's own indicator::before. */
+    .lb-reel-indicator::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -4px;
+      right: -4px;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid var(--idl-go-gold);
+    }
 
     /* Touch / reduced-motion: no pinning or hijack — a plain swipeable,
        snap-to-card carousel. JS skips the transform in these modes. */
@@ -1545,6 +1554,7 @@
         overflow-x: auto;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
+        padding-top: 0;
         padding-inline: 16px;
         padding-bottom: 10px;
         scrollbar-width: none;
@@ -1568,6 +1578,7 @@
         transform: none !important;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
+        padding-top: 0;
       }
       .lb-reel-card { scroll-snap-align: center; }
       .lb-reel-scale { display: none; }
@@ -4267,19 +4278,21 @@
        stay in the same rhythm.
        ================================================================== */
 
-    /* The header on the merch landing page stays transparent until the hero
-       wordmark finishes collapsing. There is no wordmark animation here, so
-       the docked bar has to paint on its own. */
-    .lookbooks-page .site-header.scrolled:not(.is-light) {
+    /* The bar stays transparent over the hero until the wordmark finishes
+       collapsing, then paints — so it is gated on .is-compact (the shrunk-logo
+       state), not on .scrolled alone. Without .is-compact here the dark fill
+       appeared the instant you scrolled, while the logo was still at hero size.
+       The base .scrolled:not(.is-compact) rule keeps that window transparent. */
+    .lookbooks-page .site-header.scrolled.is-compact:not(.is-light) {
       background: #050505;
     }
     @media (min-width: 761px) {
-      .lookbooks-page .site-header.scrolled:not(.is-light) {
+      .lookbooks-page .site-header.scrolled.is-compact:not(.is-light) {
         background: rgba(6, 14, 18, 0.92);
         -webkit-backdrop-filter: blur(20px);
         backdrop-filter: blur(20px);
       }
-      .lookbooks-page .site-header.scrolled:not(.is-light)::after { border-bottom: 1px solid rgb(35, 52, 59); }
+      .lookbooks-page .site-header.scrolled.is-compact:not(.is-light)::after { border-bottom: 1px solid rgb(35, 52, 59); }
     }
     /* The white (is-light) bar keeps its surface once docked, too. */
     .lookbooks-page .site-header.scrolled.is-light {
@@ -4304,7 +4317,12 @@
       display: grid;
       align-content: start;
       min-height: calc(100svh - var(--announcement-height));
-      padding: calc(var(--chrome-top) + 88px) 0 48px;
+      /* Stable top inset, NOT var(--chrome-top): that shrinks by the
+         announcement's height the moment body.is-scrolled flips on, so the hero
+         copy jumped up 36px the instant you started scrolling. The hero scrolls
+         away anyway, so pin the inset to the at-rest chrome height and it just
+         stays put. */
+      padding: calc(var(--announcement-height) + var(--header-height) + 88px) 0 48px;
       isolation: isolate;
       overflow: hidden;
       color: var(--idl-white);
@@ -4331,7 +4349,7 @@
     /* Left-align the hero copy to the navbar's edge: the header runs full-width
        with 20px side padding (12px on mobile), so match that instead of the
        wider content gutter. */
-    .lb-hero-inner { display: grid; gap: 22px; padding-inline: 20px; }
+    .lb-hero-inner { display: grid; gap: 12px; padding-inline: 20px; }
     @media (max-width: 760px) { .lb-hero-inner { padding-inline: 12px; } }
     .lb-hero-eyebrow {
       margin: 0;
@@ -4348,7 +4366,9 @@
       margin: 0;
       color: var(--idl-white);
       font-family: NeueHaas, Arial, sans-serif;
-      font-size: clamp(44px, 6vw, 72px);
+      /* Matched to the storefront hero (.hero-split-title): fixed 56px, 400,
+         0.94 line-height, -0.025em tracking. */
+      font-size: 56px;
       font-weight: 400;
       line-height: 0.94;
       letter-spacing: -0.025em;
@@ -4437,17 +4457,29 @@
          and the copy sits centred, giving the word-by-word reveal room to breathe. */
       min-height: 100svh;
       padding-inline: max(var(--gutter), calc(50vw - var(--content) / 2));
-      padding-block: clamp(56px, 7vw, 120px);
       background: var(--idl-white);
       color: var(--idl-button-ink);
+    }
+    /* The copy is centred in one viewport. On desktop the section grows a
+       runway below it (see the media query) and this inner pins to the top, so
+       continuing to scroll scrubs the word reveal in place — the section holds
+       still, grey → black — before it releases and scrolls away. */
+    .lb-editorial-pin {
+      min-height: 100svh;
+      padding-block: clamp(56px, 7vw, 120px);
       /* Centred, stacked composition (Kinetik "event partner" layout): headline,
-         a narrow reading column, then the CTA — all centred on the axis. */
+         a narrow reading column — all centred on the axis. */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
       gap: clamp(22px, 3vw, 36px);
+    }
+    @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+      /* Runway = 60vh of scroll to scrub the reveal through, then release. */
+      .lb-editorial { min-height: 160svh; }
+      .lb-editorial-pin { position: sticky; top: 0; }
     }
     /* Tone flip on the white band: black headline + body, a solid black CTA
        with white label and arrow, and a faint grey footnote. */
@@ -4478,7 +4510,7 @@
       letter-spacing: -0.03em;
       text-transform: none;
     }
-    .lb-edito { margin-top: 0; max-width: 62ch; margin-inline: auto; }
+    .lb-edito { margin-top: 0; max-width: 800px; margin-inline: auto; }
     .lb-edito p {
       margin: 0;
       color: var(--idl-silver);
@@ -4741,7 +4773,9 @@
       .lb-split--flip .lb-split-media { grid-column: 1 / span 6; }
     }
     @media (max-width: 760px) {
-      .lb-hero { min-height: calc(100svh - var(--announcement-height)); padding-top: calc(var(--chrome-top) + 56px); }
+      .lb-hero { min-height: calc(100svh - var(--announcement-height)); padding-top: calc(var(--announcement-height) + var(--header-height) + 56px); }
+      /* Same mobile scale as the storefront hero title. */
+      .lb-hero-title { font-size: clamp(38px, 10.6vw, 46px); }
       .lb-body { padding-block: 0; gap: 0 16px; }
       .lb-block { margin-top: 56px; }
       .lb-editorial { grid-template-columns: 1fr; margin-top: 0; gap: 24px; }
@@ -4900,11 +4934,13 @@
       </section>
 
       <div class="lb-body">
-        <section class="lb-editorial" aria-labelledby="lb-intro-title">
-          <p class="lb-kicker">The Vancouver Capsule</p>
-          <h2 class="lb-catchline" id="lb-intro-title">Season 01, worn the way<br>the crews wear it</h2>
-          <div class="lb-edito">
-            <p>A lookbook is the fastest way to see how a kit actually behaves — how the jersey sits under a hood, how the pants move through a set, which layers hold up between the warehouse and the stage. So we shot the season the same way we shoot the league: on the athletes, in the rooms they train in.</p>
+        <section class="lb-editorial" aria-labelledby="lb-intro-title" data-header-light data-editorial>
+          <div class="lb-editorial-pin">
+            <p class="lb-kicker">The Vancouver Capsule</p>
+            <h2 class="lb-catchline" id="lb-intro-title">Season 01, worn the way<br>the crews wear it</h2>
+            <div class="lb-edito">
+              <p>A lookbook is the fastest way to see how a kit actually behaves — how the jersey sits under a hood, how the pants move through a set, which layers hold up between the warehouse and the stage. So we shot the season the same way we shoot the league: on the athletes, in the rooms they train in.</p>
+            </div>
           </div>
         </section>
 
@@ -4955,7 +4991,7 @@
           </div>
         </section>
 
-        <section class="lb-gallery" aria-label="Season 01 editorial">
+        <section class="lb-gallery" aria-label="Season 01 editorial" data-header-light>
           <div class="lb-gallery-pair">
             <figure class="lb-gallery-figure">
               <img src="lookbook-assets/van-capsule-05.jpg" alt="Season 01 look, street portrait" loading="lazy">
@@ -4967,9 +5003,23 @@
           <figure class="lb-gallery-figure lb-gallery-wide">
             <img src="lookbook-assets/van-capsule-09.jpg" alt="Season 01 crew on location" loading="lazy">
           </figure>
+          <div class="lb-gallery-pair">
+            <figure class="lb-gallery-figure">
+              <video autoplay muted loop playsinline preload="metadata" poster="Asset Photo/WIDE/ACT_QS2.webp" aria-hidden="true" tabindex="-1">
+                <source src="standout-assets/hero-right-vancouver-capsule.mp4" type="video/mp4">
+              </video>
+              <button class="lb-gallery-mute" type="button" data-gallery-mute aria-label="Unmute video">
+                <svg class="icon-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" x2="16" y1="9" y2="15"></line><line x1="16" x2="22" y1="9" y2="15"></line></svg>
+                <svg class="icon-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+              </button>
+            </figure>
+            <figure class="lb-gallery-figure">
+              <img src="lookbook-assets/van-capsule-03.jpg" alt="Season 01 look, movement" loading="lazy">
+            </figure>
+          </div>
         </section>
 
-        <section class="lb-products" aria-labelledby="lb-shop-title">
+        <section class="lb-products" aria-labelledby="lb-shop-title" data-header-light>
           <div class="lb-products-head">
             <h2 id="lb-shop-title">Shop the Vancouver Capsule</h2>
           </div>
@@ -5161,6 +5211,8 @@
 
   <script src="team-mega-menu-state.js"></script>
   <script src="currency-selector.js"></script>
+  <script src="header-tone.js"></script>
+  <script src="hero-logo-scroll.js"></script>
   <script>
     (function lookbooksPage() {
       const body = document.body;
@@ -5177,21 +5229,80 @@
       const standingCta = document.querySelector('.lb-standing-cta');
       const megaMenuApi = window.IDLTeamMegaMenu;
 
+      // Theme-aware header, same mechanism as the storefront: the white sections
+      // carry data-header-light, and the bar flips to its light treatment
+      // whenever one of them overlaps the header band (y=0 to header height).
+      // Over the dark hero/reel/footer it stays dark. header-tone.js supplies
+      // the pure overlap test.
+      const headerToneApi = window.IDLHeaderTone;
+      const lightSections = [...document.querySelectorAll('[data-header-light]')];
+
+      // The shrinking wordmark (below) owns .is-compact so the bar and the logo
+      // shrink together off one threshold. Until that wiring claims it, the bar
+      // falls back to tracking .scrolled on its own — and it always does under
+      // reduced motion, where the logo script bails out.
+      let heroLogoOwnsCompact = false;
+
       // The bar sits absolute under the announcement and only goes fixed once
       // the announcement has scrolled fully away — flipping earlier teleports it
-      // up by the announcement's height. is-compact is set with it because this
-      // page has no shrinking wordmark to hand that class over.
+      // up by the announcement's height.
       function syncHeader() {
         const threshold = announcement ? announcement.offsetHeight : 0;
         const docked = window.scrollY > threshold;
         header.classList.toggle('scrolled', docked);
-        header.classList.toggle('is-compact', docked);
+        if (!heroLogoOwnsCompact) header.classList.toggle('is-compact', docked);
         body.classList.toggle('is-scrolled', docked);
         if (standingCta) standingCta.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.5);
+        if (headerToneApi) {
+          const rects = lightSections.map(section => section.getBoundingClientRect());
+          header.classList.toggle('is-light', headerToneApi.anyOverlapsBand(rects, header.offsetHeight));
+        }
       }
       syncHeader();
       window.addEventListener('scroll', syncHeader, { passive: true });
       window.addEventListener('resize', syncHeader);
+
+      // Shrinking wordmark, same as the storefront: the logo sits big over the
+      // hero and settles to its header size on scroll. hero-logo-scroll.js gives
+      // the pure maths; the scale is flipped between two states (not tracked per
+      // frame) so a CSS transition runs it on the compositor, and .is-compact
+      // rides the same flip. Skipped under reduced motion — the logo stays at
+      // header size and syncHeader keeps .is-compact on its own threshold.
+      const heroLogoApi = window.IDLHeroLogoScroll;
+      const brandMark = document.querySelector('.brand-mark');
+      if (heroLogoApi && brandMark && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        let logoScale = 1;
+        let logoFrame = null;
+        let logoShrunk = false;
+        heroLogoOwnsCompact = true;
+
+        const measureLogo = () => {
+          logoScale = heroLogoApi.maxScaleFor(
+            window.innerWidth,
+            brandMark.offsetWidth,
+            brandMark.offsetHeight,
+            header ? header.offsetHeight : 0
+          );
+        };
+        const paintLogo = () => {
+          logoFrame = null;
+          const shrunk = heroLogoApi.shrinkStateAt(window.scrollY, logoShrunk);
+          if (shrunk === logoShrunk) return;
+          logoShrunk = shrunk;
+          brandMark.style.setProperty('--logo-scale', shrunk ? '1' : logoScale.toFixed(4));
+          header.classList.toggle('is-compact', shrunk);
+        };
+        const queueLogo = () => {
+          if (logoFrame === null) logoFrame = requestAnimationFrame(paintLogo);
+        };
+
+        measureLogo();
+        logoShrunk = heroLogoApi.shrinkStateAt(window.scrollY, false);
+        brandMark.style.setProperty('--logo-scale', logoShrunk ? '1' : logoScale.toFixed(4));
+        header.classList.toggle('is-compact', logoShrunk);
+        window.addEventListener('scroll', queueLogo, { passive: true });
+        window.addEventListener('resize', () => { measureLogo(); queueLogo(); });
+      }
 
       let teamMenuOpen = false;
       function setTeamMenu(action) {
@@ -5263,21 +5374,28 @@
         });
       }
 
-      // The films loop on their own; the control is a genuine pause so the page
-      // can be stilled rather than a decorative play badge.
-      document.querySelectorAll('[data-lb-video-toggle]').forEach((toggle) => {
-        const video = toggle.closest('.lb-media').querySelector('[data-lb-video]');
-        // The icon tracks the element's own play/pause events rather than the
-        // click, so a blocked autoplay still leaves the button telling the truth.
-        function syncIcon() {
-          toggle.setAttribute('aria-label', video.paused ? 'Play film' : 'Pause film');
-          toggle.innerHTML = '<i data-lucide="' + (video.paused ? 'play' : 'pause') + '" aria-hidden="true"></i>';
-          if (window.lucide) window.lucide.createIcons();
+      // Gallery video: autoplays muted; this button opts the viewer into sound.
+      // The class + label track the video's own volumechange event rather than
+      // the click, so the icon stays truthful even if a browser overrides mute.
+      document.querySelectorAll('[data-gallery-mute]').forEach((toggle) => {
+        const video = toggle.closest('.lb-gallery-figure').querySelector('video');
+        if (!video) return;
+        function sync() {
+          const on = !video.muted;
+          toggle.classList.toggle('is-on', on);
+          toggle.setAttribute('aria-label', on ? 'Mute video' : 'Unmute video');
         }
-        video.addEventListener('play', syncIcon);
-        video.addEventListener('pause', syncIcon);
-        toggle.addEventListener('click', () => { if (video.paused) video.play(); else video.pause(); });
-        syncIcon();
+        // volumechange fires a tick late, so update straight away on click for
+        // an instant icon swap; the listener still catches any browser-driven
+        // mute change that did not come through the button.
+        video.addEventListener('volumechange', sync);
+        toggle.addEventListener('click', () => {
+          video.muted = !video.muted;
+          // Unmuting mid-autoplay: make sure it is actually playing so sound starts.
+          if (!video.muted && video.paused) video.play().catch(() => {});
+          sync();
+        });
+        sync();
       });
 
       const footerSignup = document.querySelector('.footer-signup');
@@ -5313,6 +5431,49 @@
 
       function pinned() { return !mqTouch.matches && !mqMotion.matches; }
 
+      // Mechanical ratchet: a short filtered-noise tick each time the needle
+      // steps to the next ruler mark, synthesised with Web Audio so there is no
+      // asset to ship. Browsers keep an AudioContext suspended until a user
+      // gesture, so it is created/resumed on the first interaction and stays
+      // silent until then — nothing plays on load.
+      var audio = null, noiseBuffer = null, lastNotch = null;
+      function ensureAudio() {
+        if (audio) return;
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audio = new AC();
+        // One 30ms white-noise buffer, reused for every tick.
+        var len = Math.floor(audio.sampleRate * 0.03);
+        noiseBuffer = audio.createBuffer(1, len, audio.sampleRate);
+        var data = noiseBuffer.getChannelData(0);
+        for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      }
+      function unlockAudio() {
+        ensureAudio();
+        if (audio && audio.state === 'suspended') audio.resume();
+      }
+      ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
+        window.addEventListener(ev, unlockAudio, { passive: true });
+      });
+      function playTick() {
+        if (!audio || audio.state !== 'running' || document.hidden) return;
+        var t = audio.currentTime;
+        var src = audio.createBufferSource();
+        src.buffer = noiseBuffer;
+        var band = audio.createBiquadFilter();
+        band.type = 'bandpass';
+        // Small random spread so repeated ticks don't sound like one machine tone.
+        band.frequency.value = 2400 + Math.random() * 500;
+        band.Q.value = 1.1;
+        var gain = audio.createGain();
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.05, t + 0.001);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+        src.connect(band).connect(gain).connect(audio.destination);
+        src.start(t);
+        src.stop(t + 0.03);
+      }
+
       function layout() {
         if (!pinned()) {
           reel.style.height = '';
@@ -5321,9 +5482,17 @@
           active = false;
           return;
         }
-        distance = Math.max(0, track.scrollWidth - viewport.clientWidth);
+        // Flex containers drop their end padding (padding-right in LTR) from
+        // scrollWidth once the items overflow, so scrollWidth stops at the last
+        // card's right edge. Left over as-is, the track travels until that edge
+        // hits the viewport edge and the last card sits flush right — no gutter
+        // to mirror the left one. Add the right padding back so the final frame
+        // is inset by the same amount the first frame is.
+        var padRight = parseFloat(getComputedStyle(track).paddingRight) || 0;
+        distance = Math.max(0, track.scrollWidth + padRight - viewport.clientWidth);
         reel.style.height = (window.innerHeight + distance) + 'px';
         active = true;
+        lastNotch = null;   // re-seed after a relayout so resizing can't fire a tick
         render();
       }
 
@@ -5349,8 +5518,13 @@
           // the 10px ticks a little further with every step. Snapping the pixel
           // position instead keeps the needle exactly on a line all the way.
           var travel = scale.clientWidth - indicator.offsetWidth;
+          var notch = Math.round(p * travel / 10);
           indicator.style.transform =
-            'translate3d(' + Math.min(travel, Math.round(p * travel / 10) * 10) + 'px,0,0)';
+            'translate3d(' + Math.min(travel, notch * 10) + 'px,0,0)';
+          // One tick per mark crossed. Seed lastNotch on the first pass (and on
+          // relayout) without firing, so nothing sounds just from arriving here.
+          if (lastNotch !== null && notch !== lastNotch) playTick();
+          lastNotch = notch;
         }
       }
 
@@ -5410,12 +5584,35 @@
 
       if (!items.length) return;
 
+      // When the editorial section pins (desktop + motion-safe), the reveal is
+      // driven by how far we have scrolled through its runway rather than by the
+      // paragraph's viewport position: at pin-start (section fully open) the
+      // copy is still all grey, and continuing to scroll scrubs it grey → black
+      // while the section holds still. On touch / reduced-motion there is no
+      // pin, so it falls back to the paragraph travelling up through view.
+      var editorial = document.querySelector('[data-editorial]');
+      var mqPin = window.matchMedia('(min-width: 761px) and (prefers-reduced-motion: no-preference)');
+
       function update() {
         var vh = window.innerHeight;
-        var start = vh * 0.85, end = vh * 0.4;      // reveal window as it scrolls up
+        var pinned = editorial && mqPin.matches;
+        var pinProg = 0;
+        if (pinned) {
+          var runway = editorial.offsetHeight - vh;
+          var raw = runway > 0 ? -editorial.getBoundingClientRect().top / runway : 0;
+          // Finish the reveal before the pin releases so the last words land
+          // black while the section is still held, not as it starts to leave.
+          pinProg = Math.min(1, Math.max(0, raw / 0.85));
+        }
         items.forEach(function (item) {
-          var prog = (start - item.el.getBoundingClientRect().top) / (start - end);
-          prog = Math.min(1, Math.max(0, prog));
+          var prog;
+          if (pinned) {
+            prog = pinProg;
+          } else {
+            var start = vh * 0.85, end = vh * 0.4;    // paragraph travels up through view
+            prog = (start - item.el.getBoundingClientRect().top) / (start - end);
+            prog = Math.min(1, Math.max(0, prog));
+          }
           var n = item.words.length;
           var lit = prog * n;
           for (var i = 0; i < n; i++) {
