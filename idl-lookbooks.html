@@ -4476,9 +4476,17 @@
       text-align: center;
       gap: clamp(22px, 3vw, 36px);
     }
+    /* Relative wrapper so the pulled-up editorial pins against it. Harmless on
+       touch/reduced-motion, where the curtain is just a passthrough. */
+    .lb-curtain { position: relative; }
     @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
-      /* Runway = 60vh of scroll to scrub the reveal through, then release. */
-      .lb-editorial { min-height: 160svh; }
+      /* Pull the editorial up a full viewport so it sits behind the hero
+         (z-index 0 vs the hero's 1) from scroll 0, and give it a 260svh runway.
+         The sticky inner then holds through the hero's exit (~100vh of cover)
+         plus the reveal scrub (~60vh) before it releases — 260 − 100(pin) =
+         160vh of hold. The editorial's net flow height stays 160vh (260 − 100
+         margin), so the reel below is unaffected. */
+      .lb-editorial { min-height: 260svh; margin-top: -100svh; }
       .lb-editorial-pin { position: sticky; top: 0; }
     }
     /* Tone flip on the white band: black headline + body, a solid black CTA
@@ -4924,16 +4932,21 @@
     </nav>
 
     <main>
-      <section class="lb-hero" id="top" aria-labelledby="lb-hero-title">
-        <img class="lb-hero-media" src="lookbook-assets/van-capsule-11.jpg" alt="" aria-hidden="true">
-        <span class="lb-hero-scrim" aria-hidden="true"></span>
-        <div class="lb-hero-inner">
-          <h1 class="lb-hero-title" id="lb-hero-title"><span>The Vancouver Capsule,</span><span>shot on the clock.</span></h1>
-          <p class="lb-hero-note">One crew, one warehouse, one full session — from 6am call time to last light. Here is how the kit actually moved.</p>
-        </div>
-      </section>
+      <!-- Curtain: the hero (z-index above) scrolls up and off, uncovering the
+           editorial pinned stationary behind it — the Crust "Section 1 slides
+           off a fixed Section 2" reveal. Both live in one relative wrapper so
+           the editorial can be pulled up behind the hero (see .lb-curtain CSS)
+           without the lb-body grid interfering. Desktop + motion-safe only. -->
+      <div class="lb-curtain" data-curtain>
+        <section class="lb-hero" id="top" aria-labelledby="lb-hero-title">
+          <img class="lb-hero-media" src="lookbook-assets/van-capsule-11.jpg" alt="" aria-hidden="true">
+          <span class="lb-hero-scrim" aria-hidden="true"></span>
+          <div class="lb-hero-inner">
+            <h1 class="lb-hero-title" id="lb-hero-title"><span>The Vancouver Capsule,</span><span>shot on the clock.</span></h1>
+            <p class="lb-hero-note">One crew, one warehouse, one full session — from 6am call time to last light. Here is how the kit actually moved.</p>
+          </div>
+        </section>
 
-      <div class="lb-body">
         <section class="lb-editorial" aria-labelledby="lb-intro-title" data-header-light data-editorial>
           <div class="lb-editorial-pin">
             <p class="lb-kicker">The Vancouver Capsule</p>
@@ -4943,7 +4956,9 @@
             </div>
           </div>
         </section>
+      </div>
 
+      <div class="lb-body">
         <section class="lb-reel" aria-label="Season 01, scene by scene" data-reel>
           <div class="lb-reel-viewport">
             <div class="lb-reel-track" data-reel-track>
@@ -5236,6 +5251,11 @@
       // the pure overlap test.
       const headerToneApi = window.IDLHeaderTone;
       const lightSections = [...document.querySelectorAll('[data-header-light]')];
+      // The editorial (a light section) is pulled up behind the hero, so it
+      // overlaps the header band from scroll 0 — but the dark hero paints over
+      // it there. While the hero still covers the band the bar must read dark;
+      // it flips light only once the hero has cleared the top.
+      const heroCover = document.querySelector('.lb-hero');
 
       // The shrinking wordmark (below) owns .is-compact so the bar and the logo
       // shrink together off one threshold. Until that wiring claims it, the bar
@@ -5254,8 +5274,11 @@
         body.classList.toggle('is-scrolled', docked);
         if (standingCta) standingCta.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.5);
         if (headerToneApi) {
+          const band = header.offsetHeight;
           const rects = lightSections.map(section => section.getBoundingClientRect());
-          header.classList.toggle('is-light', headerToneApi.anyOverlapsBand(rects, header.offsetHeight));
+          const heroRect = heroCover && heroCover.getBoundingClientRect();
+          const heroInBand = heroRect && headerToneApi.overlapsBand(heroRect.top, heroRect.bottom, band);
+          header.classList.toggle('is-light', !heroInBand && headerToneApi.anyOverlapsBand(rects, band));
         }
       }
       syncHeader();
@@ -5584,25 +5607,27 @@
 
       if (!items.length) return;
 
-      // When the editorial section pins (desktop + motion-safe), the reveal is
-      // driven by how far we have scrolled through its runway rather than by the
-      // paragraph's viewport position: at pin-start (section fully open) the
-      // copy is still all grey, and continuing to scroll scrubs it grey → black
-      // while the section holds still. On touch / reduced-motion there is no
-      // pin, so it falls back to the paragraph travelling up through view.
+      // Curtain reveal (desktop + motion-safe): the editorial is pinned
+      // stationary behind the hero, so the reveal is timed off the HERO's exit,
+      // not the editorial's own position. It stays all grey while the hero
+      // still covers the band, hits 0 the instant the hero clears the top, then
+      // scrubs grey → black over the next REVEAL_VH of scroll while the section
+      // holds still. On touch / reduced-motion there is no pin, so it falls back
+      // to the paragraph travelling up through view.
       var editorial = document.querySelector('[data-editorial]');
+      var heroSection = document.querySelector('.lb-hero');
       var mqPin = window.matchMedia('(min-width: 761px) and (prefers-reduced-motion: no-preference)');
+      var REVEAL_VH = 0.6;   // scrub distance after the hero has gone
 
       function update() {
         var vh = window.innerHeight;
-        var pinned = editorial && mqPin.matches;
+        var pinned = editorial && heroSection && mqPin.matches;
         var pinProg = 0;
         if (pinned) {
-          var runway = editorial.offsetHeight - vh;
-          var raw = runway > 0 ? -editorial.getBoundingClientRect().top / runway : 0;
-          // Finish the reveal before the pin releases so the last words land
-          // black while the section is still held, not as it starts to leave.
-          pinProg = Math.min(1, Math.max(0, raw / 0.85));
+          // -heroBottom: negative while the hero covers the viewport, 0 the
+          // moment it clears the top, positive as it continues off.
+          var heroBottom = heroSection.getBoundingClientRect().bottom;
+          pinProg = Math.min(1, Math.max(0, -heroBottom / (vh * REVEAL_VH)));
         }
         items.forEach(function (item) {
           var prog;
