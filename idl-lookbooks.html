@@ -1211,11 +1211,12 @@
     .lb-products-head { margin-bottom: 28px; }
     .lb-products-head h2 {
       margin: 0;
-      font-size: clamp(24px, 3vw, 34px);
-      font-weight: 900;
+      /* Size + weight matched to .lb-catchline ("Season 01, worn the way…"). */
+      font-size: 32px;
+      font-weight: 500;
       line-height: 1.05;
       letter-spacing: -0.01em;
-      text-transform: uppercase;
+      text-transform: none;
     }
     .lb-products-head p { margin: 8px 0 0; max-width: 52ch; color: rgba(12, 15, 19, 0.5); font-size: 15px; line-height: 1.5; }
     /* Product tiles use the exact #team-kits kit-showcase grid metrics:
@@ -1331,6 +1332,248 @@
       .lb-gallery { padding-inline: 12px; }
       .lb-gallery-pair { grid-template-columns: 1fr; }
       .lb-gallery-wide { aspect-ratio: 4 / 5; }
+    }
+
+    /* ==================================================================
+       Lookbook storytelling: the detail page reads as a documented shoot,
+       not a catalogue. A shared mono kicker labels each beat; numbered
+       "scenes" alternate image + caption down the dark page; a craft strip
+       and a pull-quote break the rhythm; the shop lands last, as the payoff.
+       ================================================================== */
+    .lb-kicker {
+      margin: 0;
+      font: 700 12px/14px CarbonPlus, monospace;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--idl-go-gold);
+    }
+    /* On the white intro/shop bands the lime kicker has no contrast, so it
+       flips to a muted ink. */
+    .lb-editorial .lb-kicker,
+    .lb-products-head .lb-kicker { color: rgba(12, 15, 19, 0.45); }
+    .lb-editorial .lb-kicker { margin-bottom: 4px; }
+
+    /* ---------- Scenes ---------- */
+    .lb-scene {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 0 20px;
+      align-items: center;
+      margin-block: clamp(72px, 10vw, 148px);
+    }
+    .lb-scene-media { grid-column: 1 / 8; margin: 0; overflow: hidden; }
+    .lb-scene-copy { grid-column: 9 / 13; }
+    /* Alternate the eye: even scenes put the image on the right. */
+    .lb-scene--flip .lb-scene-media { grid-column: 6 / 13; order: 2; }
+    .lb-scene--flip .lb-scene-copy { grid-column: 1 / 5; order: 1; }
+    .lb-scene-media img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+    }
+    .lb-scene-title {
+      margin: 0 0 16px;
+      font-family: NeueHaas, Arial, sans-serif;
+      font-size: clamp(26px, 3vw, 42px);
+      font-weight: 400;
+      line-height: 1.0;
+      letter-spacing: -0.025em;
+      color: var(--idl-white);
+      text-wrap: balance;
+    }
+    /* No bottom margin: this is now the last element in .lb-reel-copy, so a
+       trailing gap would throw the block off-centre in the card. */
+    .lb-scene-text {
+      margin: 0;
+      max-width: 42ch;
+      color: rgba(213, 215, 217, 0.78);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    /* Editorial gallery above the shop band. Same full-bleed break-out as
+       .lb-products (grid-column 1/-1 + margin-inline: 50% - 50vw): a two-up
+       portrait split, then one wide image below, with a thin gutter so the
+       frames read as a single edge-to-edge block. */
+    .lb-gallery {
+      grid-column: 1 / -1;
+      margin-inline: calc(50% - 50vw);
+      margin-block: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 1.6vw, 24px);
+      /* White band bleeds full-width (runs into the shop band below with no
+         dark slivers), but images re-inset to match the navbar exactly: the
+         header runs full-width with 20px side padding at >=761px, so image
+         edges line up with "Shop by team" and the cart. */
+      background: var(--idl-white);
+      padding-inline: 20px;
+      /* Generous white spacer top and bottom: the first look needs air after
+         the dark reel above it (in the original layout this band followed the
+         white shop band, so only the bottom was padded), and the last look
+         needs to breathe before the shop heading. */
+      padding-block: clamp(48px, 6vw, 96px);
+    }
+    .lb-gallery-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(12px, 1.6vw, 24px);
+    }
+    .lb-gallery-figure { margin: 0; overflow: hidden; background: var(--idl-white); }
+    .lb-gallery-figure img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .lb-gallery-pair .lb-gallery-figure { aspect-ratio: 4 / 5; }
+    .lb-gallery-wide { aspect-ratio: 16 / 9; }
+    @media (max-width: 760px) {
+      /* Mobile navbar drops to 12px side padding (--gutter), so match it. */
+      .lb-gallery { padding-inline: 12px; }
+      .lb-gallery-pair { grid-template-columns: 1fr; }
+      .lb-gallery-wide { aspect-ratio: 4 / 5; }
+    }
+
+    @media (max-width: 760px) {
+      .lb-scene { grid-template-columns: 1fr; gap: 24px; margin-block: clamp(56px, 14vw, 88px); }
+      .lb-scene-media,
+      .lb-scene-copy,
+      .lb-scene--flip .lb-scene-media,
+      .lb-scene--flip .lb-scene-copy { grid-column: 1 / -1; }
+      .lb-scene--flip .lb-scene-media { order: 1; }
+      .lb-scene--flip .lb-scene-copy { order: 2; }
+      .lb-scene-media img { aspect-ratio: 4 / 5; }
+      .lb-details { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .lb-details figure:last-child { grid-column: 1 / -1; }
+      .lb-details figure:last-child img { aspect-ratio: 16 / 9; }
+    }
+
+    /* ---------- Interactive scene reel ----------
+       The four numbered scenes become a horizontal reel: the viewport pins for
+       the section's height while vertical scroll drives the track sideways, so
+       the story is revealed one image-led card at a time (progressive
+       disclosure beats a wall of text). JS sets the section height and the
+       track transform; on touch / reduced-motion it degrades to a native
+       horizontal scroll-snap carousel — same cards, no scroll hijacking. */
+    .lb-reel {
+      grid-column: 1 / -1;
+      margin-inline: calc(50% - 50vw);
+      position: relative;
+    }
+    .lb-reel-viewport {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: hidden;
+      display: grid;
+      /* Two rows now that the head is gone: the track takes the space, the
+         scale sits under it. The explicit minmax(0,1fr) column matters — the
+         default auto column would be sized by the track's full scroll width
+         (all four cards), stretching the scale far past the viewport. */
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: 1fr auto;
+      background: var(--idl-bg);
+    }
+    .lb-reel-track {
+      display: flex;
+      align-items: center;
+      gap: clamp(16px, 2vw, 32px);
+      height: 100%;
+      padding-inline: max(var(--gutter), calc(50vw - var(--content) / 2));
+      will-change: transform;
+    }
+    /* Two equal 480px squares side by side: media left, copy right. */
+    .lb-reel-card {
+      /* box-sizing is border-box here, so the 1px border would otherwise eat
+         into the content box and leave each half 2px short of square — hence
+         the explicit border allowance in width/height. */
+      --reel-border: 1px;
+      --reel-square: 480px;
+      flex: 0 0 auto;
+      width: calc(var(--reel-square) * 2 + var(--reel-border) * 2);
+      height: calc(var(--reel-square) + var(--reel-border) * 2);
+      display: grid;
+      grid-template-columns: var(--reel-square) var(--reel-square);
+      background: var(--idl-panel);
+      border: var(--reel-border) solid var(--idl-line);
+      overflow: hidden;
+    }
+    .lb-reel-media { margin: 0; height: 100%; overflow: hidden; }
+    .lb-reel-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    /* Same radial lift as the promo popup panel — brightest at the centre of
+       the square, falling off to the edges. */
+    .lb-reel-copy {
+      padding: clamp(24px, 3vw, 46px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: radial-gradient(50% 50%, rgb(10, 29, 38) 0%, rgb(9, 20, 26) 100%);
+    }
+    /* Reuse the scene type styles inside the cards; drop the paragraph's max
+       width so it fills the copy column. */
+    .lb-reel-copy .lb-scene-text { max-width: none; }
+    /* Measurement readout, after the Crust "grind range" scale: a 40px ruler of
+       hairline ticks every 10px with a single accent needle riding it. The
+       needle is stepped (see the reel script) so it lands ON the ticks rather
+       than sliding between them — mechanical against the eased card travel. */
+    .lb-reel-scale {
+      position: relative;
+      height: 40px;
+      margin-inline: max(var(--gutter), calc(50vw - var(--content) / 2));
+      margin-bottom: 28px;
+      background: repeating-linear-gradient(90deg,
+        var(--idl-line) 0, var(--idl-line) 0.5px,
+        transparent 0, transparent 10px);
+    }
+    .lb-reel-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 40px;
+      background: var(--idl-go-gold);
+      will-change: transform;
+    }
+
+    /* Touch / reduced-motion: no pinning or hijack — a plain swipeable,
+       snap-to-card carousel. JS skips the transform in these modes. */
+    @media (max-width: 760px) {
+      .lb-reel-viewport { position: static; height: auto; }
+      .lb-reel-track {
+        transform: none !important;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding-inline: 16px;
+        padding-bottom: 10px;
+        scrollbar-width: none;
+      }
+      .lb-reel-track::-webkit-scrollbar { display: none; }
+      .lb-reel-card {
+        width: min(86vw, 380px);
+        height: auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        scroll-snap-align: center;
+      }
+      /* Stacked card — the square comes from the ratio here instead of the
+         grid column, matching the desktop 1:1 crop. */
+      .lb-reel-media { aspect-ratio: 1 / 1; height: auto; }
+      .lb-reel-scale { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lb-reel-viewport { position: static; height: auto; }
+      .lb-reel-track {
+        transform: none !important;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+      }
+      .lb-reel-card { scroll-snap-align: center; }
+      .lb-reel-scale { display: none; }
     }
 
     .kit-showcase {
@@ -2921,7 +3164,14 @@
     /* The shot sets the modal height; the copy panel stretches to match it.
        --look-hold drives the .look-dot fill this borrows from the capsule
        stage, so it has to match the rotation interval in the script. */
-    .promo-popup-media { position: relative; height: 480px; --look-hold: 3200ms; }
+    /* Same radial lift as .promo-popup-panel, so the two halves read as one
+       surface — it shows through while the slideshow images cross-fade. */
+    .promo-popup-media {
+      position: relative;
+      height: 480px;
+      --look-hold: 3200ms;
+      background: radial-gradient(50% 50%, rgb(10, 29, 38) 0%, rgb(9, 20, 26) 100%);
+    }
     /* The six team shots are stacked and cross-faded in place, so the panel
        height never moves as they cycle. */
     .promo-popup-media img {
@@ -4042,15 +4292,24 @@
     }
 
     /* ---------- Hero ---------- */
+    /* Section 1 → Section 2 reveal. No pin/sticky/fixed, no transform, no
+       entrance animation on either section: the two sit stacked in plain
+       document flow, so scrolling the hero up is *itself* what uncovers
+       .lb-editorial from the bottom edge. The only thing declared here is the
+       stacking order — the hero paints above .lb-editorial for as long as the
+       two share the viewport, so the handoff reads as Section 1 sliding off
+       Section 2 rather than two unrelated blocks passing by.
+       min-height + the announcement bar together fill exactly one viewport, so
+       at scroll 0 Section 1 covers the screen and Section 2 starts off-screen. */
     .lb-hero {
       position: relative;
+      z-index: 1;
       display: grid;
       align-content: start;
-      /* Hero fills exactly one screen: announcement bar + hero = one viewport,
-         so the whole image sits above the fold with no overscroll (Kinetik-style). */
       min-height: calc(100svh - var(--announcement-height));
       padding: calc(var(--chrome-top) + 88px) 0 48px;
       isolation: isolate;
+      overflow: hidden;
       color: var(--idl-white);
     }
     .lb-hero-media {
@@ -4072,7 +4331,11 @@
         linear-gradient(180deg, rgba(4, 10, 13, 0.62) 0%, rgba(4, 10, 13, 0) 30%),
         linear-gradient(0deg, var(--idl-bg) 0%, rgba(6, 16, 21, 0) 46%);
     }
-    .lb-hero-inner { display: grid; gap: 22px; }
+    /* Left-align the hero copy to the navbar's edge: the header runs full-width
+       with 20px side padding (12px on mobile), so match that instead of the
+       wider content gutter. */
+    .lb-hero-inner { display: grid; gap: 22px; padding-inline: 20px; }
+    @media (max-width: 760px) { .lb-hero-inner { padding-inline: 12px; } }
     .lb-hero-eyebrow {
       margin: 0;
       color: var(--idl-go-gold);
@@ -4163,11 +4426,19 @@
        remaining third on the right. Left-aligned, wide gutter between. */
     .lb-editorial {
       grid-column: 1 / -1;
+      /* Underneath .lb-hero (z-index: 1) while the two share the viewport, so
+         the hero slides off this rather than the other way round. Full-bleed
+         and square either way — no radius, no shadow, nothing card-like. */
+      position: relative;
+      z-index: 0;
       /* Full-bleed white band: break out of the centred measure to the viewport
          edges, then re-inset the content back to the 1276px column with padding.
          :root and .site-shell already clip the x-overflow, so no stray scrollbar. */
       margin-inline: calc(50% - 50vw);
       margin-block: 0;
+      /* Full screen, like the Crust "Lead" section: the intro owns one viewport
+         and the copy sits centred, giving the word-by-word reveal room to breathe. */
+      min-height: 100svh;
       padding-inline: max(var(--gutter), calc(50vw - var(--content) / 2));
       padding-block: clamp(56px, 7vw, 120px);
       background: var(--idl-white);
@@ -4177,6 +4448,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
       gap: clamp(22px, 3vw, 36px);
     }
@@ -4205,18 +4477,33 @@
       max-width: none;
       font-size: 32px;
       font-weight: 500;
-      line-height: 1.04;
-      letter-spacing: -0.02em;
+      line-height: 38px;
+      letter-spacing: -0.03em;
       text-transform: none;
     }
     .lb-edito { margin-top: 0; max-width: 62ch; margin-inline: auto; }
     .lb-edito p {
       margin: 0;
       color: var(--idl-silver);
-      font-size: 16px;
-      line-height: 1.62;
+      /* Lead-sized on the full-screen intro (Crust scale), not body copy. */
+      font-size: clamp(21px, 2.4vw, 32px);
+      line-height: 1.45;
+      letter-spacing: -0.01em;
     }
     .lb-edito p + p { margin-top: 18px; }
+    /* Scroll-reveal: the intro copy lights up word by word as the section
+       scrolls through view (progressive disclosure — invites reading, à la the
+       Crust "Lead" paragraph). JS wraps each word in .lb-word and adds
+       .is-revealing; without JS or with reduced motion the words stay fully lit. */
+    /* Not scoped to .lb-edito: the pull quote uses the same reveal. */
+    .is-revealing .lb-word {
+      opacity: 0.2;
+      transition: opacity 0.12s linear;
+      will-change: opacity;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .is-revealing .lb-word { opacity: 1 !important; transition: none; }
+    }
     .lb-cta-row {
       margin-top: 0;
       display: flex;
@@ -4506,7 +4793,7 @@
         </div>
       </div>
     </aside>
-    <header class="site-header is-light">
+    <header class="site-header">
       <div class="header-inner content">
         <a class="brand-mark" href="idl-merch-redesign-v2.html#top" aria-label="IDL Merch home">
           <img src="fieldbook-assets/idl-live-logo.svg" alt="IDL">
@@ -4524,8 +4811,8 @@
           <a class="nav-link has-chevron" href="idl-merch-redesign-v2.html#team-kits">
             Collections <i data-lucide="chevron-down" aria-hidden="true"></i>
           </a>
-          <a class="nav-link has-chevron" href="idl-lookbooks-index.html">
-            Lookbooks <i data-lucide="chevron-down" aria-hidden="true"></i>
+          <a class="nav-link" href="idl-lookbooks-index.html">
+            Lookbooks
           </a>
         </div>
 
@@ -4606,20 +4893,89 @@
     </nav>
 
     <main>
-      <section class="lb-hero" id="top" aria-label="Season 01 lookbook">
+      <section class="lb-hero" id="top" aria-labelledby="lb-hero-title">
         <img class="lb-hero-media" src="lookbook-assets/van-capsule-11.jpg" alt="" aria-hidden="true">
+        <span class="lb-hero-scrim" aria-hidden="true"></span>
+        <div class="lb-hero-inner">
+          <h1 class="lb-hero-title" id="lb-hero-title"><span>The Vancouver Capsule,</span><span>shot on the clock.</span></h1>
+          <p class="lb-hero-note">One crew, one warehouse, one full session — from 6am call time to last light. Here is how the kit actually moved.</p>
+        </div>
       </section>
 
       <div class="lb-body">
         <section class="lb-editorial" aria-labelledby="lb-intro-title">
+          <p class="lb-kicker">The Vancouver Capsule</p>
           <h2 class="lb-catchline" id="lb-intro-title">Season 01, worn the way<br>the crews wear it</h2>
           <div class="lb-edito">
-            <p>A lookbook is the fastest way to see how a kit actually behaves — how the jersey sits under a hood, how the pants move through a set, which layers hold up between the warehouse and the stage. So we shot the whole season the same way we shoot the league: on the athletes, in the rooms they train in.</p>
-            <p>Six crews, two city capsules, one field pack. Browse the season below, then take any look straight into the shop.</p>
+            <p>A lookbook is the fastest way to see how a kit actually behaves — how the jersey sits under a hood, how the pants move through a set, which layers hold up between the warehouse and the stage. So we shot the season the same way we shoot the league: on the athletes, in the rooms they train in.</p>
           </div>
         </section>
 
-        <section class="lb-products" aria-label="Shop Season 01">
+        <section class="lb-reel" aria-label="Season 01, scene by scene" data-reel>
+          <div class="lb-reel-viewport">
+            <div class="lb-reel-track" data-reel-track>
+              <article class="lb-reel-card" aria-labelledby="scene-01-title">
+                <figure class="lb-reel-media">
+                  <img src="lookbook-assets/van-capsule-01.jpg" alt="Athlete in the IDL Vancouver Series Tee at call time" loading="lazy">
+                </figure>
+                <div class="lb-reel-copy">
+                  <h3 class="lb-scene-title" id="scene-01-title">Call time is the tee</h3>
+                  <p class="lb-scene-text">The Series Tee goes on first — cut long, dropped shoulder, made to layer under everything that follows. Nothing in the way, nothing to think about.</p>
+                </div>
+              </article>
+
+              <article class="lb-reel-card" aria-labelledby="scene-02-title">
+                <figure class="lb-reel-media">
+                  <img src="lookbook-assets/van-capsule-04.jpg" alt="Athlete mid-set in the IDL Vancouver Utility Vest" loading="lazy">
+                </figure>
+                <div class="lb-reel-copy">
+                  <h3 class="lb-scene-title" id="scene-02-title">The vest earns the set</h3>
+                  <p class="lb-scene-text">By the second run the Utility Vest does the quiet work — pockets that hold their line, a hem that stays put when the choreography drops to the floor.</p>
+                </div>
+              </article>
+
+              <article class="lb-reel-card" aria-labelledby="scene-03-title">
+                <figure class="lb-reel-media">
+                  <img src="lookbook-assets/van-capsule-07.jpg" alt="Athlete in the IDL Vancouver Convertible Pants at last light" loading="lazy">
+                </figure>
+                <div class="lb-reel-copy">
+                  <h3 class="lb-scene-title" id="scene-03-title">One pant, two silhouettes</h3>
+                  <p class="lb-scene-text">The Convertible Pant zips from full length to short between takes — one piece carrying the whole session, warm-up to wrap, without a change of clothes.</p>
+                </div>
+              </article>
+
+              <article class="lb-reel-card" aria-labelledby="scene-04-title">
+                <figure class="lb-reel-media">
+                  <img src="lookbook-assets/van-capsule-09.jpg" alt="Athlete in the IDL Vancouver Long Sleeve Jersey as the warehouse cools down" loading="lazy">
+                </figure>
+                <div class="lb-reel-copy">
+                  <h3 class="lb-scene-title" id="scene-04-title">The jersey holds the cold</h3>
+                  <p class="lb-scene-text">The Long Sleeve Jersey runs the whole shoot — over the tee at call time, under the vest through the set, on its own once the warehouse cools down. One layer, every scene.</p>
+                </div>
+              </article>
+            </div>
+            <div class="lb-reel-scale" aria-hidden="true"><span class="lb-reel-indicator" data-reel-indicator></span></div>
+          </div>
+        </section>
+
+        <section class="lb-gallery" aria-label="Season 01 editorial">
+          <div class="lb-gallery-pair">
+            <figure class="lb-gallery-figure">
+              <img src="lookbook-assets/van-capsule-05.jpg" alt="Season 01 look, street portrait" loading="lazy">
+            </figure>
+            <figure class="lb-gallery-figure">
+              <img src="lookbook-assets/van-capsule-06.jpg" alt="Season 01 look, detail" loading="lazy">
+            </figure>
+          </div>
+          <figure class="lb-gallery-figure lb-gallery-wide">
+            <img src="lookbook-assets/van-capsule-09.jpg" alt="Season 01 crew on location" loading="lazy">
+          </figure>
+        </section>
+
+        <section class="lb-products" aria-labelledby="lb-shop-title">
+          <div class="lb-products-head">
+            <h2 id="lb-shop-title">Shop the Vancouver Capsule</h2>
+          </div>
           <div class="product-grid">
             <article class="product-card">
               <a class="product-media" href="https://shop.idl.pro/products/idl-vancouver-series-tee" target="_blank" rel="noopener noreferrer" aria-label="IDL Vancouver Series Tee">
@@ -4662,20 +5018,6 @@
               </div>
             </article>
           </div>
-        </section>
-
-        <section class="lb-gallery" aria-label="Season 01 editorial">
-          <div class="lb-gallery-pair">
-            <figure class="lb-gallery-figure">
-              <img src="lookbook-assets/van-capsule-05.jpg" alt="Season 01 look, street portrait" loading="lazy">
-            </figure>
-            <figure class="lb-gallery-figure">
-              <img src="lookbook-assets/van-capsule-06.jpg" alt="Season 01 look, detail" loading="lazy">
-            </figure>
-          </div>
-          <figure class="lb-gallery-figure lb-gallery-wide">
-            <img src="lookbook-assets/van-capsule-09.jpg" alt="Season 01 crew on location" loading="lazy">
-          </figure>
         </section>
 
       </div>
@@ -4955,5 +5297,148 @@
       window.addEventListener('DOMContentLoaded', () => { if (window.lucide) window.lucide.createIcons(); });
     }());
   </script>
+
+  <!-- Interactive scene reel: vertical scroll drives the track sideways while
+       the viewport is pinned. Degrades to native horizontal swipe on touch /
+       reduced-motion (CSS handles those; JS bails out and leaves transform
+       untouched). -->
+  <script>
+    (function () {
+      var reel = document.querySelector('[data-reel]');
+      if (!reel) return;
+      var viewport = reel.querySelector('.lb-reel-viewport');
+      var track = reel.querySelector('[data-reel-track]');
+      var scale = reel.querySelector('.lb-reel-scale');
+      var indicator = reel.querySelector('[data-reel-indicator]');
+      var distance = 0, active = false;
+      var mqTouch = window.matchMedia('(max-width: 760px)');
+      var mqMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      function pinned() { return !mqTouch.matches && !mqMotion.matches; }
+
+      function layout() {
+        if (!pinned()) {
+          reel.style.height = '';
+          track.style.transform = '';
+          if (indicator) indicator.style.transform = '';
+          active = false;
+          return;
+        }
+        distance = Math.max(0, track.scrollWidth - viewport.clientWidth);
+        reel.style.height = (window.innerHeight + distance) + 'px';
+        active = true;
+        render();
+      }
+
+      // Two readings of one scroll progress, deliberately out of step — the
+      // Crust "grind range" trick. The cards run on an ease-out so they cover
+      // most of the distance early and settle at the end; the needle runs
+      // linear but quantised to the ruler's 10px ticks. Because the two curves
+      // differ, the needle visibly trails the cards through the middle of the
+      // scroll and they only agree at both ends, which is what sells it as a
+      // measurement rather than a progress bar.
+      function render() {
+        if (!active) return;
+        var total = reel.offsetHeight - window.innerHeight;
+        var p = total > 0 ? Math.min(1, Math.max(0, -reel.getBoundingClientRect().top / total)) : 0;
+
+        var eased = 1 - Math.pow(1 - p, 2);            // power2.out
+        track.style.transform = 'translate3d(' + (-eased * distance) + 'px,0,0)';
+
+        if (indicator && scale) {
+          // Quantise to the ruler's own 10px pitch rather than to N equal
+          // fractions of the width: dividing the width into floor(w/10) steps
+          // gives a step of w/floor(w/10) (10.03px at 1276), which drifts off
+          // the 10px ticks a little further with every step. Snapping the pixel
+          // position instead keeps the needle exactly on a line all the way.
+          var travel = scale.clientWidth - indicator.offsetWidth;
+          indicator.style.transform =
+            'translate3d(' + Math.min(travel, Math.round(p * travel / 10) * 10) + 'px,0,0)';
+        }
+      }
+
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () { render(); ticking = false; });
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', layout);
+      window.addEventListener('load', layout);
+      if (mqTouch.addEventListener) mqTouch.addEventListener('change', layout);
+      if (mqMotion.addEventListener) mqMotion.addEventListener('change', layout);
+      layout();
+    }());
+  </script>
+
+  <!-- The Section 1 → Section 2 reveal is deliberately script-free: it is the
+       page's own scroll, with stacking order set in CSS (.lb-hero z-index: 1
+       over .lb-editorial z-index: 0). Anything that moved either section on a
+       scroll handler — a transform on the editorial, a drift or zoom on the
+       hero — made one of them travel at a rate other than the scroll's, which
+       is exactly what this transition must not do. -->
+
+  <!-- Word-by-word scroll reveal (Crust "Lead" effect): each word brightens as
+       its paragraph travels up through the viewport. Runs over every selector
+       listed below, each tracking its own position, on one shared listener. -->
+  <script>
+    (function () {
+      var TARGETS = ['.lb-editorial .lb-edito p', '.lb-quote blockquote p'];
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var items = [];
+
+      TARGETS.forEach(function (sel) {
+        var p = document.querySelector(sel);
+        if (!p) return;
+        // Wrap each word in a span, preserving the whitespace between words.
+        var tokens = p.textContent.split(/(\s+)/);
+        p.textContent = '';
+        var words = [];
+        tokens.forEach(function (tok) {
+          if (tok === '') return;
+          if (/^\s+$/.test(tok)) { p.appendChild(document.createTextNode(tok)); return; }
+          var s = document.createElement('span');
+          s.className = 'lb-word';
+          s.textContent = tok;
+          p.appendChild(s);
+          words.push(s);
+        });
+        p.classList.add('is-revealing');
+
+        if (reduced) { words.forEach(function (w) { w.style.opacity = '1'; }); return; }
+        items.push({ el: p, words: words });
+      });
+
+      if (!items.length) return;
+
+      function update() {
+        var vh = window.innerHeight;
+        var start = vh * 0.85, end = vh * 0.4;      // reveal window as it scrolls up
+        items.forEach(function (item) {
+          var prog = (start - item.el.getBoundingClientRect().top) / (start - end);
+          prog = Math.min(1, Math.max(0, prog));
+          var n = item.words.length;
+          var lit = prog * n;
+          for (var i = 0; i < n; i++) {
+            var w = Math.min(1, Math.max(0, lit - i));
+            item.words[i].style.opacity = (0.2 + 0.8 * w).toFixed(3);
+          }
+        });
+      }
+
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () { update(); ticking = false; });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    }());
+  </script>
+
 </body>
 </html>

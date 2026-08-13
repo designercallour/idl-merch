@@ -2781,7 +2781,14 @@
     /* The shot sets the modal height; the copy panel stretches to match it.
        --look-hold drives the .look-dot fill this borrows from the capsule
        stage, so it has to match the rotation interval in the script. */
-    .promo-popup-media { position: relative; height: 480px; --look-hold: 3200ms; }
+    /* Same radial lift as .promo-popup-panel, so the two halves read as one
+       surface — it shows through while the slideshow images cross-fade. */
+    .promo-popup-media {
+      position: relative;
+      height: 480px;
+      --look-hold: 3200ms;
+      background: radial-gradient(50% 50%, rgb(10, 29, 38) 0%, rgb(9, 20, 26) 100%);
+    }
     /* The six team shots are stacked and cross-faded in place, so the panel
        height never moves as they cycle. */
     .promo-popup-media img {
