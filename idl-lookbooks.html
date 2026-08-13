@@ -1447,9 +1447,6 @@
       .lb-scene--flip .lb-scene-media { order: 1; }
       .lb-scene--flip .lb-scene-copy { order: 2; }
       .lb-scene-media img { aspect-ratio: 4 / 5; }
-      .lb-details { grid-template-columns: 1fr 1fr; gap: 12px; }
-      .lb-details figure:last-child { grid-column: 1 / -1; }
-      .lb-details figure:last-child img { aspect-ratio: 16 / 9; }
     }
 
     /* ---------- Interactive scene reel ----------
@@ -5385,7 +5382,7 @@
        listed below, each tracking its own position, on one shared listener. -->
   <script>
     (function () {
-      var TARGETS = ['.lb-editorial .lb-edito p', '.lb-quote blockquote p'];
+      var TARGETS = ['.lb-editorial .lb-edito p'];
       var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var items = [];
 
