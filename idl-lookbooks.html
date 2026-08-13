@@ -1209,14 +1209,21 @@
       color: var(--idl-button-ink);
     }
     .lb-products-head { margin-bottom: 28px; }
+    /* Matched to the storefront's own shop heading, .kit-collection-headline h2
+       ("2026 IDL Team Kit"): 32/38 at -0.03em, dropping to 28/32 on the phone.
+       Both are the heading that opens a product grid, so they carry the same
+       scale rather than each having its own. 500, not 600 — NeueHaas ships
+       400/500/700/900, so 600 rounds up to the 700 cut. */
     .lb-products-head h2 {
       margin: 0;
-      /* Size + weight matched to .lb-catchline ("Season 01, worn the way…"). */
       font-size: 32px;
       font-weight: 500;
-      line-height: 1.05;
-      letter-spacing: -0.01em;
+      line-height: 38px;
+      letter-spacing: -0.03em;
       text-transform: none;
+    }
+    @media (max-width: 760px) {
+      .lb-products-head h2 { font-size: 28px; line-height: 32px; }
     }
     .lb-products-head p { margin: 8px 0 0; max-width: 52ch; color: rgba(12, 15, 19, 0.5); font-size: 15px; line-height: 1.5; }
     /* Product tiles use the exact #team-kits kit-showcase grid metrics:
@@ -1228,67 +1235,17 @@
       gap: 24px 6px;
       border: 0;
     }
-    .lb-products .product-card { background: transparent; border: 0; padding: 0; }
-    .lb-products .product-media {
-      position: relative;
-      height: auto;
-      aspect-ratio: 5 / 6;
-      background: #f1f1f1;
-      border: 0;
-      border-radius: 0;
-      display: block;
-      overflow: hidden;
-    }
-    .lb-products .product-media img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center bottom;
-    }
-    .lb-products .product-badge {
-      position: absolute;
-      z-index: 3;
-      top: 16px;
-      left: 16px;
-      padding: 4px 3px 2px 4px;
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid var(--idl-button-ink);
-      border-radius: 3px;
-      background: #fff;
-      color: var(--idl-button-ink);
-      font: 400 12px/1 CarbonPlus, monospace;
-      letter-spacing: 0.36px;
-      text-transform: uppercase;
-    }
-    .lb-products .product-badge--soldout { border-color: rgb(151, 8, 8); color: rgb(151, 8, 8); }
-    /* Match the #team-kits .kit-showcase-details spacing: 10px above the name,
-       price sitting tight underneath (no default <p> margin). */
-    .lb-products .product-details { min-height: 0; padding: 10px 0 0; gap: 0; }
-    .lb-products .product-details h3 {
-      margin: 0;
-      padding: 3px 0 2px;
-      color: #111;
-      font-family: NeueHaas, Arial, sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 16px;
-      letter-spacing: -0.01em;
-      text-transform: none;
-    }
-    .lb-products .product-price {
-      margin: 0;
-      padding: 0 0 4px;
-      color: #111;
-      font: 500 14px/18px CarbonPlus, monospace;
-      text-transform: uppercase;
-    }
+    /* The cards themselves are the storefront's official-product-card — see
+       the component's own rules above and the light-theme block that closes
+       this sheet. Only the grid that holds them lives here. */
     @media (min-width: 761px) and (max-width: 1080px) {
       .lb-products .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     @media (max-width: 760px) {
+      /* Desktop's 20px follows the navbar's inset; the mobile navbar drops to
+         --gutter, and the gallery band above already tracks it. Left at 20 the
+         shop grid started 8px inside every other section on the page. */
+      .lb-products { padding-inline: var(--gutter); }
       .lb-products .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 6px; }
     }
 
@@ -1310,6 +1267,48 @@
     .lb-editorial .lb-kicker,
     .lb-products-head .lb-kicker { color: rgba(12, 15, 19, 0.45); }
     .lb-editorial .lb-kicker { margin-bottom: 4px; }
+
+    /* Flag + ticket-stub eyebrow tag, lifted from idl.pro's event date badge
+       (the "LOS ANGELES / Sep 19, 2026" chip). Geometry is the reference's:
+       43x26 flag, 4px gap, then a 26px-tall plate whose right edge is cut by a
+       wedge with a second hairline slash floating past it. That two-part cut is
+       not a plain skew — it is one SVG mask (viewBox 0 0 39 64, so 15.84px wide
+       at 26px tall), copied path-for-path so the shape matches exactly. */
+    .lb-date-badge {
+      margin: 0 0 4px;
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .lb-date-flag {
+      flex: none;
+      width: 43px;
+      height: 26px;
+      overflow: hidden;
+    }
+    .lb-date-flag img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .lb-date-tags { display: flex; align-items: center; }
+    .lb-date-tag {
+      display: flex;
+      align-items: center;
+      height: 26px;
+      padding: 4px 6px;
+      /* The reference plate is white on a near-black hero; this band is white,
+         so the plate takes a grey a step below the #f1f1f1 shop tiles — enough
+         for the wedge and slash to read against the page. */
+      background: #e2e5e8;
+      font: 700 16px/18px CarbonPlus, monospace;
+      color: var(--idl-button-ink);
+      white-space: nowrap;
+    }
+    .lb-date-cut {
+      flex: none;
+      width: 15.84px;
+      height: 26px;
+      background: #e2e5e8;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 39 64'%3E%3Cpath d='M0 64L32 0H0Z' fill='%23000'/%3E%3Cpath d='M34.941 0H39L6.5 64H3Z' fill='%23000'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 39 64'%3E%3Cpath d='M0 64L32 0H0Z' fill='%23000'/%3E%3Cpath d='M34.941 0H39L6.5 64H3Z' fill='%23000'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    }
 
     /* ---------- Scenes ---------- */
     .lb-scene {
@@ -1348,7 +1347,7 @@
       margin: 0;
       max-width: 42ch;
       color: rgba(213, 215, 217, 0.78);
-      font-size: 16px;
+      font-size: 20px;
       line-height: 1.55;
     }
 
@@ -1421,8 +1420,11 @@
     @media (max-width: 760px) {
       /* Mobile navbar drops to 12px side padding (--gutter), so match it. */
       .lb-gallery { padding-inline: 12px; }
-      .lb-gallery-pair { grid-template-columns: 1fr; }
-      .lb-gallery-wide { aspect-ratio: 4 / 5; }
+      /* The pairs stay two-up rather than unstacking. Stacked, the five looks
+         run three full screens of scroll and the pair/wide/pair rhythm — the
+         thing that makes this read as an edit rather than a feed — is gone.
+         Side by side keeps the desktop composition and the wide shot stays the
+         full-width breather between them. */
       .lb-gallery-mute { width: 40px; height: 40px; bottom: 12px; right: 12px; }
     }
 
@@ -1545,9 +1547,62 @@
       border-top: 5px solid var(--idl-go-gold);
     }
 
-    /* Touch / reduced-motion: no pinning or hijack — a plain swipeable,
-       snap-to-card carousel. JS skips the transform in these modes. */
+    /* Phones run the same pinned reel as the desktop: the viewport sticks for
+       the section's height, and the page's own scroll drives the track
+       sideways. Nothing about the mechanism changes here — only the card does,
+       from two squares side by side to one stacked, sized off the viewport so
+       it fits whatever screen it lands on. */
     @media (max-width: 760px) {
+      .lb-reel-track {
+        gap: 16px;
+        /* Same --gutter as every other band, so the first card's left edge
+           lands on the page's one content line. */
+        padding-inline: var(--gutter);
+      }
+      .lb-reel-card {
+        /* Width-driven: the square crop below is what sets the card's height,
+           so the width has to stay inside what the pinned viewport can spare
+           once the caption and the chrome are paid for — otherwise the shot
+           grows past the fold on a short phone. */
+        width: min(86vw, 380px, calc(100svh - var(--header-height) - 128px - 200px));
+        height: auto;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        scroll-snap-align: center;
+      }
+      /* Square crop, the same 1:1 the desktop card gets from its two equal
+         columns — stacked here rather than side by side. */
+      .lb-reel-media { aspect-ratio: 1 / 1; height: auto; }
+      /* All four captions run to different lengths, and with an auto row that
+         would leave four cards of four different heights sitting on one centre
+         line. The floor is the longest caption at its longest wrap (six lines,
+         which is where the narrowest phone puts it), so the four cards stay
+         one band at every size the square passes through — and the copy sits
+         to the top of it, so every title starts at the same distance under its
+         photo instead of drifting with the caption's length. */
+      .lb-reel-copy { min-height: 218px; justify-content: flex-start; }
+      /* Deeper at the top than the other three sides: the photo runs edge to
+         edge above it, so the title needs more air off that hard crop than it
+         does off the card's own border. */
+      .lb-reel-copy { padding: 32px 20px 20px; }
+      /* Desktop's 42px/20px is set against a 480px square. In a ~320px card it
+         runs the caption past the height the media row needs. */
+      .lb-reel-copy .lb-scene-title { margin-bottom: 10px; font-size: 24px; }
+      .lb-reel-copy .lb-scene-text { font-size: 16px; line-height: 1.5; }
+      /* Ruler, shorter and tucked in to the card gutter. */
+      .lb-reel-scale {
+        height: 24px;
+        margin-inline: var(--gutter);
+        margin-top: 14px;
+        margin-bottom: 24px;
+      }
+      .lb-reel-indicator { height: 24px; }
+    }
+    /* Reduced motion is the one mode that still opts out of the pin: no
+       hijack-adjacent travel at all, just a plain swipeable snap carousel. JS
+       skips the transform here and drives the same needle off the track's own
+       scrollLeft instead. */
+    @media (prefers-reduced-motion: reduce) {
       .lb-reel-viewport { position: static; height: auto; }
       .lb-reel-track {
         transform: none !important;
@@ -1555,33 +1610,10 @@
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
         padding-top: 0;
-        padding-inline: 16px;
-        padding-bottom: 10px;
         scrollbar-width: none;
       }
       .lb-reel-track::-webkit-scrollbar { display: none; }
-      .lb-reel-card {
-        width: min(86vw, 380px);
-        height: auto;
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-        scroll-snap-align: center;
-      }
-      /* Stacked card — the square comes from the ratio here instead of the
-         grid column, matching the desktop 1:1 crop. */
-      .lb-reel-media { aspect-ratio: 1 / 1; height: auto; }
-      .lb-reel-scale { display: none; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .lb-reel-viewport { position: static; height: auto; }
-      .lb-reel-track {
-        transform: none !important;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        padding-top: 0;
-      }
       .lb-reel-card { scroll-snap-align: center; }
-      .lb-reel-scale { display: none; }
     }
 
     .kit-showcase {
@@ -1977,13 +2009,53 @@
       opacity: 0;
       transition: opacity 240ms ease;
     }
-    .kit-showcase-card.official-product-card:hover .kit-showcase-visual img.kit-showcase-hover-media,
-    .kit-showcase-card.official-product-card:focus-within .kit-showcase-visual img.kit-showcase-hover-media {
+    .kit-showcase-card.official-product-card:hover .kit-showcase-visual:not([data-gallery]) img.kit-showcase-hover-media,
+    .kit-showcase-card.official-product-card:focus-within .kit-showcase-visual:not([data-gallery]) img.kit-showcase-hover-media {
       opacity: 1;
     }
     .official-product-card .kit-showcase-visual.has-hover-media:hover img,
     .official-product-card .kit-showcase-visual.has-hover-media.is-zooming img {
       transform: none;
+    }
+
+    /* Card mini-gallery — arrows appear on hover and step through the product
+       shots. Once JS marks a visual with data-gallery (2+ images), the active
+       image is driven by .is-active instead of the hover swap above, so the
+       arrows fully own which shot shows. */
+    .official-product-card .kit-showcase-visual[data-gallery] img {
+      opacity: 0;
+      transition: opacity 240ms ease;
+    }
+    .kit-showcase-card.official-product-card .kit-showcase-visual[data-gallery] img.is-active {
+      opacity: 1;
+    }
+    .kit-showcase-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 5;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.64);
+      color: #111;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-50%);
+      transition: opacity 160ms ease, background 140ms ease;
+      pointer-events: none;
+    }
+    .kit-showcase-nav svg { width: 16px; height: 16px; }
+    .kit-showcase-nav--prev { left: 12px; }
+    .kit-showcase-nav--next { right: 12px; }
+    .kit-showcase-nav:hover { background: #fff; }
+    .official-product-card:hover .kit-showcase-nav,
+    .official-product-card:focus-within .kit-showcase-nav {
+      opacity: 1;
+      pointer-events: auto;
     }
     .kit-showcase-details {
       min-width: 0;
@@ -4023,7 +4095,7 @@
       }
       .kit-showcase-badges { top: 10px; left: 10px; gap: 4px; }
       .kit-showcase-badge { padding: 3px 3px 1px 4px; font-size: 10px; }
-      .kit-showcase-details { padding: 10px 0 0; background: transparent; color: #111; }
+      .kit-showcase-details { padding: 8px 0 0; background: transparent; color: #111; }
       /* One line with an ellipsis, the same as desktop. Rows align for free —
          every title is exactly one line tall. */
       .kit-showcase-info h3 {
@@ -4032,8 +4104,8 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         color: #111;
-        font-size: 13px;
-        line-height: 17px;
+        font-size: 14px;
+        line-height: 16px;
         letter-spacing: -0.01em;
       }
       .kit-showcase-price {
@@ -4063,24 +4135,24 @@
         bottom: calc(100% + 8px);
         left: auto;
         z-index: 3;
-        width: 36px;
+        width: 32px;
         padding: 0;
-        grid-template-columns: 36px;
+        grid-template-columns: 32px;
         gap: 0;
       }
-      /* Draws at 36px — 44px read as a quarter of the card. ::after pads the
-         tap target out by 2px a side to 40px, the same trick the menu and bag
-         buttons use. Needs overflow: visible to escape the button box, so the
-         wipe ::before takes the radius itself instead of being clipped to it. */
+      /* Draws at 32px — 44px read as a quarter of the card. ::after pads the
+         tap target out by 2px a side, the same trick the menu and bag buttons
+         use. Needs overflow: visible to escape the button box, so the wipe
+         ::before takes the radius itself instead of being clipped to it. */
       .kit-showcase-actions .add-button {
-        width: 36px;
-        height: 36px;
-        min-height: 36px;
+        width: 32px;
+        height: 32px;
+        min-height: 32px;
         padding: 0;
-        border-radius: 2px;
+        border-radius: 0;
         overflow: visible;
       }
-      .kit-showcase-actions .add-button::before { border-radius: 2px; }
+      .kit-showcase-actions .add-button::before { border-radius: 0; }
       .kit-showcase-actions .add-button::after {
         content: "";
         position: absolute;
@@ -4093,8 +4165,8 @@
         position: relative;
         display: grid;
         place-items: center;
-        width: 36px;
-        height: 36px;
+        width: 100%;
+        height: 100%;
         padding: 0;
       }
       /* Label gone, so the glyph carries the whole meaning: a plus for add,
@@ -4111,8 +4183,8 @@
         background: currentColor;
         transform: translate(-50%, -50%);
       }
-      .kit-showcase-actions .add-button:not([data-notify]) .button-icon::before { width: 13px; height: 1.5px; }
-      .kit-showcase-actions .add-button:not([data-notify]) .button-icon::after { width: 1.5px; height: 13px; }
+      .kit-showcase-actions .add-button:not([data-notify]) .button-icon::before { width: 12px; height: 1.5px; }
+      .kit-showcase-actions .add-button:not([data-notify]) .button-icon::after { width: 1.5px; height: 12px; }
       /* The 36px plate exists to seat a glyph beside a label. Here the 44px
          square is the button, so plate and swap-mask both go flat — otherwise
          the bell sits on a dark tile inside the red one. */
@@ -4479,13 +4551,17 @@
     /* Relative wrapper so the pulled-up editorial pins against it. Harmless on
        touch/reduced-motion, where the curtain is just a passthrough. */
     .lb-curtain { position: relative; }
-    @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+    @media (prefers-reduced-motion: no-preference) {
       /* Pull the editorial up a full viewport so it sits behind the hero
          (z-index 0 vs the hero's 1) from scroll 0, and give it a 260svh runway.
          The sticky inner then holds through the hero's exit (~100vh of cover)
          plus the reveal scrub (~60vh) before it releases — 260 − 100(pin) =
          160vh of hold. The editorial's net flow height stays 160vh (260 − 100
-         margin), so the reel below is unaffected. */
+         margin), so the reel below is unaffected.
+
+         Phones run it too: this is position: sticky and the page's own scroll,
+         not a hijack, so a swipe drives it exactly as a wheel does — and svh
+         keeps the maths honest while the address bar comes and goes. */
       .lb-editorial { min-height: 260svh; margin-top: -100svh; }
       .lb-editorial-pin { position: sticky; top: 0; }
     }
@@ -4786,7 +4862,18 @@
       .lb-hero-title { font-size: clamp(38px, 10.6vw, 46px); }
       .lb-body { padding-block: 0; gap: 0 16px; }
       .lb-block { margin-top: 56px; }
-      .lb-editorial { grid-template-columns: 1fr; margin-top: 0; gap: 24px; }
+      /* No margin-top reset here: the curtain's -100svh pull-up now runs on
+         phones too, and this rule sits after that block, so zeroing it would
+         silently unstack the hero and the editorial again. */
+      .lb-editorial { gap: 24px; }
+      /* The pin centres its copy in the viewport, and dead centre parks the
+         badge under the fixed bar. Padding the top by the chrome height moves
+         the centring axis into the visible area — the same correction the
+         desktop reel track makes for the same reason. */
+      .lb-editorial-pin {
+        padding-block: calc(var(--header-height) + 32px) 48px;
+        gap: 20px;
+      }
       .lb-catchline { max-width: none; }
       .lb-media { aspect-ratio: 4 / 3; }
       .lb-split { grid-template-columns: 1fr; }
@@ -4804,6 +4891,61 @@
       .lb-push-card { min-height: 320px; padding: 24px; }
       .lb-standing-cta { right: 12px; bottom: 12px; left: 12px; justify-content: space-between; }
     }
+
+    /* ================================================================
+       Shop cards — light "catalog" theme.
+       Ported verbatim from the storefront, where it closes the sheet for the
+       same reason it closes this one: the card's base theme is the dark panel,
+       and these rules flip it to the light catalogue card the shop bands
+       actually sit on — grey image tile, outlined status badge, dark title +
+       price, no action row at rest. Position matters as much as the values:
+       every one of these is a plain re-declaration at the same specificity as
+       the breakpoint blocks above, so it is source order that lets them win.
+       Move this block up and the phone card goes dark again.
+       ================================================================ */
+    .kit-showcase-card,
+    .kit-showcase .kit-showcase-card,
+    .kit-showcase .kit-showcase-card:hover {
+      padding: 0;
+      border-radius: 0;
+      background: #fff;
+      color: #111;
+    }
+    .kit-showcase .kit-showcase-card::after { display: none; }
+    .official-product-card .kit-showcase-visual,
+    .kit-showcase-card .kit-showcase-visual {
+      aspect-ratio: 5 / 6;
+      background: #f1f1f1;
+      border-radius: 0;
+    }
+    .kit-showcase-info h3 {
+      /* Set so the title's first line lands 16px under the image. The details
+         block already spends 10px above this, and the line box adds ~3px of
+         half-leading, which is what leaves 3px here. */
+      padding-top: 3px;
+      padding-bottom: 2px;
+      color: #111;
+      font-size: 14px;
+      line-height: 16px;
+      font-weight: 500;
+    }
+    .kit-showcase-price {
+      min-height: 0;
+      margin-top: 0;
+      padding: 0 0 4px;
+      border-top: 0;
+      justify-content: flex-start;
+      color: #111;
+      font-weight: 500;
+    }
+    /* Reference card shows image + title + price at rest; the action row is
+       revealed on hover (see the .kit-showcase-actions hover-reveal in the
+       ≥761px grid block, and the always-on corner button on touch/phones).
+       Availability text stays off entirely. */
+    .kit-showcase-availability { display: none !important; }
+    /* Status badge reads on the light tile as a plain outlined label. */
+    .kit-showcase-badge { background: #fff; }
+    .kit-showcase-badge--stock { border-color: #111; color: #111; }
   </style>
 </head>
 <body class="lookbooks-page">
@@ -4949,7 +5091,13 @@
 
         <section class="lb-editorial" aria-labelledby="lb-intro-title" data-header-light data-editorial>
           <div class="lb-editorial-pin">
-            <p class="lb-kicker">The Vancouver Capsule</p>
+            <p class="lb-date-badge">
+              <span class="lb-date-flag"><img src="standout-assets/capsule-flags/canada.webp" alt="" aria-hidden="true"></span>
+              <span class="lb-date-tags">
+                <span class="lb-date-tag">The Vancouver Capsule</span>
+                <span class="lb-date-cut" aria-hidden="true"></span>
+              </span>
+            </p>
             <h2 class="lb-catchline" id="lb-intro-title">Season 01, worn the way<br>the crews wear it</h2>
             <div class="lb-edito">
               <p>A lookbook is the fastest way to see how a kit actually behaves — how the jersey sits under a hood, how the pants move through a set, which layers hold up between the warehouse and the stage. So we shot the season the same way we shoot the league: on the athletes, in the rooms they train in.</p>
@@ -5039,44 +5187,44 @@
             <h2 id="lb-shop-title">Shop the Vancouver Capsule</h2>
           </div>
           <div class="product-grid">
-            <article class="product-card">
-              <a class="product-media" href="https://shop.idl.pro/products/idl-vancouver-series-tee" target="_blank" rel="noopener noreferrer" aria-label="IDL Vancouver Series Tee">
-                <img class="product-image-default" src="standout-assets/shop-products/idl-vancouver-series-tee-studio.jpg" alt="IDL Vancouver Series Tee" loading="lazy">
-                <img class="product-image-hover" src="standout-assets/shop-products/idl-vancouver-series-tee-lifestyle.jpg" alt="" aria-hidden="true" loading="lazy">
-              </a>
-              <div class="product-details">
-                <h3>IDL Vancouver Series Tee</h3>
-                <p class="product-price">Rp 915.000</p>
+            <article class="kit-showcase-card official-product-card" data-capsule="vancouver" data-showcase-card>
+              <div class="kit-showcase-grid">
+                <a class="kit-showcase-visual has-hover-media" href="https://shop.idl.pro/products/idl-van-hockey-inspired-jersey?variant=49048118821107" target="_blank" rel="noopener noreferrer" aria-label="View IDL Vancouver Long Sleeve Jersey">
+                  <img src="standout-assets/shop-products/idl-vancouver-long-sleeve-jersey-studio.jpg?v=1" alt="IDL Vancouver Long Sleeve Jersey" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-vancouver-long-sleeve-jersey-lifestyle.jpg?v=1" alt="" aria-hidden="true" loading="lazy"><span class="kit-showcase-badges"><span class="kit-showcase-badge">Sold out</span></span>
+                </a>
+                <div class="kit-showcase-details">
+                  <div class="kit-showcase-info"><h3>IDL Vancouver Long Sleeve Jersey</h3><div class="kit-showcase-price"><span>Rp 2.013.000</span></div><div class="kit-showcase-actions"><a class="add-button button primary" data-notify data-product="IDL Vancouver Long Sleeve Jersey" href="https://shop.idl.pro/products/idl-van-hockey-inspired-jersey?variant=49048118821107" target="_blank" rel="noopener noreferrer"><span class="button-label">Notify me</span><span class="button-icon"><i data-lucide="bell" aria-hidden="true"></i></span></a><a class="kit-showcase-secondary button primary" href="https://shop.idl.pro/products/idl-van-hockey-inspired-jersey?variant=49048118821107" target="_blank" rel="noopener noreferrer"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                </div>
               </div>
             </article>
-            <article class="product-card">
-              <a class="product-media" href="https://shop.idl.pro/products/idl-vancouver-utility-vest" target="_blank" rel="noopener noreferrer" aria-label="IDL Vancouver Utility Vest">
-                <img class="product-image-default" src="standout-assets/shop-products/idl-vancouver-utility-vest-studio.jpg" alt="IDL Vancouver Utility Vest" loading="lazy">
-                <img class="product-image-hover" src="standout-assets/shop-products/idl-vancouver-utility-vest-lifestyle.jpg" alt="" aria-hidden="true" loading="lazy">
-              </a>
-              <div class="product-details">
-                <h3>IDL Vancouver Utility Vest</h3>
-                <p class="product-price">Rp 1.830.000</p>
+            <article class="kit-showcase-card official-product-card" data-capsule="vancouver" data-stock="1" data-showcase-card>
+              <div class="kit-showcase-grid">
+                <a class="kit-showcase-visual has-hover-media" href="https://shop.idl.pro/products/idl-van-series-tee?variant=49048118657267" target="_blank" rel="noopener noreferrer" aria-label="View IDL Vancouver Series Tee">
+                  <img src="standout-assets/shop-products/idl-vancouver-series-tee-studio.jpg?v=1" alt="IDL Vancouver Series Tee" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-vancouver-series-tee-lifestyle.jpg?v=1" alt="" aria-hidden="true" loading="lazy">
+                </a>
+                <div class="kit-showcase-details">
+                  <div class="kit-showcase-info"><h3>IDL Vancouver Series Tee</h3><div class="kit-showcase-price"><span>Rp 915.000</span></div><div class="kit-showcase-actions"><a class="add-button button primary" data-product="IDL Vancouver Series Tee" href="https://shop.idl.pro/products/idl-van-series-tee?variant=49048118657267" target="_blank" rel="noopener noreferrer" aria-label="Add IDL Vancouver Series Tee to cart"><span class="button-label">Add to cart</span><span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span></a><a class="kit-showcase-secondary button primary" href="https://shop.idl.pro/products/idl-van-series-tee?variant=49048118657267" target="_blank" rel="noopener noreferrer"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                </div>
               </div>
             </article>
-            <article class="product-card">
-              <a class="product-media" href="https://shop.idl.pro/products/idl-vancouver-long-sleeve-jersey" target="_blank" rel="noopener noreferrer" aria-label="IDL Vancouver Long Sleeve Jersey">
-                <img class="product-image-default" src="standout-assets/shop-products/idl-vancouver-long-sleeve-jersey-studio.jpg" alt="IDL Vancouver Long Sleeve Jersey" loading="lazy">
-                <img class="product-image-hover" src="standout-assets/shop-products/idl-vancouver-long-sleeve-jersey-lifestyle.jpg" alt="" aria-hidden="true" loading="lazy">
-              </a>
-              <div class="product-details">
-                <h3>IDL Vancouver Long Sleeve Jersey</h3>
-                <p class="product-price">Rp 2.013.000</p>
+            <article class="kit-showcase-card official-product-card" data-capsule="vancouver" data-stock="2" data-showcase-card>
+              <div class="kit-showcase-grid">
+                <a class="kit-showcase-visual has-hover-media" href="https://shop.idl.pro/products/idl-van-vest?variant=49048119050483" target="_blank" rel="noopener noreferrer" aria-label="View IDL Utility Vest">
+                  <img src="standout-assets/shop-products/idl-vancouver-utility-vest-studio.jpg?v=1" alt="IDL Utility Vest" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-vancouver-utility-vest-lifestyle.jpg?v=1" alt="" aria-hidden="true" loading="lazy">
+                </a>
+                <div class="kit-showcase-details">
+                  <div class="kit-showcase-info"><h3>IDL Utility Vest</h3><div class="kit-showcase-price"><span>Rp 1.830.000</span></div><div class="kit-showcase-actions"><a class="add-button button primary" data-product="IDL Utility Vest" href="https://shop.idl.pro/products/idl-van-vest?variant=49048119050483" target="_blank" rel="noopener noreferrer" aria-label="Add IDL Utility Vest to cart"><span class="button-label">Add to cart</span><span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span></a><a class="kit-showcase-secondary button primary" href="https://shop.idl.pro/products/idl-van-vest?variant=49048119050483" target="_blank" rel="noopener noreferrer"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                </div>
               </div>
             </article>
-            <article class="product-card">
-              <a class="product-media" href="https://shop.idl.pro/products/idl-vancouver-convertible-pants" target="_blank" rel="noopener noreferrer" aria-label="IDL Vancouver Convertible Pants">
-                <img class="product-image-default" src="standout-assets/shop-products/idl-vancouver-convertible-pants-studio.jpg" alt="IDL Vancouver Convertible Pants" loading="lazy">
-                <img class="product-image-hover" src="standout-assets/shop-products/idl-vancouver-convertible-pants-lifestyle.jpg" alt="" aria-hidden="true" loading="lazy">
-              </a>
-              <div class="product-details">
-                <h3>IDL Vancouver Convertible Pants</h3>
-                <p class="product-price">Rp 2.287.000</p>
+            <article class="kit-showcase-card official-product-card" data-capsule="vancouver" data-stock="3" data-showcase-card>
+              <div class="kit-showcase-grid">
+                <a class="kit-showcase-visual has-hover-media" href="https://shop.idl.pro/products/idl-van-convertible-pants?variant=49048119705843" target="_blank" rel="noopener noreferrer" aria-label="View IDL Convertible Pants">
+                  <img src="standout-assets/shop-products/idl-vancouver-convertible-pants-studio.jpg?v=1" alt="IDL Convertible Pants" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-vancouver-convertible-pants-lifestyle.jpg?v=1" alt="" aria-hidden="true" loading="lazy">
+                </a>
+                <div class="kit-showcase-details">
+                  <div class="kit-showcase-info"><h3>IDL Convertible Pants</h3><div class="kit-showcase-price"><span>Rp 2.287.000</span></div><div class="kit-showcase-actions"><a class="add-button button primary" data-product="IDL Convertible Pants" href="https://shop.idl.pro/products/idl-van-convertible-pants?variant=49048119705843" target="_blank" rel="noopener noreferrer" aria-label="Add IDL Convertible Pants to cart"><span class="button-label">Add to cart</span><span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span></a><a class="kit-showcase-secondary button primary" href="https://shop.idl.pro/products/idl-van-convertible-pants?variant=49048119705843" target="_blank" rel="noopener noreferrer"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                </div>
               </div>
             </article>
           </div>
@@ -5267,6 +5415,7 @@
   <script src="currency-selector.js"></script>
   <script src="header-tone.js"></script>
   <script src="hero-logo-scroll.js"></script>
+  <script src="product-image-zoom.js"></script>
   <script>
     (function lookbooksPage() {
       const body = document.body;
@@ -5460,6 +5609,100 @@
         sync();
       });
 
+      // ---- Shop cards -------------------------------------------------
+      // The same official-product-card behaviour the storefront's capsule rail
+      // runs: pointer zoom over the photo, prev/next arrows through the shots,
+      // and the low-stock badge. Ported as-is so the two grids are one
+      // component, with one addition at the end for touch.
+      const productImageVisuals = Array.from(
+        document.querySelectorAll('.official-product-card .kit-showcase-visual')
+      );
+      if (window.IDLProductImageZoom) {
+        window.IDLProductImageZoom.bindProductImageZoom(productImageVisuals);
+      }
+
+      // Card mini-gallery: prev/next arrows (shown on hover) step through the
+      // product shots. The visual is an <a> to the product, so arrow clicks must
+      // not follow that link — preventDefault + stopPropagation keep them local.
+      const altMedia = window.matchMedia('(hover: none) and (prefers-reduced-motion: no-preference)');
+      productImageVisuals.forEach((visual) => {
+        const images = Array.from(visual.querySelectorAll('img'));
+        if (images.length < 2) return;
+
+        visual.dataset.gallery = '';
+        let index = 0;
+        const show = (next) => {
+          index = (next + images.length) % images.length;
+          images.forEach((img, i) => img.classList.toggle('is-active', i === index));
+        };
+        show(0);
+
+        const makeArrow = (dir, label, path) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `kit-showcase-nav kit-showcase-nav--${dir}`;
+          btn.setAttribute('aria-label', label);
+          btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+          btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            show(index + (dir === 'next' ? 1 : -1));
+          });
+          return btn;
+        };
+
+        visual.appendChild(makeArrow('prev', 'Previous photo', '<path d="m15 18-6-6 6-6"></path>'));
+        visual.appendChild(makeArrow('next', 'Next photo', '<path d="m9 18 6-6-6-6"></path>'));
+
+        // Hovering a card still auto-advances to the lifestyle shot (image 2),
+        // the way it did before the arrows existed; the arrows then browse from
+        // there. Pointer devices only — touch has no hover to leave.
+        const cardEl = visual.closest('.official-product-card') || visual;
+        cardEl.addEventListener('pointerenter', () => {
+          if (window.matchMedia('(hover: hover)').matches) show(1);
+        });
+        // Snap back to the default shot once the hover leaves the card, so every
+        // card is resting on its studio photo again the next time it's seen.
+        cardEl.addEventListener('pointerleave', () => show(0));
+        cardEl.addEventListener('focusout', (event) => {
+          if (!cardEl.contains(event.relatedTarget)) show(0);
+        });
+
+        // The one addition: a phone has no hover and the arrows are pointer-only,
+        // so the second shot would never be seen. The card advances to it while
+        // it sits in the middle band of the screen instead — same reveal, driven
+        // by the scroll the visitor is already making.
+        if (typeof IntersectionObserver !== 'function') return;
+        new IntersectionObserver(([entry]) => {
+          if (!altMedia.matches) return;
+          show(entry.isIntersecting ? 1 : 0);
+        }, { rootMargin: '-34% 0px -34% 0px' }).observe(cardEl);
+      });
+
+      // Low-stock badge: a product card with data-stock renders a "{n} LEFT"
+      // badge only while 1–3 remain. data-stock="0" is sold out (its own static
+      // badge + notify button handle that); 4 or more, or no attribute, shows
+      // nothing.
+      document.querySelectorAll('.official-product-card[data-stock]').forEach((card) => {
+        const stock = Number.parseInt(card.dataset.stock, 10);
+        if (!Number.isFinite(stock) || stock <= 0 || stock >= 4) return;
+        const visual = card.querySelector('.kit-showcase-visual');
+        if (!visual) return;
+        let badges = visual.querySelector('.kit-showcase-badges');
+        if (!badges) {
+          badges = document.createElement('span');
+          badges.className = 'kit-showcase-badges';
+          visual.appendChild(badges);
+        }
+        let badge = badges.querySelector('.kit-showcase-badge--stock');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'kit-showcase-badge kit-showcase-badge--stock';
+          badges.appendChild(badge);
+        }
+        badge.textContent = `${stock} left`;
+      });
+
       const footerSignup = document.querySelector('.footer-signup');
       if (footerSignup) {
         footerSignup.addEventListener('submit', (event) => {
@@ -5646,8 +5889,8 @@
 
   <!-- Interactive scene reel: vertical scroll drives the track sideways while
        the viewport is pinned. Degrades to native horizontal swipe on touch /
-       reduced-motion (CSS handles those; JS bails out and leaves transform
-       untouched). -->
+       reduced-motion (CSS handles the layout; JS leaves the transform untouched
+       and drives the same needle + tick off the track's own scrollLeft). -->
   <script>
     (function () {
       var reel = document.querySelector('[data-reel]');
@@ -5660,20 +5903,28 @@
       var mqTouch = window.matchMedia('(max-width: 760px)');
       var mqMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-      function pinned() { return !mqTouch.matches && !mqMotion.matches; }
+      // Reduced motion is the only opt-out now. Width is not: the pin is
+      // sticky plus a transform driven by the page's own scroll, so a swipe
+      // moves it exactly as a wheel does — nothing here fights the scroller.
+      // mqTouch still triggers a relayout, because the card (and so the
+      // distance the track has to travel) changes shape at that breakpoint.
+      function pinned() { return !mqMotion.matches; }
 
-      // Mechanical ratchet: a short filtered-noise tick each time the needle
-      // steps to the next ruler mark, synthesised with Web Audio so there is no
-      // asset to ship. Browsers keep an AudioContext suspended until a user
-      // gesture, so it is created/resumed on the first interaction and stays
-      // silent until then — nothing plays on load.
+      // A short tick each time the needle steps to the next ruler mark,
+      // synthesised with Web Audio so there is no asset to ship. Browsers keep
+      // an AudioContext suspended until a user gesture, so it is
+      // created/resumed on the first interaction and stays silent until then —
+      // nothing plays on load. Four timbres are registered below; TICK_VARIANT
+      // picks which one actually plays, and ?picktick=1 exposes a small panel
+      // to audition and switch between them live (persisted to localStorage,
+      // so the choice sticks once you land on one you like).
       var audio = null, noiseBuffer = null, lastNotch = null;
       function ensureAudio() {
         if (audio) return;
         var AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
         audio = new AC();
-        // One 30ms white-noise buffer, reused for every tick.
+        // One 30ms white-noise buffer, reused by every noise-based variant.
         var len = Math.floor(audio.sampleRate * 0.03);
         noiseBuffer = audio.createBuffer(1, len, audio.sampleRate);
         var data = noiseBuffer.getChannelData(0);
@@ -5686,32 +5937,169 @@
       ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
         window.addEventListener(ev, unlockAudio, { passive: true });
       });
+
+      // Each variant renders one tick at time t. All of them share the same
+      // ~25-70ms envelope window so switching never changes how "long" a tick
+      // reads against the scroll, only its colour.
+      var TICK_VARIANTS = {
+        // Original: bandpass-filtered noise, short and percussive — a ratchet
+        // or a tape measure's click.
+        mechanical: function (t) {
+          var src = audio.createBufferSource();
+          src.buffer = noiseBuffer;
+          var band = audio.createBiquadFilter();
+          band.type = 'bandpass';
+          band.frequency.value = 2400 + Math.random() * 500;
+          band.Q.value = 1.1;
+          var gain = audio.createGain();
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.05, t + 0.001);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+          src.connect(band).connect(gain).connect(audio.destination);
+          src.start(t);
+          src.stop(t + 0.03);
+        },
+        // Soft tock: a sine with a quick downward pitch slide and a lowpass
+        // over it, so the attack is rounded instead of clicky — closer to a
+        // wood block than a switch.
+        soft: function (t) {
+          var osc = audio.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(760, t);
+          osc.frequency.exponentialRampToValueAtTime(360, t + 0.05);
+          var lp = audio.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.value = 1500;
+          var gain = audio.createGain();
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.09, t + 0.004);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.055);
+          osc.connect(lp).connect(gain).connect(audio.destination);
+          osc.start(t);
+          osc.stop(t + 0.06);
+        },
+        // Chime: a clean sine plus a quiet octave-up partial, longer decay —
+        // reads as a precise UI tick rather than a mechanical one.
+        chime: function (t) {
+          var gain = audio.createGain();
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.07, t + 0.003);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.075);
+          gain.connect(audio.destination);
+          [1600, 3200].forEach(function (freq, i) {
+            var osc = audio.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            var partialGain = audio.createGain();
+            partialGain.gain.value = i === 0 ? 1 : 0.18;
+            osc.connect(partialGain).connect(gain);
+            osc.start(t);
+            osc.stop(t + 0.08);
+          });
+        },
+        // Felt: lowpass-filtered noise instead of bandpass — no bite left in
+        // it, just a soft brushed thump. The quietest and roundest of the four.
+        felt: function (t) {
+          var src = audio.createBufferSource();
+          src.buffer = noiseBuffer;
+          var lp = audio.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.value = 900;
+          var gain = audio.createGain();
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.035, t + 0.003);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+          src.connect(lp).connect(gain).connect(audio.destination);
+          src.start(t);
+          src.stop(t + 0.05);
+        }
+      };
+      var TICK_STORAGE_KEY = 'lb-tick-variant';
+      var tickVariant = 'mechanical';
+      try {
+        var savedTick = localStorage.getItem(TICK_STORAGE_KEY);
+        if (savedTick && TICK_VARIANTS[savedTick]) tickVariant = savedTick;
+      } catch (error) { /* storage blocked: fall back to the default */ }
+
       function playTick() {
         if (!audio || audio.state !== 'running' || document.hidden) return;
-        var t = audio.currentTime;
-        var src = audio.createBufferSource();
-        src.buffer = noiseBuffer;
-        var band = audio.createBiquadFilter();
-        band.type = 'bandpass';
-        // Small random spread so repeated ticks don't sound like one machine tone.
-        band.frequency.value = 2400 + Math.random() * 500;
-        band.Q.value = 1.1;
-        var gain = audio.createGain();
-        gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.exponentialRampToValueAtTime(0.05, t + 0.001);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
-        src.connect(band).connect(gain).connect(audio.destination);
-        src.start(t);
-        src.stop(t + 0.03);
+        TICK_VARIANTS[tickVariant](audio.currentTime);
+      }
+
+      // Audition panel: only built when ?picktick=1 is in the URL, so regular
+      // visitors never see it. Each button unlocks audio, plays that variant
+      // immediately so you can compare by ear without scrolling, and sets it
+      // as the one real ticks use too.
+      if (/[?&]picktick=1\b/.test(location.search)) {
+        var pickerLabels = { mechanical: 'Mechanical', soft: 'Soft', chime: 'Chime', felt: 'Felt' };
+        var picker = document.createElement('div');
+        picker.style.cssText = 'position:fixed;z-index:99999;left:16px;bottom:16px;' +
+          'display:flex;gap:6px;padding:8px;border-radius:10px;' +
+          'background:rgba(6,16,21,0.92);font:12px/1 CarbonPlus,monospace;';
+        Object.keys(TICK_VARIANTS).forEach(function (key) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = pickerLabels[key];
+          btn.style.cssText = 'padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);' +
+            'background:' + (key === tickVariant ? 'var(--idl-go-gold,#c0e700)' : 'transparent') + ';' +
+            'color:' + (key === tickVariant ? '#000' : '#fff') + ';cursor:pointer;';
+          btn.addEventListener('click', function () {
+            unlockAudio();
+            tickVariant = key;
+            try { localStorage.setItem(TICK_STORAGE_KEY, key); } catch (error) { /* no-op */ }
+            Array.prototype.forEach.call(picker.children, function (b) {
+              b.style.background = 'transparent';
+              b.style.color = '#fff';
+            });
+            btn.style.background = 'var(--idl-go-gold,#c0e700)';
+            btn.style.color = '#000';
+            window.setTimeout(function () { playTick(); }, 30); // after unlock resolves
+          });
+          picker.appendChild(btn);
+        });
+        document.body.appendChild(picker);
+      }
+
+      // Swipe mode (touch / reduced-motion): the track is a native horizontal
+      // scroller, so the same needle runs off its scrollLeft instead of the
+      // page's scroll. Deliberately the same maths as render() below —
+      // quantised to the ruler's 10px pitch, one tick per mark crossed — so
+      // the readout is the identical component, only the input changes.
+      var swipeBound = false;
+      function renderSwipe() {
+        if (!indicator || !scale) return;
+        var max = track.scrollWidth - track.clientWidth;
+        var p = max > 0 ? Math.min(1, Math.max(0, track.scrollLeft / max)) : 0;
+        var travel = scale.clientWidth - indicator.offsetWidth;
+        var notch = Math.round(p * travel / 10);
+        indicator.style.transform =
+          'translate3d(' + Math.min(travel, notch * 10) + 'px,0,0)';
+        if (lastNotch !== null && notch !== lastNotch) playTick();
+        lastNotch = notch;
+      }
+      var swipeTicking = false;
+      function onTrackScroll() {
+        if (swipeTicking) return;
+        swipeTicking = true;
+        requestAnimationFrame(function () { renderSwipe(); swipeTicking = false; });
       }
 
       function layout() {
         if (!pinned()) {
           reel.style.height = '';
           track.style.transform = '';
-          if (indicator) indicator.style.transform = '';
           active = false;
+          if (!swipeBound) {
+            track.addEventListener('scroll', onTrackScroll, { passive: true });
+            swipeBound = true;
+          }
+          lastNotch = null;   // seed without firing, same as the pinned path
+          renderSwipe();
           return;
+        }
+        if (swipeBound) {
+          track.removeEventListener('scroll', onTrackScroll);
+          swipeBound = false;
         }
         // Flex containers drop their end padding (padding-right in LTR) from
         // scrollWidth once the items overflow, so scrollWidth stops at the last
@@ -5815,16 +6203,16 @@
 
       if (!items.length) return;
 
-      // Curtain reveal (desktop + motion-safe): the editorial is pinned
+      // Curtain reveal (motion-safe, phones included): the editorial is pinned
       // stationary behind the hero, so the reveal is timed off the HERO's exit,
       // not the editorial's own position. It stays all grey while the hero
       // still covers the band, hits 0 the instant the hero clears the top, then
       // scrubs grey → black over the next REVEAL_VH of scroll while the section
-      // holds still. On touch / reduced-motion there is no pin, so it falls back
-      // to the paragraph travelling up through view.
+      // holds still. Under reduced motion there is no pin, so it falls back to
+      // the paragraph travelling up through view.
       var editorial = document.querySelector('[data-editorial]');
       var heroSection = document.querySelector('.lb-hero');
-      var mqPin = window.matchMedia('(min-width: 761px) and (prefers-reduced-motion: no-preference)');
+      var mqPin = window.matchMedia('(prefers-reduced-motion: no-preference)');
       var REVEAL_VH = 0.6;   // scrub distance after the hero has gone
 
       function update() {
