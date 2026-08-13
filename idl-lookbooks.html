@@ -5223,7 +5223,46 @@
     </footer>
   </div>
 
+  <!-- Offer popup, same as the storefront: greets a first-time visitor once,
+       never again on its own — after that the discount teaser below is the way
+       back in. -->
+  <dialog class="promo-popup" aria-labelledby="promo-popup-title">
+    <div class="promo-popup-panel">
+      <div class="promo-popup-copy">
+        <p class="promo-popup-kicker">You've got 10% off</p>
+        <h2 id="promo-popup-title">&amp; free shipping</h2>
+      </div>
+      <form class="promo-popup-form">
+        <label class="sr-only" for="promo-popup-email">Email address</label>
+        <input id="promo-popup-email" type="email" name="email" placeholder="Email address" autocomplete="email" required>
+        <button class="newsletter-submit button primary" type="submit"><span class="button-label signup-button-label">Get access</span><span class="button-icon"><i data-lucide="bell" aria-hidden="true"></i></span></button>
+        <p class="promo-popup-note" aria-live="polite"></p>
+      </form>
+    </div>
+    <div class="promo-popup-media">
+      <img class="is-active" src="Asset Photo/MEDIUM/MEDIUM_BRO.webp" alt="" width="1080" height="1440">
+      <img src="Asset Photo/MEDIUM/MEDIUM_GRV.webp" alt="" width="1080" height="1440" loading="lazy">
+      <img src="Asset Photo/MEDIUM/MEDIUM_1M.webp" alt="" width="1080" height="1440" loading="lazy">
+      <img src="Asset Photo/MEDIUM/MEDIUM_RF.webp" alt="" width="1080" height="1440" loading="lazy">
+      <img src="Asset Photo/MEDIUM/MEDIUM_QS.webp" alt="" width="1080" height="1440" loading="lazy">
+      <img src="Asset Photo/MEDIUM/MEDIUM_JR.webp" alt="" width="1080" height="1440" loading="lazy">
+      <div class="look-dots" aria-hidden="true"></div>
+      <button class="promo-popup-close" type="button" aria-label="Close offer"><i data-lucide="x" aria-hidden="true"></i></button>
+    </div>
+  </dialog>
 
+  <!-- Standing 10%-off corner teaser. Its animated grid is filled by
+       discount-teaser-grid.js; clicking it reopens the popup above (the href
+       is the no-JS fallback, scrolling to the footer signup instead); the
+       close button dismisses the teaser itself, and it fades out near the
+       footer where that signup already lives. -->
+  <a class="discount-teaser" href="#site-footer" aria-label="Take 10 percent off by joining IDL Club">
+    <span class="discount-teaser-grid" aria-hidden="true"></span>
+    <span class="discount-teaser-copy"><strong>Take 10%</strong><small>off</small></span>
+  </a>
+  <button class="discount-close" type="button" aria-label="Close discount offer"><i data-lucide="x" aria-hidden="true"></i></button>
+
+  <script src="discount-teaser-grid.js"></script>
   <script src="team-mega-menu-state.js"></script>
   <script src="currency-selector.js"></script>
   <script src="header-tone.js"></script>
@@ -5431,8 +5470,177 @@
         });
       }
 
+      // 10%-off corner teaser: the close button dismisses it for the session,
+      // and it fades out (via body.footer-in-view, styled in CSS) once the
+      // footer — which already carries the signup — comes into view, so the two
+      // never sit on top of each other.
+      const discountTeaser = document.querySelector('.discount-teaser');
+      const discountClose = document.querySelector('.discount-close');
+      if (discountClose && discountTeaser) {
+        discountClose.addEventListener('click', () => {
+          discountTeaser.hidden = true;
+          discountClose.hidden = true;
+        });
+      }
+      // Fill the teaser's animated cell grid from discount-teaser-grid.js.
+      const discountGrid = document.querySelector('.discount-teaser-grid');
+      const discountGridApi = window.IDLDiscountTeaserGrid;
+      if (discountGrid && discountGridApi) {
+        const fragment = document.createDocumentFragment();
+        for (const cell of discountGridApi.cells()) {
+          const node = document.createElement('span');
+          node.className = 'discount-teaser-cell';
+          node.style.gridColumn = String(cell.col);
+          node.style.gridRow = String(cell.row);
+          node.style.setProperty('--cell-level', String(cell.level));
+          node.style.setProperty('--cell-delay', `${cell.delay}ms`);
+          node.style.setProperty('--cell-cycle', `${cell.cycle}ms`);
+          fragment.append(node);
+        }
+        discountGrid.append(fragment);
+      }
+      const siteFooter = document.querySelector('#site-footer');
+      if (siteFooter && typeof IntersectionObserver === 'function') {
+        new IntersectionObserver(([entry]) => {
+          body.classList.toggle('footer-in-view', entry.isIntersecting);
+        }, { rootMargin: '0px 0px -40% 0px' }).observe(siteFooter);
+      }
+
       if (window.lucide) window.lucide.createIcons();
       window.addEventListener('DOMContentLoaded', () => { if (window.lucide) window.lucide.createIcons(); });
+    }());
+  </script>
+
+  <!-- Offer popup, ported from the storefront as-is (same markup, same
+       behaviour): greets a first-time visitor once via localStorage, then the
+       discount teaser is the only way back in. Simplified from the storefront
+       version only where this page has no equivalent — there is no preloader
+       here, so the first-visit open just waits a beat instead of watching for
+       one to clear, and there is no other dialog/drawer to coordinate the body
+       scroll lock with, so that is a plain toggle instead of setBodyLock's
+       four-way check. -->
+  <script>
+    (function promoPopupControl() {
+      const popup = document.querySelector('.promo-popup');
+      const discountTeaser = document.querySelector('.discount-teaser');
+      if (!popup || !discountTeaser) return;
+      const form = popup.querySelector('.promo-popup-form');
+      const note = popup.querySelector('.promo-popup-note');
+      const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const SEEN = 'idl-promo-popup-seen';
+
+      // localStorage, not session: this is a first-visit greeting, so it has to
+      // outlive the tab. Marked on open rather than on close, otherwise someone
+      // who navigates away without dismissing it gets greeted all over again.
+      const remember = () => {
+        try { localStorage.setItem(SEEN, '1'); } catch (error) { /* no-op */ }
+      };
+
+      // The six team shots cycle while the popup is up. The timer is tied to the
+      // popup's lifetime so a dismissed popup leaves nothing ticking, and it
+      // stays put under reduced motion — one still frame is a complete design.
+      const SLIDE_HOLD = 3200; // keep in step with --look-hold on .promo-popup-media
+      const slides = Array.from(popup.querySelectorAll('.promo-popup-media img'));
+      const dots = popup.querySelector('.promo-popup-media .look-dots');
+      let slideIndex = 0;
+      let slideTimer;
+
+      // Same indicator as the reel's own progress element, classes and all, so
+      // the two read as one component: a segment per slide, the live one
+      // filling over its hold.
+      slides.forEach(() => {
+        const dot = document.createElement('span');
+        dot.className = 'look-dot';
+        dot.appendChild(document.createElement('i'));
+        dots.appendChild(dot);
+      });
+
+      const markDots = running => {
+        Array.from(dots.children).forEach((dot, i) => {
+          dot.classList.remove('is-live', 'is-done');
+          if (i < slideIndex) dot.classList.add('is-done');
+          if (i !== slideIndex) return;
+          if (!running) {
+            dot.classList.add('is-done');
+            return;
+          }
+          // Restart the fill from zero — re-adding the class alone would let the
+          // browser carry the previous animation straight through.
+          void dot.offsetWidth;
+          dot.classList.add('is-live');
+        });
+      };
+
+      const stopSlides = () => window.clearInterval(slideTimer);
+      const startSlides = () => {
+        stopSlides();
+        // The five deferred shots are lazy — and a lazy image inside a
+        // display: none dialog is never fetched — so opening is what starts
+        // them, with a full hold's head start before the first swap.
+        slides.forEach(slide => { slide.loading = 'eager'; });
+        const running = !reducedMotionQuery.matches && slides.length > 1;
+        markDots(running);
+        if (!running) return;
+        slideTimer = window.setInterval(() => {
+          slides[slideIndex].classList.remove('is-active');
+          slideIndex = (slideIndex + 1) % slides.length;
+          slides[slideIndex].classList.add('is-active');
+          markDots(true);
+        }, SLIDE_HOLD);
+      };
+
+      const open = () => {
+        if (popup.open) return;
+        remember();
+        popup.showModal();
+        startSlides();
+        document.body.classList.add('locked');
+      };
+
+      const settle = () => {
+        stopSlides();
+        document.body.classList.remove('locked');
+      };
+      const dismiss = () => {
+        popup.close();
+        settle();
+      };
+
+      popup.addEventListener('close', settle);
+      // Esc skips every button. 'cancel' fires while .open is still true, so the
+      // lock can only be recomputed once the close itself has gone through.
+      popup.addEventListener('cancel', () => window.setTimeout(settle, 0));
+
+      popup.querySelector('.promo-popup-close').addEventListener('click', dismiss);
+      popup.addEventListener('click', event => {
+        if (event.target === popup) dismiss();
+      });
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        note.textContent = 'Your code is on its way.';
+        form.reset();
+        window.setTimeout(dismiss, 1200);
+      });
+
+      // The teaser is the same offer, so it reopens the popup rather than
+      // following its href to the footer. The href stays as the no-JS fallback.
+      discountTeaser.addEventListener('click', event => {
+        event.preventDefault();
+        open();
+      });
+
+      let greeted = false;
+      try {
+        greeted = localStorage.getItem(SEEN) === '1';
+      } catch (error) {
+        greeted = true; // storage blocked: never nag rather than nag every load
+      }
+      if (greeted) return;
+
+      // A beat after load, so it reads as an offer rather than a wall the
+      // visitor hits before seeing anything.
+      window.setTimeout(open, 1400);
     }());
   </script>
 
