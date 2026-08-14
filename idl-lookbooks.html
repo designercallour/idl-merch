@@ -1417,6 +1417,151 @@
     .lb-gallery-mute .icon-on { display: none; }
     .lb-gallery-mute.is-on .icon-on { display: block; }
     .lb-gallery-mute.is-on .icon-off { display: none; }
+
+    /* Click target over each still. A real <button> rather than a listener on
+       the <img>: the reference lookbook wires its grid straight to the image
+       and the whole gallery ends up unreachable by keyboard. Sits under the
+       mute button's z-index 2, so the video frame keeps its own control. */
+    .lb-gallery-open {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: zoom-in;
+    }
+    .lb-gallery-open:focus-visible {
+      outline: 2px solid var(--idl-go-gold);
+      outline-offset: -4px;
+    }
+    /* Hover cue that the frame opens — the figure already clips, so the scale
+       reads as the shot pushing at its own edges rather than growing. */
+    .lb-gallery-figure:has(.lb-gallery-open) img { transition: transform 420ms ease; }
+    .lb-gallery-figure:has(.lb-gallery-open):hover img { transform: scale(1.02); }
+
+    /* ---- Gallery lightbox ------------------------------------------------
+       Same shape as the reference viewer — dark full-bleed field, the shot at
+       its own ratio, prev/next and a position counter. Four things there are
+       deliberately not carried over: it hard-cuts between shots, has no swipe,
+       spends a flat 48px of padding per side on a phone (leaving the image
+       about a third of the screen), and parks the counter on top of the image
+       area. Here the stage and the bar are separate grid rows, so they can
+       never collide. */
+    .lb-lightbox {
+      position: fixed;
+      /* Over the bag drawer (80), under the toast (100). */
+      z-index: 90;
+      inset: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      /* Solid, not a 0.97 scrim. The band behind this is white and the
+         announcement bar is full lime — at 3% both still read through clearly
+         enough to compete with the shot. The fade-in below is what keeps it
+         from feeling like a hard cut. */
+      background: var(--idl-bg-deep);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 180ms ease, visibility 180ms;
+    }
+    .lb-lightbox.is-open { opacity: 1; visibility: visible; }
+    /* Flex, not grid, to centre the shot: as a grid item the image's
+       max-height: 100% goes unenforced (it takes its width cap, derives a
+       taller box from the ratio and keeps it), so a portrait frame overshoots
+       the row and lands on the counter. Measured at 930px against an 896px
+       row before the switch. */
+    .lb-lightbox-stage {
+      position: relative;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(16px, 3vw, 48px);
+    }
+    .lb-lightbox-image {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      object-fit: contain;
+      opacity: 1;
+      transition: opacity 140ms ease;
+    }
+    /* Held low while the next shot decodes, so a slow frame never lands
+       half-painted. See the swap in the script. */
+    .lb-lightbox-image.is-swapping { opacity: 0; }
+    .lb-lightbox-video {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
+    /* The author display above outranks the UA rule the hidden attribute
+       leans on, so say it here or the two frames stack. */
+    .lb-lightbox-image[hidden],
+    .lb-lightbox-video[hidden] { display: none; }
+    .lb-lightbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 20px 24px;
+    }
+    .lb-lightbox-count {
+      margin: 0;
+      min-width: 68px;
+      color: var(--idl-muted);
+      font: 400 12px/14px CarbonPlus, monospace;
+      letter-spacing: 0.14em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .lb-lightbox-nav,
+    .lb-lightbox-close {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--idl-silver);
+      cursor: pointer;
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+    .lb-lightbox-nav:hover,
+    .lb-lightbox-close:hover { color: var(--idl-white); border-color: var(--idl-line); }
+    .lb-lightbox-nav:focus-visible,
+    .lb-lightbox-close:focus-visible {
+      outline: 2px solid var(--idl-go-gold);
+      outline-offset: 2px;
+    }
+    .lb-lightbox-nav svg,
+    .lb-lightbox-close svg { width: 24px; height: 24px; display: block; }
+    .lb-lightbox-close {
+      position: absolute;
+      z-index: 2;
+      top: 16px;
+      right: 16px;
+    }
+    /* Phones keep the arrows in the bar beside the counter: on the flanks they
+       would either sit over the shot or squeeze it, which is the trade the
+       reference makes and loses. Swipe carries the gesture anyway. */
+    @media (min-width: 761px) {
+      .lb-lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .lb-lightbox-nav.prev { left: clamp(12px, 2.5vw, 40px); }
+      .lb-lightbox-nav.next { right: clamp(12px, 2.5vw, 40px); }
+      .lb-lightbox-stage { padding-inline: clamp(72px, 8vw, 132px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lb-lightbox,
+      .lb-lightbox-image,
+      .lb-gallery-figure:has(.lb-gallery-open) img { transition: none; }
+      .lb-gallery-figure:has(.lb-gallery-open):hover img { transform: none; }
+    }
+
     @media (max-width: 760px) {
       /* Mobile navbar drops to 12px side padding (--gutter), so match it. */
       .lb-gallery { padding-inline: 12px; }
@@ -1580,7 +1725,7 @@
          one band at every size the square passes through — and the copy sits
          to the top of it, so every title starts at the same distance under its
          photo instead of drifting with the caption's length. */
-      .lb-reel-copy { min-height: 218px; justify-content: flex-start; }
+      .lb-reel-copy { min-height: 240px; justify-content: flex-start; }
       /* Deeper at the top than the other three sides: the photo runs edge to
          edge above it, so the title needs more air off that hard crop than it
          does off the card's own border. */
@@ -4409,15 +4554,46 @@
       object-position: 50% 32%;
     }
     /* Two stops, not one: the top band keeps the header legible over a light
-       frame, the bottom one hands the eye to the dark body below. */
+       frame, the bottom one weights the lower half. That bottom stop used to
+       land on solid --idl-bg, which buried the photo exactly where the frayed
+       seam below opens its gaps — the bars then read as white-on-black instead
+       of white-on-photo. Capping it at 0.58 keeps the weight but leaves the
+       image legible through the gaps. */
     .lb-hero-scrim {
       position: absolute;
       z-index: -1;
       inset: 0;
       background:
         linear-gradient(180deg, rgba(4, 10, 13, 0.62) 0%, rgba(4, 10, 13, 0) 30%),
-        linear-gradient(0deg, var(--idl-bg) 0%, rgba(6, 16, 21, 0) 46%);
+        linear-gradient(0deg, rgba(6, 16, 21, 0.58) 0%, rgba(6, 16, 21, 0) 46%);
     }
+    /* Frayed seam at the hero's bottom edge (the whatmattersagency.com
+       "mask-section"): three bars painted in the page white. The script parks
+       the stack below the hero's bottom at rest — .lb-hero's overflow: hidden
+       clips it there — so the opening frame is the photo uncovered. Scrolling
+       raises them while separating them by different multiples of one step,
+       so the straight edge frays into evenly spaced lines that thin out as
+       they climb, with the photo showing through the gaps. Heights and travel
+       are the reference's: 8/13/18% of a 5vh strip, 3x/2x/1x a 0.8em step. */
+    .lb-hero-mask {
+      position: absolute;
+      z-index: 1;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 5svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+    .lb-hero-mask-bar {
+      background: var(--idl-white);
+      will-change: transform;
+    }
+    .lb-hero-mask-bar.is-1 { height: 8%; }
+    .lb-hero-mask-bar.is-2 { height: 13%; }
+    .lb-hero-mask-bar.is-3 { height: 18%; }
     /* Left-align the hero copy to the navbar's edge: the header runs full-width
        with 20px side padding (12px on mobile), so match that instead of the
        wider content gutter. */
@@ -5087,6 +5263,11 @@
             <h1 class="lb-hero-title" id="lb-hero-title"><span>The Vancouver Capsule,</span><span>shot on the clock.</span></h1>
             <p class="lb-hero-note">One crew, one warehouse, one full session — from 6am call time to last light. Here is how the kit actually moved.</p>
           </div>
+          <div class="lb-hero-mask" data-hero-mask aria-hidden="true">
+            <span class="lb-hero-mask-bar is-1"></span>
+            <span class="lb-hero-mask-bar is-2"></span>
+            <span class="lb-hero-mask-bar is-3"></span>
+          </div>
         </section>
 
         <section class="lb-editorial" aria-labelledby="lb-intro-title" data-header-light data-editorial>
@@ -5158,19 +5339,23 @@
           <div class="lb-gallery-pair">
             <figure class="lb-gallery-figure">
               <img src="lookbook-assets/van-capsule-05.jpg" alt="Season 01 look, street portrait" loading="lazy">
+              <button class="lb-gallery-open" type="button" data-lightbox-open aria-label="Open full size: Season 01 look, street portrait"></button>
             </figure>
             <figure class="lb-gallery-figure">
               <img src="lookbook-assets/van-capsule-06.jpg" alt="Season 01 look, detail" loading="lazy">
+              <button class="lb-gallery-open" type="button" data-lightbox-open aria-label="Open full size: Season 01 look, detail"></button>
             </figure>
           </div>
           <figure class="lb-gallery-figure lb-gallery-wide">
             <img src="lookbook-assets/van-capsule-09.jpg" alt="Season 01 crew on location" loading="lazy">
+            <button class="lb-gallery-open" type="button" data-lightbox-open aria-label="Open full size: Season 01 crew on location"></button>
           </figure>
           <div class="lb-gallery-pair">
             <figure class="lb-gallery-figure">
               <video autoplay muted loop playsinline preload="metadata" poster="Asset Photo/WIDE/ACT_QS2.webp" aria-hidden="true" tabindex="-1">
                 <source src="standout-assets/hero-right-vancouver-capsule.mp4" type="video/mp4">
               </video>
+              <button class="lb-gallery-open" type="button" data-lightbox-open data-lightbox-video-src="standout-assets/hero-right-vancouver-capsule.mp4" aria-label="Open full size: Season 01 film, Vancouver capsule"></button>
               <button class="lb-gallery-mute" type="button" data-gallery-mute aria-label="Unmute video">
                 <svg class="icon-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" x2="16" y1="9" y2="15"></line><line x1="16" x2="22" y1="9" y2="15"></line></svg>
                 <svg class="icon-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
@@ -5178,6 +5363,7 @@
             </figure>
             <figure class="lb-gallery-figure">
               <img src="lookbook-assets/van-capsule-03.jpg" alt="Season 01 look, movement" loading="lazy">
+              <button class="lb-gallery-open" type="button" data-lightbox-open aria-label="Open full size: Season 01 look, movement"></button>
             </figure>
           </div>
         </section>
@@ -5277,6 +5463,30 @@
           </div>
         </div>
       </section>
+      <aside class="announcement-bar is-footer" aria-label="Store highlights">
+        <div class="announcement-track">
+          <div class="announcement-group">
+            <span class="announcement-copy">Free shipping on US orders over $160</span>
+            <span class="announcement-copy">New: Capsule 2026</span>
+            <span class="announcement-copy">Easy returns</span>
+          </div>
+          <div class="announcement-group" aria-hidden="true">
+            <span class="announcement-copy">Free shipping on US orders over $160</span>
+            <span class="announcement-copy">New: Capsule 2026</span>
+            <span class="announcement-copy">Easy returns</span>
+          </div>
+          <div class="announcement-group" aria-hidden="true">
+            <span class="announcement-copy">Free shipping on US orders over $160</span>
+            <span class="announcement-copy">New: Capsule 2026</span>
+            <span class="announcement-copy">Easy returns</span>
+          </div>
+          <div class="announcement-group" aria-hidden="true">
+            <span class="announcement-copy">Free shipping on US orders over $160</span>
+            <span class="announcement-copy">New: Capsule 2026</span>
+            <span class="announcement-copy">Easy returns</span>
+          </div>
+        </div>
+      </aside>
     </main>
 
     <footer class="footer" id="site-footer">
@@ -5369,6 +5579,34 @@
         </div>
       </div>
     </footer>
+  </div>
+
+  <!-- Editorial lightbox. Outside .site-shell on purpose: that wrapper clips
+       its overflow, and any transformed ancestor would make it the containing
+       block for a position: fixed child. Empty src until first open so the
+       page never pays for a shot nobody asked to see. -->
+  <div class="lb-lightbox" role="dialog" aria-modal="true" aria-label="Season 01 editorial, full size" data-lightbox inert>
+    <button class="lb-lightbox-close" type="button" data-lightbox-close aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+    </button>
+    <div class="lb-lightbox-stage" data-lightbox-stage>
+      <img class="lb-lightbox-image" data-lightbox-image src="" alt="">
+      <!-- Native controls rather than the grid's bare mute toggle: this clip
+           runs half a minute, so at full size the viewer wants to pause and
+           scrub it, not just silence it. They also carry their own keyboard
+           and screen-reader support. preload="none" keeps the file off the
+           wire until someone actually opens it. -->
+      <video class="lb-lightbox-video" data-lightbox-video controls loop playsinline preload="none" hidden></video>
+    </div>
+    <div class="lb-lightbox-bar">
+      <button class="lb-lightbox-nav prev" type="button" data-lightbox-prev aria-label="Previous image">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+      </button>
+      <p class="lb-lightbox-count" aria-live="polite"><span data-lightbox-index>1</span> / <span data-lightbox-total>4</span></p>
+      <button class="lb-lightbox-nav next" type="button" data-lightbox-next aria-label="Next image">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+      </button>
+    </div>
   </div>
 
   <!-- Offer popup, same as the storefront: greets a first-time visitor once,
@@ -5608,6 +5846,217 @@
         });
         sync();
       });
+
+      // ---- Editorial lightbox -----------------------------------------
+      // Click any still in the gallery to see it full size, then walk the set
+      // with the arrows, the keyboard, or a swipe. The video frame is left
+      // out: it already owns its corner for the mute toggle.
+      (function galleryLightbox() {
+        const root = document.querySelector('[data-lightbox]');
+        const triggers = Array.from(document.querySelectorAll('[data-lightbox-open]'));
+        if (!root || !triggers.length) return;
+
+        const stage = root.querySelector('[data-lightbox-stage]');
+        const view = root.querySelector('[data-lightbox-image]');
+        const film = root.querySelector('[data-lightbox-video]');
+        const indexOut = root.querySelector('[data-lightbox-index]');
+        const totalOut = root.querySelector('[data-lightbox-total]');
+        const closeBtn = root.querySelector('[data-lightbox-close]');
+        const prevBtn = root.querySelector('[data-lightbox-prev]');
+        const nextBtn = root.querySelector('[data-lightbox-next]');
+
+        // Every trigger sits in the figure beside its own media, so read the
+        // source off that rather than repeating the paths in data attributes.
+        // The video frame is the exception: its file lives on the trigger,
+        // because the grid copy streams from a <source> child.
+        const shots = triggers.map((btn) => {
+          const videoSrc = btn.getAttribute('data-lightbox-video-src');
+          if (videoSrc) {
+            return { type: 'video', src: videoSrc, alt: btn.getAttribute('aria-label') || '' };
+          }
+          const img = btn.closest('.lb-gallery-figure').querySelector('img');
+          return { type: 'image', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '' };
+        });
+        // The grid clip is still playing behind the overlay, and if the viewer
+        // had unmuted it that would run underneath this one.
+        const gridFilm = document.querySelector('.lb-gallery-figure video');
+
+        let current = 0;
+        let lastFocused = null;
+        totalOut.textContent = String(shots.length);
+
+        // Neighbours only. At five frames the whole set would be cheap, but
+        // this keeps the cost flat if the edit grows. Stills only — warming
+        // the clip would pull the whole file down for a frame nobody opened.
+        function preload(i) {
+          [i - 1, i + 1].forEach((n) => {
+            const shot = shots[(n + shots.length) % shots.length];
+            if (shot.type !== 'image') return;
+            const warm = new Image();
+            warm.src = shot.src;
+          });
+        }
+
+        // Drop the clip's source when it is not on screen: left set, the
+        // browser keeps buffering half a minute of video behind a still.
+        function stopFilm() {
+          film.pause();
+          if (film.getAttribute('src')) {
+            film.removeAttribute('src');
+            film.load();
+          }
+        }
+
+        function show(i, immediate) {
+          current = (i + shots.length) % shots.length;
+          const shot = shots[current];
+          indexOut.textContent = String(current + 1);
+
+          if (shot.type === 'video') {
+            view.hidden = true;
+            view.classList.remove('is-swapping');
+            film.hidden = false;
+            if (film.getAttribute('src') !== shot.src) film.src = shot.src;
+            // Muted so the autoplay is allowed to start at all; the controls
+            // are right there to turn it up.
+            film.muted = true;
+            // preload="none" means a cold open has nothing buffered, so this
+            // first play() aborts and the frame sits at 0:00 — it only looked
+            // fine in testing because the second open was cached. Retry once
+            // there is something to show, and only if this is still the frame
+            // on screen.
+            film.play().catch(() => {
+              film.addEventListener('canplay', () => {
+                if (shots[current].type === 'video' && film.paused) film.play().catch(() => {});
+              }, { once: true });
+            });
+            preload(current);
+            return;
+          }
+
+          stopFilm();
+          film.hidden = true;
+          view.hidden = false;
+
+          function commit() {
+            view.src = shot.src;
+            view.alt = shot.alt;
+            view.classList.remove('is-swapping');
+            preload(current);
+          }
+          if (immediate) { commit(); return; }
+
+          // Hold the current frame down while the next one decodes: a cached
+          // shot lands near-instantly, a cold one fades in instead of
+          // painting in bands.
+          view.classList.add('is-swapping');
+          const next = new Image();
+          next.src = shot.src;
+          if (next.decode) next.decode().then(commit).catch(commit);
+          else commit();
+        }
+
+        // Lock the page behind the overlay on <html>, not <body> — body is
+        // kept out of the scroll-container role on purpose (see the note on
+        // its overflow) and the pinned reel's sticky depends on that.
+        function lockScroll() {
+          const bar = window.innerWidth - document.documentElement.clientWidth;
+          document.documentElement.style.overflow = 'hidden';
+          if (bar > 0) document.documentElement.style.paddingRight = bar + 'px';
+        }
+        function unlockScroll() {
+          document.documentElement.style.overflow = '';
+          document.documentElement.style.paddingRight = '';
+        }
+
+        function open(i, trigger) {
+          lastFocused = trigger || document.activeElement;
+          root.removeAttribute('inert');
+          if (gridFilm) gridFilm.pause();
+          show(i, true);
+          lockScroll();
+          root.classList.add('is-open');
+          // One frame later: the panel is still visibility: hidden at the
+          // moment the class lands, and a hidden element cannot take focus.
+          requestAnimationFrame(() => closeBtn.focus());
+          document.addEventListener('keydown', onKey);
+        }
+
+        function close() {
+          root.classList.remove('is-open');
+          root.setAttribute('inert', '');
+          stopFilm();
+          unlockScroll();
+          document.removeEventListener('keydown', onKey);
+          if (gridFilm) gridFilm.play().catch(() => {});
+          if (lastFocused && lastFocused.focus) lastFocused.focus();
+          lastFocused = null;
+        }
+
+        // Built per keystroke rather than once: the clip's own controls are a
+        // stop on the way round only while the clip is the frame on show.
+        function focusables() {
+          return Array.from(root.querySelectorAll('button, video[controls]'))
+            .filter((el) => !el.hidden && el.getBoundingClientRect().width > 0);
+        }
+
+        function trapFocus(event) {
+          const order = focusables();
+          if (!order.length) return;
+          const first = order[0];
+          const last = order[order.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+
+        function onKey(event) {
+          if (event.key === 'Escape') { event.preventDefault(); close(); }
+          else if (event.key === 'Tab') trapFocus(event);
+          else if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            // With the clip focused its own controls own the arrows — they
+            // seek. Stealing them for the gallery would make the video
+            // unscrubbable by keyboard.
+            if (event.target === film) return;
+            event.preventDefault();
+            show(current + (event.key === 'ArrowRight' ? 1 : -1));
+          }
+        }
+
+        triggers.forEach((btn, i) => btn.addEventListener('click', () => open(i, btn)));
+        closeBtn.addEventListener('click', close);
+        prevBtn.addEventListener('click', () => show(current - 1));
+        nextBtn.addEventListener('click', () => show(current + 1));
+        // Only the field around the shot dismisses; the shot itself does not.
+        stage.addEventListener('click', (event) => { if (event.target === stage) close(); });
+        root.addEventListener('click', (event) => { if (event.target === root) close(); });
+
+        let startX = 0;
+        let startY = 0;
+        let tracking = false;
+        stage.addEventListener('touchstart', (event) => {
+          // Hands off the clip: dragging its scrub bar is a horizontal drag
+          // too, and swallowing it would jump the frame mid-seek.
+          tracking = event.touches.length === 1 && event.target !== film;
+          if (!tracking) return;
+          startX = event.touches[0].clientX;
+          startY = event.touches[0].clientY;
+        }, { passive: true });
+        stage.addEventListener('touchend', (event) => {
+          if (!tracking) return;
+          tracking = false;
+          const dx = event.changedTouches[0].clientX - startX;
+          const dy = event.changedTouches[0].clientY - startY;
+          // Horizontal intent only: a mostly-vertical drag is someone trying
+          // to scroll the page, not to change shot.
+          if (Math.abs(dx) < 44 || Math.abs(dx) < Math.abs(dy)) return;
+          show(current + (dx < 0 ? 1 : -1));
+        }, { passive: true });
+      })();
 
       // ---- Shop cards -------------------------------------------------
       // The same official-product-card behaviour the storefront's capsule rail
@@ -6253,6 +6702,279 @@
       window.addEventListener('resize', update);
       update();
     }());
+  </script>
+
+  <!-- Frayed hero seam. At rest the whole stack is parked below the hero's
+       bottom edge, where overflow: hidden clips it, so the opening frame is the
+       photo uncovered. Scrolling walks that parking offset back to zero while
+       the bars separate by 3x / 2x / 1x one step, so the band rises out of the
+       edge and spreads at the same time — thinnest line first — and lands on a
+       set of evenly spaced lines that thin out as they climb. The travel is
+       linear; the softness comes from the value chasing the scroll rather than
+       from an ease, so a flick still lands where the scroll says it should. -->
+  <script>
+    (function () {
+      var mask = document.querySelector('[data-hero-mask]');
+      if (!mask) return;
+      var bars = mask.querySelectorAll('.lb-hero-mask-bar');
+      if (!bars.length) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var STEPS = [3, 2, 1];   // multiples of one gap; equal spacing falls out of this
+      var STEP_EM = 0.8;       // one gap
+      var SCRUB = 0.8;         // seconds to catch up to the scroll
+      var END_VH = 0.7;        // done once the hero's bottom edge reaches 70% up the viewport
+
+      var current = 0, target = 0, last = 0, raf = 0;
+      var stack = 0, stepPx = 0;
+
+      // Bar heights are percentages of a 5svh strip and the step is an em, so
+      // both have to be re-read whenever the viewport changes.
+      function measure() {
+        stack = 0;
+        for (var i = 0; i < bars.length; i++) stack += bars[i].getBoundingClientRect().height;
+        stepPx = parseFloat(window.getComputedStyle(bars[0]).fontSize) * STEP_EM;
+      }
+
+      function paint(p) {
+        // (1 - p) holds the stack below the edge at rest and unwinds to nothing
+        // by the end, so the finished spread is unaffected by the parking.
+        var base = stack * (1 - p);
+        for (var i = 0; i < bars.length; i++) {
+          var step = i < STEPS.length ? STEPS[i] : 1;
+          bars[i].style.transform = 'translate3d(0,' + (base - stepPx * step * p).toFixed(2) + 'px,0)';
+        }
+      }
+
+      function tick(now) {
+        // Frame-rate independent chase: covers the same ground in SCRUB seconds
+        // whether the display runs at 60Hz or 120.
+        var dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 60;
+        last = now;
+        current += (target - current) * (1 - Math.pow(0.001, dt / SCRUB));
+        if (Math.abs(target - current) < 0.0005) { current = target; raf = 0; paint(current); return; }
+        paint(current);
+        raf = requestAnimationFrame(tick);
+      }
+
+      // The window opens when the strip could first be on screen and closes
+      // when the hero's bottom edge has climbed to END_VH, so it re-derives
+      // itself from wherever the hero actually ends at this viewport size.
+      function read(snap) {
+        var rect = mask.getBoundingClientRect();
+        var vh = window.innerHeight;
+        var y = window.pageYOffset;
+        var start = Math.max(0, y + rect.top - vh);
+        var span = Math.max(1, (y + rect.bottom - vh * END_VH) - start);
+        target = Math.min(1, Math.max(0, (y - start) / span));
+        if (snap) { current = target; paint(current); return; }
+        if (!raf) { last = 0; raf = requestAnimationFrame(tick); }
+      }
+
+      window.addEventListener('scroll', function () { read(false); }, { passive: true });
+      window.addEventListener('resize', function () { measure(); read(false); });
+      measure();
+      read(true);
+    }());
+  </script>
+
+  <script>
+    // Closing banner flag — the clip loops on its own; a pointer over the tile
+    // drags the fold around with it. Falls back to the plain <video> whenever
+    // the shader is unavailable or unwanted.
+    (function flagBanner() {
+      const tile = document.querySelector('.closer-signup');
+      if (!tile) return;
+      const video = tile.querySelector('.newsletter-background-video');
+      const canvas = tile.querySelector('.closer-flag-canvas');
+      if (!video) return;
+
+      let visible = false;
+
+      // The banner is the last section on the page, so the clip is only fetched
+      // once the reader is close to it rather than on first paint.
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          visible = entry.isIntersecting;
+          if (visible) {
+            const playing = video.play();
+            if (playing && playing.catch) playing.catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      }, { rootMargin: '500px 0px' });
+      observer.observe(tile);
+
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+      if (!canvas || reduceMotion || !finePointer) return;
+
+      const gl = canvas.getContext('webgl', { alpha: false, antialias: false, depth: false, stencil: false })
+        || canvas.getContext('experimental-webgl', { alpha: false });
+      if (!gl) return;
+
+      const compile = (type, source) => {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : null;
+      };
+
+      const vert = compile(gl.VERTEX_SHADER, [
+        'attribute vec2 aPos;',
+        'varying vec2 vUv;',
+        'void main() {',
+        '  vUv = aPos * 0.5 + 0.5;',
+        '  gl_Position = vec4(aPos, 0.0, 1.0);',
+        '}'
+      ].join('\n'));
+
+      const frag = compile(gl.FRAGMENT_SHADER, [
+        '#ifdef GL_FRAGMENT_PRECISION_HIGH',
+        'precision highp float;',
+        '#else',
+        'precision mediump float;',
+        '#endif',
+        'uniform sampler2D uTex;',
+        'uniform vec2 uCover;',
+        'uniform float uTime;',
+        'uniform vec2 uPointer;',
+        'uniform float uStrength;',
+        'uniform float uAspect;',
+        'varying vec2 vUv;',
+        'void main() {',
+        '  vec2 uv = (vUv - 0.5) * uCover + 0.5;',
+        // The roll that runs with or without a pointer. Three octaves at odd
+        // ratios, so it never lands on an obvious repeating beat.
+        '  float base = sin(vUv.x * 4.5 + uTime * 1.05) * 0.0085',
+        '             + sin(vUv.y * 3.2 - uTime * 0.72) * 0.0060',
+        '             + sin((vUv.x + vUv.y) * 7.0 + uTime * 1.60) * 0.0022;',
+        // The fold the pointer drags around. The envelope tapers to nothing
+        // rather than clipping, so the far edge of the fold has no visible ring.
+        '  vec2 p = vec2(vUv.x * uAspect, vUv.y);',
+        '  vec2 m = vec2(uPointer.x * uAspect, uPointer.y);',
+        '  vec2 delta = p - m;',
+        '  float d = length(delta);',
+        '  float envelope = exp(-d * 2.1) * (1.0 - smoothstep(0.0, 1.15, d));',
+        '  float ripple = sin(d * 9.0 - uTime * 2.1) * envelope * uStrength * 0.055;',
+        '  vec2 dir = d > 0.0001 ? delta / d : vec2(0.0);',
+        '  vec2 offset = vec2(base) + dir * ripple;',
+        '  gl_FragColor = texture2D(uTex, clamp(uv + offset, 0.002, 0.998));',
+        '}'
+      ].join('\n'));
+
+      if (!vert || !frag) return;
+
+      const program = gl.createProgram();
+      gl.attachShader(program, vert);
+      gl.attachShader(program, frag);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+      gl.useProgram(program);
+
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const aPos = gl.getAttribLocation(program, 'aPos');
+      gl.enableVertexAttribArray(aPos);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+      const uTex = gl.getUniformLocation(program, 'uTex');
+      const uCover = gl.getUniformLocation(program, 'uCover');
+      const uTime = gl.getUniformLocation(program, 'uTime');
+      const uPointer = gl.getUniformLocation(program, 'uPointer');
+      const uStrength = gl.getUniformLocation(program, 'uStrength');
+      const uAspect = gl.getUniformLocation(program, 'uAspect');
+
+      const texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.uniform1i(uTex, 0);
+
+      let width = 0;
+      let height = 0;
+
+      function resize() {
+        const dpr = Math.min(devicePixelRatio || 1, 1.5);
+        const rect = tile.getBoundingClientRect();
+        width = Math.max(1, Math.round(rect.width * dpr));
+        height = Math.max(1, Math.round(rect.height * dpr));
+        canvas.width = width;
+        canvas.height = height;
+        gl.viewport(0, 0, width, height);
+        gl.uniform1f(uAspect, width / height);
+        // match object-fit: cover by sampling a crop of the clip
+        const videoAspect = (video.videoWidth || 16) / (video.videoHeight || 9);
+        const canvasAspect = width / height;
+        if (canvasAspect > videoAspect) {
+          gl.uniform2f(uCover, 1, videoAspect / canvasAspect);
+        } else {
+          gl.uniform2f(uCover, canvasAspect / videoAspect, 1);
+        }
+      }
+
+      const pointer = { x: 0.5, y: 0.5 };
+      const target = { x: 0.5, y: 0.5 };
+      let strength = 0;
+      let targetStrength = 0;
+
+      tile.addEventListener('pointermove', event => {
+        const rect = tile.getBoundingClientRect();
+        target.x = (event.clientX - rect.left) / rect.width;
+        target.y = 1 - (event.clientY - rect.top) / rect.height;
+        targetStrength = 1;
+      });
+      tile.addEventListener('pointerleave', () => { targetStrength = 0; });
+
+      addEventListener('resize', resize);
+      resize();
+
+      const start = performance.now();
+      let previous = start;
+      let live = false;
+
+      function frame(now) {
+        requestAnimationFrame(frame);
+        if (!visible || video.readyState < 2) {
+          previous = now;
+          return;
+        }
+
+        // Exponential damping on elapsed time, so the follow feels identical at
+        // 60 Hz and 120 Hz instead of running twice as fast on a fast display.
+        const delta = Math.min((now - previous) / 1000, 0.05);
+        previous = now;
+        const follow = 1 - Math.exp(-delta * 7.5);
+        const settle = 1 - Math.exp(-delta * 3.2);
+
+        if (canvas.width !== Math.max(1, Math.round(tile.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 1.5)))) {
+          resize();
+        }
+
+        pointer.x += (target.x - pointer.x) * follow;
+        pointer.y += (target.y - pointer.y) * follow;
+        strength += (targetStrength - strength) * settle;
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
+        gl.uniform1f(uTime, (now - start) / 1000);
+        gl.uniform2f(uPointer, pointer.x, pointer.y);
+        gl.uniform1f(uStrength, strength);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        if (!live) {
+          live = true;
+          tile.dataset.flag = 'live';
+        }
+      }
+
+      requestAnimationFrame(frame);
+    })();
   </script>
 
 </body>
