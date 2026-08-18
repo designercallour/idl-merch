@@ -2719,7 +2719,14 @@
     /* display: grid above outranks the UA sheet's dialog:not([open]) rule, so a
        closed popup would otherwise sit in normal flow just above the footer. */
     .promo-popup:not([open]) { display: none; }
-    .promo-popup::backdrop { background: rgba(0, 0, 0, 0.72); }
+    /* The full overlay from the storefront original: black at 0.7 PLUS a 5px
+       blur of the page behind — the blur was dropped when this popup was
+       copied here, which made it read as a flat dark scrim. */
+    .promo-popup::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+    }
     .promo-popup-panel {
       /* The "Rep your team" panel on idl.pro is not a flat fill — it is this
          radial lift, brightest at the centre. #020405 behind it is the section,
@@ -4502,6 +4509,349 @@
     .toast.show { transform: translateY(0); opacity: 1; }
 
     /* ===================================================================
+       Cart drawer — light rebuild (cart-v2)
+       Structure and behaviour ported from banditrunning.com's minicart:
+       free-shipping progress, per-item quantity stepper, in-cart size
+       switch, and a "Pair it with" upsell rail. The drawer flips to a light
+       surface (the rest of the chrome stays dark), so it carries its own
+       token set rather than the inverted --idl-* ones. Selectors are scoped
+       under .cart-v2 so they win over the two older .bag-drawer blocks above
+       without those needing to be torn out.
+       =================================================================== */
+    .bag-drawer.cart-v2 {
+      --c-paper: #ffffff;
+      --c-soft: #f2f2f0;
+      --c-footer: #ffffff;
+      --c-ink: #0a0a0a;
+      --c-muted: #767676;
+      --c-line: rgba(10, 10, 10, 0.16);
+      --c-track: #676769;
+      --c-accent: #d67400;
+      width: min(680px, 100%);
+      background: var(--c-paper);
+      color: var(--c-ink);
+      border-left: 0;
+      font-family: NeueHaas, "Helvetica Neue", Arial, sans-serif;
+    }
+    .cart-v2 * { box-sizing: border-box; }
+
+    /* ---- header (scaled to the IDL navbar: 20px bag glyph, 13px label, the
+       small black count circle from .bag-count rather than a big amber pill) ---- */
+    .cart-v2 .drawer-header {
+      min-height: 56px;
+      padding: 0 22px;
+    }
+    .cart-v2 .drawer-head-left { display: flex; align-items: center; gap: 8px; }
+    .cart-v2 .drawer-head-left > svg { width: 20px; height: 20px; stroke-width: 1.5; }
+    .cart-v2 .drawer-header h2 {
+      margin: 0;
+      font: 500 13px/1 inherit;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--c-ink);
+    }
+    .cart-v2 .drawer-count {
+      display: grid;
+      place-items: center;
+      min-width: 15px;
+      height: 15px;
+      padding: 0 3px;
+      border: 1px solid #6e7276;
+      border-radius: 50%;
+      background: #6e7276;
+      color: #fff;
+      font: 600 9px/1 CarbonPlus, monospace;
+    }
+    .cart-v2 .drawer-close-icon {
+      width: 34px;
+      height: 34px;
+      margin-right: -7px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      background: transparent;
+      color: var(--c-ink);
+      cursor: pointer;
+    }
+    .cart-v2 .drawer-close-icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
+    .cart-v2 .drawer-close-icon:hover { color: var(--c-accent); }
+
+    /* ---- body / scroll ---- */
+    .cart-v2 .drawer-body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
+    .cart-v2 .drawer-items { flex: 0 0 auto; overflow: visible; }
+
+    /* ---- free-shipping progress: full-bleed bar, IDL lime fill (same token as
+       the checkout button) on a light track. Message ink rather than white so
+       it stays legible over both the lime fill and the empty track. ---- */
+    .cart-v2 .cart-ship { padding: 0; }
+    .cart-v2 .cart-ship-track {
+      position: relative;
+      height: 26px;
+      background: #e7e7e3;
+      overflow: hidden;
+    }
+    .cart-v2 .cart-ship-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0;
+      background: var(--idl-go-gold);
+      transition: width 420ms cubic-bezier(0.22, 0.8, 0.2, 1);
+    }
+    .cart-v2 .cart-ship-msg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--idl-button-ink);
+      font: 500 12px/1 inherit;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    /* ---- line item ---- */
+    .cart-v2 .drawer-item {
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 16px;
+      align-items: start;
+      border-bottom: 1px solid var(--c-line);
+    }
+    .cart-v2 .drawer-item-thumb {
+      width: 84px;
+      height: 100px;
+      object-fit: cover;
+      background: var(--c-soft);
+    }
+    .cart-v2 .drawer-item-main { min-width: 0; }
+    .cart-v2 .drawer-item-top { display: flex; align-items: flex-start; gap: 14px; }
+    .cart-v2 .drawer-item h3 {
+      flex: 1;
+      margin: 0;
+      font: 500 14px/1.33 inherit;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--c-ink);
+    }
+    .cart-v2 .drawer-item-price {
+      flex: 0 0 auto;
+      font: 500 14px/1.33 inherit;
+      color: var(--c-ink);
+      white-space: nowrap;
+    }
+    .cart-v2 .drawer-item-meta {
+      margin: 7px 0 0;
+      font: 400 12px/1.55 inherit;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+    }
+    .cart-v2 .drawer-item-meta > span { display: block; }
+
+    /* In-cart size switch styled to read as Bandit's "SIZE: XS" text line: a
+       bare select in the meta colour with a small caret, not a boxed control. */
+    .cart-v2 .drawer-item-size {
+      position: relative;
+      display: inline-flex;
+      vertical-align: baseline;
+    }
+    .cart-v2 .drawer-item-size select {
+      appearance: none;
+      -webkit-appearance: none;
+      margin: 0;
+      padding: 0 14px 0 0;
+      border: 0;
+      background: transparent;
+      color: var(--c-ink);
+      font: inherit;
+      text-transform: uppercase;
+      letter-spacing: inherit;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .cart-v2 .drawer-item-size::after {
+      content: "";
+      position: absolute;
+      right: 3px;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-right: 1.3px solid var(--c-ink);
+      border-bottom: 1.3px solid var(--c-ink);
+      transform: translateY(-75%) rotate(45deg);
+      pointer-events: none;
+    }
+
+    /* quantity stepper — three bordered cells [trash|qty|plus] with collapsed
+       shared borders, Bandit's exact shape */
+    .cart-v2 .qty-stepper { margin-top: 14px; display: inline-flex; align-items: stretch; }
+    .cart-v2 .qty-stepper button,
+    .cart-v2 .qty-stepper .qty-value {
+      height: 34px;
+      min-width: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--c-line);
+      margin-left: -1px;
+      background: transparent;
+    }
+    .cart-v2 .qty-stepper button { color: var(--c-ink); cursor: pointer; padding: 0; }
+    .cart-v2 .qty-stepper button:first-child { margin-left: 0; }
+    .cart-v2 .qty-stepper button:hover { background: var(--c-soft); }
+    .cart-v2 .qty-stepper button svg { width: 15px; height: 15px; }
+    .cart-v2 .qty-stepper button:disabled { color: rgba(10,10,10,0.26); cursor: not-allowed; background: transparent; }
+    .cart-v2 .qty-stepper .qty-value { font: 500 13px/1 inherit; }
+
+    /* ---- upsell rail ---- */
+    .cart-v2 .cart-upsell { padding: 22px 24px 24px; border-top: 1px solid var(--c-line); }
+    .cart-v2 .cart-upsell-head {
+      margin: 0 0 16px;
+      font: 500 14px/1 inherit;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-ink);
+    }
+    .cart-v2 .cart-upsell-viewport { overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; }
+    .cart-v2 .cart-upsell-viewport::-webkit-scrollbar { display: none; }
+    .cart-v2 .cart-upsell-track { display: flex; gap: 20px; }
+    .cart-v2 .upsell-card {
+      flex: 0 0 300px;
+      scroll-snap-align: start;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .cart-v2 .upsell-card img { width: 64px; height: 76px; object-fit: cover; background: var(--c-soft); }
+    .cart-v2 .upsell-body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .cart-v2 .upsell-top { display: flex; align-items: flex-start; gap: 10px; }
+    .cart-v2 .upsell-name {
+      flex: 1;
+      margin: 0;
+      font: 500 13px/1.3 inherit;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--c-ink);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cart-v2 .upsell-add {
+      flex: 0 0 auto;
+      padding: 6px 14px;
+      border: 1px solid var(--c-ink);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--c-ink);
+      font: 500 11px/1 inherit;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 140ms ease, color 140ms ease;
+    }
+    .cart-v2 .upsell-add:hover { background: var(--c-ink); color: #fff; }
+    .cart-v2 .upsell-meta {
+      font: 400 12px/1 inherit;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cart-v2 .upsell-size { position: relative; display: inline-flex; }
+    .cart-v2 .upsell-size select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 3px 22px 3px 8px;
+      border: 1px solid var(--c-line);
+      background: var(--c-paper);
+      color: var(--c-ink);
+      font: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .cart-v2 .upsell-size::after {
+      content: "";
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-right: 1.3px solid var(--c-ink);
+      border-bottom: 1.3px solid var(--c-ink);
+      transform: translateY(-75%) rotate(45deg);
+      pointer-events: none;
+    }
+    .cart-v2 .upsell-price { font: 400 13px/1 inherit; color: var(--c-ink); }
+    .cart-v2 .cart-upsell-arrows { margin-top: 18px; display: flex; justify-content: flex-start; gap: 10px; }
+    .cart-v2 .cart-upsell-arrow {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--c-line);
+      border-radius: 999px;
+      background: var(--c-paper);
+      color: var(--c-ink);
+      cursor: pointer;
+    }
+    .cart-v2 .cart-upsell-arrow:hover:not(:disabled) { border-color: var(--c-ink); }
+    .cart-v2 .cart-upsell-arrow:disabled { color: rgba(10,10,10,0.22); cursor: not-allowed; }
+    .cart-v2 .cart-upsell-arrow svg { width: 16px; height: 16px; }
+
+    /* ---- empty state ---- */
+    .cart-v2 .drawer-empty { padding: 44px 24px; color: var(--c-muted); }
+    .cart-v2 .drawer-empty-head { margin: 0; font: 500 22px/1.2 inherit; color: var(--c-ink); }
+    .cart-v2 .drawer-empty-sub { margin: 10px 0 22px; font-size: 14px; }
+    .cart-v2 .drawer-empty-links { display: flex; flex-direction: column; gap: 10px; }
+    .cart-v2 .drawer-empty-links a {
+      font: 500 13px/1 inherit;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-ink);
+      text-decoration: none;
+    }
+    .cart-v2 .drawer-empty-links a:hover { text-decoration: underline; }
+
+    /* ---- footer ---- */
+    .cart-v2 .drawer-footer { padding: 18px 24px 20px; border-top: 1px solid var(--c-line); background: var(--c-footer); }
+    .cart-v2 .drawer-subtotal {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font: 500 15px/1 inherit;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-ink);
+    }
+    .cart-v2 .drawer-subtotal span:last-child { font-size: 16px; }
+
+    /* Checkout is IDL's own .button.primary component (lime fill, ink text,
+       CarbonPlus, right-hand icon plate + hover swap) — just stretched full
+       width here. Only the hover is re-pointed: the stock button hovers to
+       white, which would vanish against this light footer, so it inverts to
+       ink instead. */
+    .cart-v2 .cart-checkout { width: 100%; justify-content: space-between; }
+    .cart-v2 .cart-checkout:hover { background: var(--idl-button-ink); color: var(--idl-go-gold); }
+    .cart-v2 .cart-checkout:hover .button-icon svg { background: #12242c; }
+    .cart-v2 .cart-trust {
+      margin: 14px 0 2px;
+      text-align: center;
+      font: 400 14px/1 inherit;
+      letter-spacing: 0;
+      color: var(--c-ink);
+    }
+
+    /* ===================================================================
        Product detail page
        The chrome above and below stays on the dark palette; everything
        between the header and the closer is a white surface, so the PDP gets
@@ -4520,7 +4870,6 @@
     /* main is painted dark for the closer/assurance band; the PDP sections
        each lay their own paper over it. */
     .pdp,
-    .pdp-spec,
     .pdp-related {
       position: relative;
       background: var(--pdp-paper);
@@ -4536,19 +4885,11 @@
       .pdp-wrap { width: 100%; max-width: none; margin-inline: 0; padding-inline: 20px; }
     }
 
-    .pdp { padding-block: calc(var(--chrome-top) + 28px) 72px; }
-    .pdp-crumbs {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 24px;
-      color: var(--pdp-muted);
-      font: 700 12px/14px CarbonPlus, monospace;
-      text-transform: uppercase;
-    }
-    .pdp-crumbs a:hover { color: var(--pdp-ink); }
-    .pdp-crumbs [aria-current] { color: var(--pdp-ink); }
+    /* No added top padding at all, down from the +28px this started at: that
+       space was tuned to sit above the breadcrumb nav, which sat above the
+       gallery in turn. With the crumb gone this gap is bare chrome-top —
+       just clearing the fixed header, nothing extra on top of it. */
+    .pdp { padding-block: var(--chrome-top) 72px; }
 
     .pdp-layout {
       display: grid;
@@ -4571,7 +4912,6 @@
       background: var(--pdp-paper-soft);
       aspect-ratio: 5 / 6;
     }
-    .pdp-shot.is-wide { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
     .pdp-shot img { width: 100%; height: 100%; object-fit: cover; }
     /* The whole gallery is one hover surface — a shot lifts only while the
        pointer is on it, so the column stays still while it is being read. */
@@ -4579,71 +4919,255 @@
       .pdp-shot img { transition: transform 600ms cubic-bezier(0.22, 0.8, 0.2, 1); }
       .pdp-shot:hover img { transform: scale(1.04); }
     }
-    .pdp-shot-badges {
+    /* Click target over each shot — a real button so the gallery is reachable
+       by keyboard, sits under nothing else on the frame. The shot already
+       clips + lifts on hover above, so this only adds the zoom cursor. */
+    .pdp-shot-open {
       position: absolute;
       z-index: 1;
-      top: 12px;
-      left: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+      inset: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: zoom-in;
     }
-    .pdp-badge {
-      padding: 6px 10px;
-      background: var(--pdp-ink);
-      color: var(--idl-white);
-      font: 700 11px/11px CarbonPlus, monospace;
+    .pdp-shot-open:focus-visible {
+      outline: 2px solid var(--pdp-ink);
+      outline-offset: -4px;
+    }
+
+    /* ---- Model-size badge (ported 1:1 from adidas.co.id's "Ukuran model")
+       Sits over one gallery shot (the front-facing model frame). A white
+       square pill — text + ruler glyph — that toggles a white measurement
+       popup above it, swapping the ruler for a close X while open. adidas
+       uses no radius, no shadow, no arrow, no animation; kept exactly. */
+    .pdp-modelsize {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 2;
+    }
+    .pdp-modelsize-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 32px;
+      padding: 4px;
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+      color: var(--pdp-ink);
+      font: 400 14px/20px CarbonPlus, monospace;
+      cursor: pointer;
+    }
+    .pdp-modelsize-icon,
+    .pdp-modelsize-icon svg { display: block; width: 24px; height: 24px; }
+    /* Small model thumbnail on the badge's left edge — stays visible in both
+       states. Specificity clears the sitewide ".pdp-shot img" rule. */
+    .pdp-modelsize-toggle .pdp-modelsize-thumb {
+      display: block;
+      flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .pdp-modelsize-icon .pdp-modelsize-x { display: none; }
+    .pdp-modelsize-toggle[aria-expanded="true"] .pdp-modelsize-ruler { display: none; }
+    .pdp-modelsize-toggle[aria-expanded="true"] .pdp-modelsize-x { display: block; }
+    .pdp-modelsize-popup {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 7px);
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+      background: #fff;
+      color: var(--pdp-ink);
+      white-space: nowrap;
+    }
+    .pdp-modelsize-toggle[aria-expanded="true"] ~ .pdp-modelsize-popup { display: flex; }
+    .pdp-modelsize-popup ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pdp-modelsize-popup li { font: 400 14px/20px CarbonPlus, monospace; }
+
+    /* ---- Gallery lightbox --------------------------------------------
+       The same viewer idl-lookbooks.html uses (its .lb-lightbox), ported
+       verbatim: dark full-bleed field, the shot at its own ratio, prev/next
+       and a position counter as a separate grid row so they never collide,
+       crossfade behind a decode(), keyboard arrows, swipe, focus trap. The
+       product gallery has no video, so that branch simply never fires. */
+    .lb-lightbox {
+      position: fixed;
+      /* Over the bag drawer (80), under the toast (100). */
+      z-index: 90;
+      inset: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      /* Exception to the translucent overlay standard: the photo viewer keeps
+         the lookbook's solid fill so a dimmed-but-visible page doesn't compete
+         behind the shot. Dialogs (promo popup, size guide) stay translucent. */
+      background: var(--idl-bg-deep);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 180ms ease, visibility 180ms;
+    }
+    .lb-lightbox.is-open { opacity: 1; visibility: visible; }
+    /* Flex, not grid, to centre the shot: as a grid item the image's
+       max-height: 100% goes unenforced, so a portrait frame overshoots the
+       row and lands on the counter. */
+    .lb-lightbox-stage {
+      position: relative;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(16px, 3vw, 48px);
+    }
+    .lb-lightbox-image {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      object-fit: contain;
+      opacity: 1;
+      transition: opacity 140ms ease;
+    }
+    /* Held low while the next shot decodes, so a slow frame never lands
+       half-painted. See the swap in the script. */
+    .lb-lightbox-image.is-swapping { opacity: 0; }
+    .lb-lightbox-image[hidden] { display: none; }
+    .lb-lightbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 20px 24px;
+    }
+    .lb-lightbox-count {
+      margin: 0;
+      min-width: 68px;
+      color: var(--idl-muted);
+      font: 400 12px/14px CarbonPlus, monospace;
+      letter-spacing: 0.14em;
+      text-align: center;
       text-transform: uppercase;
     }
-    .pdp-badge--stock { background: var(--idl-go-gold); color: var(--idl-button-ink); }
-    .pdp-badge--out { background: var(--pdp-paper); color: var(--pdp-ink); box-shadow: inset 0 0 0 1px var(--pdp-line); }
+    .lb-lightbox-nav,
+    .lb-lightbox-close {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--idl-silver);
+      cursor: pointer;
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+    .lb-lightbox-nav:hover,
+    .lb-lightbox-close:hover { color: var(--idl-white); border-color: var(--idl-line); }
+    .lb-lightbox-nav:focus-visible,
+    .lb-lightbox-close:focus-visible {
+      outline: 2px solid var(--idl-go-gold);
+      outline-offset: 2px;
+    }
+    .lb-lightbox-nav svg,
+    .lb-lightbox-close svg { width: 24px; height: 24px; display: block; }
+    .lb-lightbox-close {
+      position: absolute;
+      z-index: 2;
+      top: 16px;
+      right: 16px;
+    }
+    /* Phones keep the arrows in the bar beside the counter; swipe carries the
+       gesture anyway. */
+    @media (min-width: 761px) {
+      .lb-lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .lb-lightbox-nav.prev { left: clamp(12px, 2.5vw, 40px); }
+      .lb-lightbox-nav.next { right: clamp(12px, 2.5vw, 40px); }
+      .lb-lightbox-stage { padding-inline: clamp(72px, 8vw, 132px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lb-lightbox,
+      .lb-lightbox-image { transition: none; }
+    }
+    /* Same badge as the storefront's catalogue card (.kit-showcase-badge in
+       idl-merch-redesign-v2): the sold-out state is a bare red-outlined label
+       on white, 3px radius, 12px CarbonPlus at 400 with the same optical
+       padding (nudged down/right to sit even under all-caps + tracking). The
+       old dark/grey chip here read as a different component. */
+    .pdp-badge {
+      padding: 4px 3px 2px 4px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgb(151, 8, 8);
+      border-radius: 3px;
+      background: #fff;
+      color: rgb(151, 8, 8);
+      font: 400 12px/1 CarbonPlus, monospace;
+      letter-spacing: 0.36px;
+      text-transform: uppercase;
+    }
+    /* "N left" style badge (storefront's --stock) — dark outline instead of
+       red. Unused by the gallery today, kept in parity with the storefront. */
+    .pdp-badge--stock { border-color: var(--pdp-ink); color: var(--pdp-ink); }
     .pdp-gallery-dots { display: none; }
 
     /* ---- buy panel ------------------------------------------------- */
     .pdp-panel { position: sticky; top: calc(var(--header-height) + 20px); }
     .pdp-panel-inner { display: flex; flex-direction: column; }
 
+    /* Breadcrumb-style text line (not the crest+flag lockup this replaced),
+       plus the one piece of that lockup asked back: the team crest, sitting
+       beside the line rather than stacked with a flag inside it. */
     .pdp-team {
-      margin: 0 0 18px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font: 700 13px/14px CarbonPlus, monospace;
+      margin: 0 0 12px;
+      color: var(--pdp-muted);
+      font: 400 12px/14px CarbonPlus, monospace;
       text-transform: uppercase;
     }
-    .pdp-team-crest { width: 34px; height: 34px; flex: 0 0 auto; object-fit: contain; }
-    .pdp-team > span { display: flex; flex-direction: column; gap: 5px; }
-    .pdp-team small {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      color: var(--pdp-muted);
-      font: 400 11px/11px CarbonPlus, monospace;
-    }
-    .pdp-team-flag { width: 18px; height: auto; flex: 0 0 auto; }
 
     .pdp-title {
       margin: 0;
-      font-size: 34px;
+      font-size: 22px;
       font-weight: 500;
-      line-height: 36px;
+      line-height: 24px;
       letter-spacing: -0.03em;
       text-transform: uppercase;
+      /* Every product name comes from JS (textContent from the catalog), so
+         there's no markup to hand-place a &nbsp; in — this has to be a pure
+         CSS fix. Balances line lengths instead of just wrapping greedily, so
+         a name that wraps never strands one word alone on the last line. */
+      text-wrap: balance;
     }
+    /* Stock status sits above the title as the first label read, not tucked
+       in a corner of the photo where it goes unnoticed. Its own line; in
+       stock the slot is empty and collapses so it leaves no gap above the
+       title. */
+    .pdp-status { margin: 0 0 10px; }
+    .pdp-status:empty { display: none; }
     .pdp-price {
-      margin-top: 14px;
-      padding-bottom: 26px;
-      border-bottom: 1px solid var(--pdp-line);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      margin-top: 8px;
+      padding-bottom: 14px;
     }
-    .pdp-price span { font: 700 22px/24px CarbonPlus, monospace; }
-    .pdp-price small { color: var(--pdp-muted); font: 400 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
+    .pdp-price [data-pdp-price] { font: 700 18px/20px CarbonPlus, monospace; }
 
-    .pdp-block { padding-block: 24px; border-bottom: 1px solid var(--pdp-line); }
+    .pdp-block { padding-block: 8px; }
     .pdp-block-head {
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       display: flex;
       align-items: baseline;
       justify-content: space-between;
@@ -4654,30 +5178,29 @@
       font: 700 13px/14px CarbonPlus, monospace;
       text-transform: uppercase;
     }
-    .pdp-block-value { color: var(--pdp-muted); font: 400 13px/14px CarbonPlus, monospace; text-transform: uppercase; }
     .pdp-size-guide {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 0;
+      padding: 0 0 1px;
       border: 0;
+      border-bottom: 1px solid currentColor;
       background: transparent;
-      color: var(--pdp-muted);
+      color: var(--pdp-ink);
       font: 400 13px/14px CarbonPlus, monospace;
       text-transform: uppercase;
-      text-decoration: underline;
-      text-underline-offset: 3px;
+      text-decoration: none;
       cursor: pointer;
     }
     .pdp-size-guide:hover { color: var(--pdp-ink); }
-    .pdp-size-guide svg { width: 15px; height: 15px; }
+    .pdp-size-guide__icon { width: 18px; height: 18px; flex: 0 0 auto; }
 
     .pdp-cuts { display: flex; gap: 10px; }
     .pdp-cut {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 6px 14px 6px 6px;
+      padding: 5px 14px 5px 5px;
       border: 1px solid var(--pdp-line);
       background: var(--pdp-paper);
       color: var(--pdp-ink);
@@ -4686,13 +5209,13 @@
       cursor: pointer;
       transition: border-color 120ms ease, background 120ms ease;
     }
-    .pdp-cut img { width: 40px; height: 48px; object-fit: cover; background: var(--pdp-paper-soft); }
+    .pdp-cut img { width: 36px; height: 36px; object-fit: cover; background: var(--pdp-paper-soft); }
     .pdp-cut:hover { border-color: var(--pdp-ink); }
-    .pdp-cut.is-selected { border-color: var(--pdp-ink); background: var(--pdp-paper-soft); }
+    .pdp-cut.is-selected { border-color: var(--pdp-ink); }
 
     .pdp-sizes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
     .pdp-size {
-      height: 48px;
+      height: 40px;
       border: 1px solid var(--pdp-line);
       background: var(--pdp-paper);
       color: var(--pdp-ink);
@@ -4702,7 +5225,7 @@
       transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
     }
     .pdp-size:hover:not(.is-out) { border-color: var(--pdp-ink); }
-    .pdp-size[aria-checked="true"] { border-color: var(--pdp-ink); background: var(--pdp-ink); color: var(--idl-white); }
+    .pdp-size[aria-checked="true"] { border-color: var(--pdp-ink); }
     /* Sold out reads as struck through rather than merely dimmed: at this size
        a grey label is easy to mistake for a style choice. */
     .pdp-size.is-out {
@@ -4713,44 +5236,36 @@
     .pdp-size-note { margin: 14px 0 0; color: var(--pdp-muted); font-size: 13px; line-height: 18px; }
     .pdp-size-note.is-warning { color: var(--pdp-accent); }
 
-    .pdp-actions { margin-top: 26px; display: flex; gap: 8px; }
-    .pdp-add { flex: 1 1 auto; }
-    .pdp-save {
-      width: 48px;
-      height: 48px;
-      flex: 0 0 auto;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--pdp-line);
-      background: var(--pdp-paper);
-      color: var(--pdp-ink);
-      cursor: pointer;
-      transition: border-color 120ms ease, color 120ms ease;
+    .pdp-actions { margin-top: 16px; display: flex; gap: 8px; }
+    .pdp-add { flex: 1 1 auto; position: relative; }
+    /* The icon box only eats width from the right, so a flex-centered label
+       lands left of the button's true midpoint. Pin the icon absolutely and
+       let the label span the full button so its centered text lines up with
+       the button itself, not with the leftover space beside the icon. */
+    .pdp-add .button-label { flex: none; width: 100%; }
+    /* Specificity has to match the sitewide ".newsletter-submit.button > span"
+       rule (which sets position: relative) or it wins the cascade instead. */
+    .pdp-add > span.button-icon { position: absolute; top: 0; right: 0; }
+    /* Sold out swaps this from the shared gold "primary action" colour to the
+       exact red the storefront's own catalogue cards use for a sold-out
+       add-button (.kit-showcase-actions .add-button:is(:disabled,[data-notify])
+       at >=761px in idl-merch-redesign-v2.html) — a gradient, not a flat fill,
+       and not --pdp-accent: that token is this page's own warning red for the
+       "Every size is gone" note, close in hue but a different value, and not
+       what was actually being asked for here. Scoped to the PDP button alone,
+       not .newsletter-submit generally, so the footer/popup signup forms keep
+       their gold. */
+    .pdp-add[data-sold-out="true"],
+    .pdp-add[data-sold-out="true"]:hover {
+      background: linear-gradient(90deg, rgb(89, 13, 13) 0%, rgb(151, 8, 8) 100%);
+      color: var(--idl-white);
     }
-    .pdp-save:hover { border-color: var(--pdp-ink); }
-    .pdp-save svg { width: 20px; height: 20px; }
-    .pdp-save[aria-pressed="true"] { color: var(--pdp-accent); border-color: var(--pdp-accent); }
-    .pdp-save[aria-pressed="true"] svg { fill: currentColor; }
+    .pdp-add[data-sold-out="true"] .button-icon svg {
+      background: var(--idl-panel-soft);
+      color: var(--idl-white);
+    }
     .pdp-add-note { margin: 10px 0 0; min-height: 16px; color: var(--pdp-muted); font: 400 12px/16px CarbonPlus, monospace; text-transform: uppercase; }
     .pdp-add-note:empty { margin-top: 0; min-height: 0; }
-
-    .pdp-shop-link {
-      margin-top: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--pdp-muted);
-      font: 400 12px/14px CarbonPlus, monospace;
-      text-transform: uppercase;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-    .pdp-shop-link:hover { color: var(--pdp-ink); }
-    .pdp-shop-link svg { width: 14px; height: 14px; }
-    /* A crest or flag is dropped, not merely blanked, for the capsule groups
-       that have neither — an empty box would still take its gap. */
-    .pdp-team-crest[hidden],
-    .pdp-team-flag[hidden] { display: none; }
 
     .pdp-perks { margin: 26px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; }
     .pdp-perks li { display: flex; align-items: center; gap: 12px; font-size: 14px; line-height: 18px; }
@@ -4775,29 +5290,38 @@
     .pdp-detail-body { padding-bottom: 20px; font-size: 14px; line-height: 20px; color: #3d4449; }
     .pdp-detail-body p { margin: 0 0 12px; }
     .pdp-detail-body p:last-child { margin-bottom: 0; }
-    .pdp-detail-body ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
-
-    /* ---- spec strip ------------------------------------------------ */
-    .pdp-spec { padding-block: 72px; border-top: 1px solid var(--pdp-line-soft); }
-    .pdp-eyebrow { margin: 0 0 12px; color: var(--pdp-muted); font: 700 12px/12px CarbonPlus, monospace; text-transform: uppercase; }
-    .pdp-spec-head { margin-bottom: 36px; }
-    .pdp-spec-head h2 {
-      margin: 0;
-      max-width: 16ch;
-      font-size: 36px;
-      font-weight: 500;
-      line-height: 38px;
-      letter-spacing: -0.03em;
-      text-transform: uppercase;
+    .pdp-detail-body ul { margin: 0; padding-left: 18px; list-style: none; display: grid; gap: 6px; }
+    .pdp-detail-body ul li { position: relative; }
+    .pdp-detail-body ul li::before {
+      content: "";
+      position: absolute;
+      left: -18px;
+      top: 7.5px;
+      width: 5px;
+      height: 5px;
+      background: var(--pdp-ink);
     }
-    .pdp-spec-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
-    .pdp-spec-media { margin: 0; overflow: hidden; background: var(--pdp-paper-soft); aspect-ratio: 4 / 3; }
-    .pdp-spec-media img { width: 100%; height: 100%; object-fit: cover; }
-    .pdp-spec-list { margin: 0; display: grid; gap: 0; }
-    .pdp-spec-item { padding-block: 18px; border-bottom: 1px solid var(--pdp-line); display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; }
-    .pdp-spec-item:first-child { padding-top: 0; }
-    .pdp-spec-item dt { font: 700 13px/18px CarbonPlus, monospace; text-transform: uppercase; }
-    .pdp-spec-item dd { margin: 0; font-size: 14px; line-height: 20px; color: #3d4449; }
+
+    /* ---- spec list --------------------------------------------------
+       Was its own full-width section below the gallery (photo + a big
+       headline); now folded into the accordion stack as a fourth detail, the
+       same shape as Description/Fabric & fit/Shipping & returns. Only the
+       list itself survives that move — the photo was a duplicate of a shot
+       already in the gallery, and the section-level headline is now the
+       accordion's own summary label instead of needing its own type scale. */
+    .pdp-spec-list { margin: 0; padding-left: 18px; list-style: none; display: grid; gap: 10px; }
+    .pdp-spec-item { position: relative; }
+    .pdp-spec-item::before {
+      content: "";
+      position: absolute;
+      left: -18px;
+      top: 6px;
+      width: 5px;
+      height: 5px;
+      background: var(--pdp-ink);
+    }
+    .pdp-spec-item dt { display: block; color: var(--pdp-ink); font: 700 13px/18px CarbonPlus, monospace; text-transform: uppercase; }
+    .pdp-spec-item dd { display: block; margin: 2px 0 0; font-size: 14px; line-height: 20px; color: #3d4449; }
 
     /* ---- related --------------------------------------------------- */
     .pdp-related { padding-block: 0 88px; }
@@ -4810,35 +5334,157 @@
       letter-spacing: -0.03em;
       text-transform: uppercase;
     }
-    .pdp-related-all {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font: 700 13px/14px CarbonPlus, monospace;
-      text-transform: uppercase;
-      text-decoration: underline;
-      text-underline-offset: 3px;
+    /* Same shape and interaction as the storefront's .look-slider-nav /
+       .look-slider-arrow (idl-merch-redesign-v2.html's capsule slider): a
+       bordered icon square, one arrow-right glyph mirrored via CSS for
+       "previous," disabled state at either end. Not that class verbatim,
+       though — it's colored for the dark storefront panel (a white icon on a
+       white border), which is invisible on this page's white paper. Same
+       component, re-themed the way the kit-showcase-card block below it
+       already re-themes the cards. */
+    .pdp-related-nav { display: flex; flex: 0 0 auto; gap: 6px; }
+    .pdp-related-nav[hidden] { display: none; }
+    .pdp-related-arrow {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--pdp-line);
+      background: transparent;
+      color: var(--pdp-ink);
+      cursor: pointer;
+      transition: border-color 140ms ease, opacity 140ms ease;
     }
-    .pdp-related-all svg { width: 15px; height: 15px; }
-    .pdp-related-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
-    .pdp-rel-media { display: block; overflow: hidden; background: var(--pdp-paper-soft); aspect-ratio: 5 / 6; }
-    .pdp-rel-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms cubic-bezier(0.22, 0.8, 0.2, 1); }
-    .pdp-rel-card:hover .pdp-rel-media img { transform: scale(1.04); }
-    .pdp-rel-copy { padding-top: 14px; }
-    .pdp-rel-team { margin: 0 0 6px; color: var(--pdp-muted); font: 700 11px/11px CarbonPlus, monospace; text-transform: uppercase; }
-    .pdp-rel-copy h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; line-height: 20px; text-transform: uppercase; }
-    .pdp-rel-copy h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
-    .pdp-rel-price { margin: 0; font: 700 13px/14px CarbonPlus, monospace; }
+    .pdp-related-arrow:hover:not(:disabled) { border-color: var(--pdp-ink); }
+    .pdp-related-arrow:disabled { opacity: 0.32; cursor: default; }
+    .pdp-related-arrow svg { width: 18px; height: 18px; }
+    .pdp-related-arrow[data-capsule-slide="-1"] svg { transform: rotate(180deg); }
+    /* Cards are the storefront's own kit-showcase-card / official-product-card
+       — same component idl-lookbooks.html embeds under "Shop the Vancouver
+       Capsule", down to the grid metrics: 24px×6px, no border box. The card's
+       own rules live in the kit-showcase block above; the light "catalog"
+       theme override just below this one re-themes them for a white page
+       instead of the dark storefront panel.
+       A rail, not a fixed grid: grid-auto-flow lays every card out in one row
+       regardless of count, so the arrows above have something to page through
+       instead of sitting on a set that already fits. 4 cards is one page at
+       desktop width — the auto-columns width divides it out the same way the
+       old fixed repeat(4) did — 3 at tablet, 2 on a phone. */
+    .pdp-related-grid {
+      display: grid;
+      grid-auto-flow: column;
+      /* Card width is the storefront's exact catalog metric — (row − the 6px
+         gaps) / 4 — so a card here is the same size as one in the shop grid
+         (idl-merch-redesign-v2's .kit-showcase-stack, 294.75px in its 20px-
+         gutter column) rather than an arbitrary clamp. The 24px is a no-op
+         row-gap kept from the fixed grid this replaced; only the 6px column
+         value ever sits between two cards.
+         4 fill the content row exactly, so the 5th would sit just past the
+         right gutter. To let it peek — the scroll hint — the track bleeds one
+         gutter wide past the content edge (margin-right) so it clips at the
+         viewport edge instead of the gutter, and re-pads that width
+         (padding-right) so the end of the scroll still lands on a gutter. The
+         card width is still computed off the content box, so it stays the
+         storefront metric; only the clip edge moves. */
+      grid-auto-columns: calc((100% - 3 * 6px) / 4);
+      gap: 24px 6px;
+      margin-right: -20px;
+      padding-right: 20px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      border: 0;
+    }
+    .pdp-related-grid::-webkit-scrollbar { display: none; }
+    .pdp-related-grid > * { scroll-snap-align: start; }
 
-    /* ---- size guide dialog ------------------------------------------ */
+    /* ================================================================
+       Related cards — light "catalog" theme.
+       Ported verbatim from idl-lookbooks.html's own copy of this override,
+       which is itself ported from the storefront: the card's base theme is
+       the dark panel, and these rules flip it to the light catalogue card a
+       white page actually sits on — grey image tile, outlined status badge,
+       dark title + price, no action row at rest. Position matters as much as
+       the values: every one of these is a plain re-declaration at the same
+       specificity as the kit-showcase block above, so it is source order
+       that lets them win. Move this block above that one and the cards go
+       dark again. */
+    .kit-showcase-card,
+    .kit-showcase .kit-showcase-card,
+    .kit-showcase .kit-showcase-card:hover {
+      padding: 0;
+      border-radius: 0;
+      background: #fff;
+      color: #111;
+    }
+    .kit-showcase .kit-showcase-card::after { display: none; }
+    .official-product-card .kit-showcase-visual,
+    .kit-showcase-card .kit-showcase-visual {
+      aspect-ratio: 5 / 6;
+      background: #f1f1f1;
+      border-radius: 0;
+    }
+    .kit-showcase-info h3 {
+      padding-top: 3px;
+      padding-bottom: 2px;
+      color: #111;
+      font-size: 14px;
+      line-height: 16px;
+      font-weight: 500;
+    }
+    .kit-showcase-price {
+      min-height: 0;
+      margin-top: 0;
+      padding: 0 0 4px;
+      border-top: 0;
+      justify-content: flex-start;
+      color: #111;
+      font-weight: 500;
+    }
+    .kit-showcase-availability { display: none !important; }
+    .kit-showcase-badge { background: #fff; }
+    .kit-showcase-badge--stock { border-color: #111; color: #111; }
+
+    /* ---- size guide dialog ------------------------------------------
+       Two-column split, same shape as the promo popup: the chart on the
+       left, a model shot on the right. */
     .size-guide {
-      width: min(560px, calc(100% - 32px));
+      width: min(760px, calc(100% - 32px));
+      max-width: none;
       padding: 0;
       border: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       background: var(--idl-bg-deep);
       color: var(--idl-white);
+      overflow: hidden;
     }
-    .size-guide::backdrop { background: rgba(6, 14, 18, 0.72); }
+    /* display: grid outranks the UA dialog:not([open]) rule, so a closed
+       dialog would otherwise sit in flow. */
+    .size-guide:not([open]) { display: none; }
+    /* Same overlay as the promo popup: black 0.7 + a 5px page blur. */
+    .size-guide::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+    }
+    /* Photo on the left, chart on the right — order flips the two grid
+       columns without touching source order (title stays first for a11y). */
+    .size-guide-panel { order: 2; display: flex; flex-direction: column; min-width: 0; }
+    .size-guide-media {
+      order: 1;
+      position: relative;
+      /* Same radial lift as the promo popup, so the two halves read as one. */
+      background: radial-gradient(50% 50%, rgb(10, 29, 38) 0%, rgb(9, 20, 26) 100%);
+    }
+    .size-guide-media img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .size-guide-head {
       min-height: 72px;
       padding: 0 22px;
@@ -4850,6 +5496,11 @@
     .size-guide-head h2 { margin: 0; font-size: 22px; line-height: 22px; text-transform: uppercase; }
     .size-guide-body { padding: 22px; }
     .size-guide-body > p { margin: 0 0 18px; color: var(--idl-muted); font-size: 14px; line-height: 20px; }
+    /* Stack to one column on a phone — chart first, model shot below. */
+    @media (max-width: 620px) {
+      .size-guide { grid-template-columns: minmax(0, 1fr); }
+      .size-guide-media { order: 2; aspect-ratio: 4 / 3; }
+    }
     .size-guide-scroll { overflow-x: auto; }
     .size-guide-table { width: 100%; border-collapse: collapse; font: 400 13px/14px CarbonPlus, monospace; text-transform: uppercase; }
     .size-guide-table th,
@@ -4860,17 +5511,16 @@
     /* ---- responsive -------------------------------------------------- */
     @media (max-width: 1180px) {
       .pdp-layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; }
-      .pdp-related-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .pdp-related-grid .pdp-rel-card:nth-child(4) { display: none; }
+      /* 3-up at tablet, same storefront metric — right gutter (still 20px
+         here) carries the peek, inherited from the base rule. */
+      .pdp-related-grid { grid-auto-columns: calc((100% - 2 * 6px) / 3); }
     }
     @media (max-width: 900px) {
       .pdp-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
       .pdp-panel { position: static; }
-      .pdp-spec-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-      .pdp-spec-head h2 { max-width: none; }
     }
     @media (max-width: 760px) {
-      .pdp { padding-block: calc(var(--chrome-top) + 16px) 48px; }
+      .pdp { padding-block: var(--chrome-top) 48px; }
       /* Five stacked frames would bury the buy panel, so on a phone the gallery
          becomes a snap rail: one shot per screen, swiped through. */
       .pdp-gallery {
@@ -4883,7 +5533,6 @@
       }
       .pdp-gallery::-webkit-scrollbar { display: none; }
       .pdp-shot { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 4 / 5; }
-      .pdp-shot.is-wide { aspect-ratio: 4 / 5; }
       .pdp-gallery-dots {
         display: flex;
         justify-content: center;
@@ -4892,13 +5541,15 @@
       }
       .pdp-gallery-dot { width: 26px; height: 2px; background: var(--pdp-line); transition: background 160ms ease; }
       .pdp-gallery-dot.is-active { background: var(--pdp-ink); }
-      .pdp-title { font-size: 26px; line-height: 28px; }
-      .pdp-spec { padding-block: 48px; }
-      .pdp-spec-head h2 { font-size: 26px; line-height: 28px; }
-      .pdp-spec-item { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+      .pdp-title { font-size: 20px; line-height: 22px; }
       .pdp-related { padding-bottom: 56px; }
-      .pdp-related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .pdp-related-grid .pdp-rel-card:nth-child(4) { display: block; }
+      /* 2-up at phone; the right bleed that carries the peek matches the
+         page --gutter (12px) here, not the desktop 20. */
+      .pdp-related-grid {
+        grid-auto-columns: calc((100% - 6px) / 2);
+        margin-right: calc(-1 * var(--gutter));
+        padding-right: var(--gutter);
+      }
       .pdp-cuts { flex-wrap: wrap; }
     }
 
@@ -5043,16 +5694,6 @@
            if the script never runs. -->
       <article class="pdp" data-header-light>
         <div class="pdp-wrap">
-          <nav class="pdp-crumbs" aria-label="Breadcrumb">
-            <a href="idl-merch-redesign-v2.html#top">Home</a>
-            <span aria-hidden="true">/</span>
-            <a href="idl-merch-redesign-v2.html#team-kits">Team kits</a>
-            <span aria-hidden="true">/</span>
-            <a href="idl-merch-redesign-v2.html#team-kits" data-pdp-crumb-group>Brotherhood</a>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page" data-pdp-crumb-name>IDL Brotherhood Short Sleeve Red Jersey</span>
-          </nav>
-
           <div class="pdp-layout">
             <!-- Gallery: a paired stack on desktop, tall enough that the sticky
                  panel beside it has something to stay put against. On phones the
@@ -5062,21 +5703,43 @@
             <div class="pdp-gallery" data-pdp-gallery>
               <figure class="pdp-shot">
                 <img data-shot="studio" src="standout-assets/shop-products/idl-brotherhood-short-sleeve-red-jersey-studio.jpg" alt="" width="1200" height="1440">
-                <span class="pdp-shot-badges" data-pdp-badges>
-                  <span class="pdp-badge">Season 01</span>
-                </span>
+                <button class="pdp-shot-open" type="button" data-lightbox-open aria-label="Open image full size"></button>
               </figure>
               <figure class="pdp-shot">
                 <img data-shot="" src="standout-assets/shop-products/idl-brotherhood-short-sleeve-red-jersey.jpg" alt="" loading="lazy" width="1600" height="2400">
+                <button class="pdp-shot-open" type="button" data-lightbox-open aria-label="Open image full size"></button>
+                <div class="pdp-modelsize" data-modelsize>
+                  <button class="pdp-modelsize-toggle" type="button" data-modelsize-toggle aria-expanded="false" aria-controls="pdp-modelsize-popup">
+                    <img class="pdp-modelsize-thumb" data-shot="lifestyle" src="standout-assets/shop-products/idl-brotherhood-short-sleeve-red-jersey-lifestyle.jpg" alt="" width="1200" height="1440" loading="lazy">
+                    <span class="pdp-modelsize-text">Model size</span>
+                    <span class="pdp-modelsize-icon">
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+                        <path class="pdp-modelsize-ruler" fill-rule="evenodd" clip-rule="evenodd" d="M2 11H30V21H2V11ZM3 12V20H29V12H25.5V16H24.5V12H21V15H20V12H16.5V16H15.5V12H12V15H11V12H7.5V16H6.5V12H3Z" fill="currentColor"></path>
+                        <path class="pdp-modelsize-x" d="M16.707 16.0001L23.8535 8.85359L23.1464 8.14648L15.9999 15.293L8.85354 8.14649L8.14642 8.85359L15.2928 16.0001L8.14643 23.1465L8.85353 23.8536L15.9999 16.7072L23.1464 23.8536L23.8535 23.1465L16.707 16.0001Z" fill="currentColor"></path>
+                      </svg>
+                    </span>
+                  </button>
+                  <div class="pdp-modelsize-popup" id="pdp-modelsize-popup" role="tooltip" aria-hidden="true">
+                    <ul>
+                      <li>Item size: M</li>
+                      <li>Height: 182 cm</li>
+                      <li>Chest: 96 cm</li>
+                      <li>Waist: 77 cm</li>
+                    </ul>
+                  </div>
+                </div>
               </figure>
               <figure class="pdp-shot">
                 <img data-shot="lifestyle" src="standout-assets/shop-products/idl-brotherhood-short-sleeve-red-jersey-lifestyle.jpg" alt="" loading="lazy" width="1200" height="1440">
+                <button class="pdp-shot-open" type="button" data-lightbox-open aria-label="Open image full size"></button>
               </figure>
               <figure class="pdp-shot">
                 <img data-pdp-group-photo="0" src="Asset Photo/MEDIUM/MEDIUM_BRO.webp" alt="" loading="lazy" width="1080" height="1440">
+                <button class="pdp-shot-open" type="button" data-lightbox-open aria-label="Open image full size"></button>
               </figure>
-              <figure class="pdp-shot is-wide">
+              <figure class="pdp-shot">
                 <img data-pdp-group-photo="1" src="Asset Photo/ACTION/ACT_BRO.webp" alt="" loading="lazy" width="1080" height="1440">
+                <button class="pdp-shot-open" type="button" data-lightbox-open aria-label="Open image full size"></button>
               </figure>
             </div>
             <!-- Outside the rail, not in it: on phones .pdp-gallery is the
@@ -5088,15 +5751,17 @@
             <div class="pdp-panel">
               <div class="pdp-panel-inner">
                 <p class="pdp-team">
-                  <img class="pdp-team-crest" data-pdp-crest src="standout-assets/team-logos/brotherhood.webp" alt="" width="512" height="512">
-                  <span><span data-pdp-group-label>Brotherhood</span><small><img class="pdp-team-flag" data-pdp-flag src="standout-assets/team-flags/canada.webp" alt="" width="512" height="303"><span data-pdp-place>Vancouver, CAN</span></small></span>
+                  <span data-pdp-group-label>Brotherhood</span>
+                  <span aria-hidden="true"> | </span>
+                  <span data-pdp-place>Vancouver, CAN</span>
                 </p>
+
+                <p class="pdp-status" data-pdp-badges></p>
 
                 <h1 class="pdp-title" data-pdp-title>IDL Brotherhood Short Sleeve Red Jersey</h1>
 
                 <div class="pdp-price">
                   <span data-pdp-price data-price="2109000">Rp 2.109.000</span>
-                  <small>Incl. tax &middot; duties calculated at checkout</small>
                 </div>
 
                 <!-- Short and long sleeve are two catalogue entries that differ
@@ -5104,19 +5769,18 @@
                      rather than as two products that never mention each other.
                      Hidden entirely for anything without a pair. -->
                 <div class="pdp-block" data-pdp-cut-block hidden>
-                  <div class="pdp-block-head"><h2>Cut</h2><span class="pdp-block-value" data-cut-label></span></div>
+                  <div class="pdp-block-head"><h2>Cut:</h2></div>
                   <div class="pdp-cuts" data-pdp-cuts></div>
                 </div>
 
                 <div class="pdp-block">
                   <div class="pdp-block-head">
-                    <h2>Size</h2>
-                    <button class="pdp-size-guide" type="button" data-size-guide>Size guide<i data-lucide="ruler" aria-hidden="true"></i></button>
+                    <h2>Size:</h2>
+                    <button class="pdp-size-guide" type="button" data-size-guide><svg class="pdp-size-guide__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="20" height="8" rx="1"></rect><line x1="6.5" y1="8" x2="6.5" y2="12"></line><line x1="11" y1="8" x2="11" y2="12"></line><line x1="15.5" y1="8" x2="15.5" y2="12"></line><line x1="20" y1="8" x2="20" y2="12"></line></svg><span class="pdp-size-guide__text">Size guide</span></button>
                   </div>
                   <!-- Sold-out sizes stay in the list rather than disappearing:
                        a gap in the run is the clearest way to say what is gone. -->
                   <div class="pdp-sizes" role="radiogroup" aria-label="Choose a size" data-pdp-sizes></div>
-                  <p class="pdp-size-note" data-size-note>Model is 182cm, wearing M. Fits true to size.</p>
                 </div>
 
                 <div class="pdp-actions">
@@ -5128,12 +5792,8 @@
                     <span class="button-label signup-button-label" data-pdp-add-label>Add to cart</span>
                     <span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span>
                   </button>
-                  <button class="pdp-save" type="button" aria-pressed="false" aria-label="Save to wishlist" data-pdp-save>
-                    <i data-lucide="heart" aria-hidden="true"></i>
-                  </button>
                 </div>
                 <p class="pdp-add-note" role="status" aria-live="polite" data-pdp-note></p>
-                <a class="pdp-shop-link" data-pdp-shop href="https://shop.idl.pro/products/idl-brotherhood-short-sleeve-red-jersey" target="_blank" rel="noopener noreferrer">Buy it on shop.idl.pro<i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
 
                 <ul class="pdp-perks">
                   <li><i data-lucide="truck" aria-hidden="true"></i><span>Ships from Seoul in 2&ndash;4 business days</span></li>
@@ -5157,6 +5817,12 @@
                       <p>Unworn kit goes back within 30 days. Team-name customisations are final sale.</p>
                     </div>
                   </details>
+                  <details class="pdp-detail">
+                    <summary><span data-pdp-spec-headline>Built for the floor, not the shelf</span><i data-lucide="plus" aria-hidden="true"></i></summary>
+                    <div class="pdp-detail-body">
+                      <dl class="pdp-spec-list" data-pdp-spec></dl>
+                    </div>
+                  </details>
                 </div>
               </div>
             </div>
@@ -5164,28 +5830,20 @@
         </div>
       </article>
 
-      <!-- Spec strip: the things the page is actually asked about, kept out of
-           the accordions so they are readable without a click. -->
-      <section class="pdp-spec" data-header-light aria-labelledby="pdp-spec-title">
-        <div class="pdp-wrap">
-          <div class="pdp-spec-head">
-            <p class="pdp-eyebrow">Season 01 &middot; <span data-pdp-group-label>Brotherhood</span></p>
-            <h2 id="pdp-spec-title" data-pdp-spec-headline>Built for the floor, not the shelf</h2>
-          </div>
-          <div class="pdp-spec-grid">
-            <figure class="pdp-spec-media">
-              <img data-pdp-group-photo="0" src="Asset Photo/MEDIUM/MEDIUM_BRO.webp" alt="" loading="lazy">
-            </figure>
-            <dl class="pdp-spec-list" data-pdp-spec></dl>
-          </div>
-        </div>
-      </section>
-
       <section class="pdp-related" data-header-light aria-labelledby="pdp-related-title">
         <div class="pdp-wrap">
           <div class="pdp-related-head">
-            <h2 id="pdp-related-title">Complete the kit</h2>
-            <a class="pdp-related-all" href="idl-merch-redesign-v2.html#team-kits">All team kits<i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+            <h2 id="pdp-related-title">You may also like</h2>
+            <!-- Same rail-paging pattern as the storefront's own capsule slider
+                 (idl-merch-redesign-v2.html's "Shop the Vancouver Capsule"):
+                 IDLCapsuleSlider does the scroll math, these two buttons just
+                 page by one viewport width. Starts hidden — data-pdp-related
+                 rebuilds the rail on every render, and JS only reveals the nav
+                 once it can measure that the rail actually overflows. -->
+            <div class="pdp-related-nav" data-pdp-related-nav hidden>
+              <button class="pdp-related-arrow" type="button" data-capsule-slide="-1" aria-label="Previous products"><i data-lucide="arrow-right" aria-hidden="true"></i></button>
+              <button class="pdp-related-arrow" type="button" data-capsule-slide="1" aria-label="Next products"><i data-lucide="arrow-right" aria-hidden="true"></i></button>
+            </div>
           </div>
           <div class="pdp-related-grid" data-pdp-related></div>
         </div>
@@ -5353,39 +6011,112 @@
     </footer>
   </div>
 
+  <!-- Gallery lightbox, the same component as idl-lookbooks.html. Outside
+       .site-shell on purpose: that wrapper clips overflow and a transformed
+       ancestor would make it the containing block for this fixed child. -->
+  <div class="lb-lightbox" role="dialog" aria-modal="true" aria-label="Product photo, full size" data-lightbox inert>
+    <button class="lb-lightbox-close" type="button" data-lightbox-close aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+    </button>
+    <div class="lb-lightbox-stage" data-lightbox-stage>
+      <img class="lb-lightbox-image" data-lightbox-image src="" alt="">
+    </div>
+    <div class="lb-lightbox-bar">
+      <button class="lb-lightbox-nav prev" type="button" data-lightbox-prev aria-label="Previous image">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+      </button>
+      <p class="lb-lightbox-count" aria-live="polite"><span data-lightbox-index>1</span> / <span data-lightbox-total>5</span></p>
+      <button class="lb-lightbox-nav next" type="button" data-lightbox-next aria-label="Next image">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+      </button>
+    </div>
+  </div>
+
   <!-- Cart drawer + toast, ported from the storefront so Add to cart on this
        page lands somewhere real instead of bouncing the visitor back to the
        grid. Same markup and same classes, so it inherits the storefront's CSS. -->
   <div class="drawer-scrim" data-close-drawer></div>
-  <aside class="bag-drawer" id="bag-drawer" aria-hidden="true" aria-labelledby="bag-title">
-    <header class="drawer-header"><h2 id="bag-title">Your cart</h2><button class="icon-button" type="button" data-close-drawer aria-label="Close cart"><i data-lucide="x" aria-hidden="true"></i></button></header>
-    <div class="drawer-items"><p class="drawer-empty">Your cart is empty.</p></div>
-    <footer class="drawer-footer"><div class="drawer-total"><span>Total</span><span data-total>Rp 0</span></div><button class="button primary" type="button"><span class="button-label">Checkout</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button></footer>
+  <aside class="bag-drawer cart-v2" id="bag-drawer" aria-hidden="true" aria-labelledby="bag-title">
+    <header class="drawer-header">
+      <div class="drawer-head-left">
+        <i data-lucide="shopping-bag" aria-hidden="true"></i>
+        <h2 id="bag-title">Cart</h2>
+        <span class="drawer-count" data-count>0</span>
+      </div>
+      <button class="drawer-close-icon" type="button" data-close-drawer aria-label="Close cart"><i data-lucide="x" aria-hidden="true"></i></button>
+    </header>
+
+    <div class="drawer-body">
+      <!-- Free-shipping progress: threshold read off the cart total, the fill
+           and message ported from banditrunning.com's minicart. -->
+      <div class="cart-ship" data-ship hidden>
+        <div class="cart-ship-track">
+          <div class="cart-ship-fill" data-ship-fill></div>
+          <p class="cart-ship-msg" data-ship-msg></p>
+        </div>
+      </div>
+
+      <div class="drawer-items">
+        <div class="drawer-empty">
+          <p class="drawer-empty-head">Your cart is empty</p>
+          <p class="drawer-empty-sub">Nothing on the bench yet — go pull a kit.</p>
+          <div class="drawer-empty-links">
+            <a href="idl-merch-redesign-v2.html" data-close-drawer>Shop all →</a>
+            <a href="idl-lookbooks.html" data-close-drawer>Lookbooks →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upsell rail: one add-to-cart control per card, size picked inline,
+           the "Pair it with" pattern lifted from the Bandit minicart. -->
+      <section class="cart-upsell" data-upsell hidden>
+        <p class="cart-upsell-head">Pair it with</p>
+        <div class="cart-upsell-viewport" data-upsell-viewport>
+          <div class="cart-upsell-track" data-upsell-track></div>
+        </div>
+        <div class="cart-upsell-arrows" data-upsell-arrows hidden>
+          <button type="button" class="cart-upsell-arrow" data-upsell-prev aria-label="Previous"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+          <button type="button" class="cart-upsell-arrow" data-upsell-next aria-label="Next"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+        </div>
+      </section>
+    </div>
+
+    <footer class="drawer-footer">
+      <div class="drawer-subtotal"><span>Subtotal</span><span data-total>Rp 0</span></div>
+
+      <button class="button primary cart-checkout" type="button"><span class="button-label">Checkout</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button>
+      <p class="cart-trust">Free returns. Fast shipping.</p>
+    </footer>
   </aside>
   <div class="toast" role="status" aria-live="polite"></div>
 
   <!-- Size guide, opened from the panel. A dialog rather than a fourth
        accordion: it is a reference table, not part of the read-down. -->
   <dialog class="size-guide" aria-labelledby="size-guide-title">
-    <div class="size-guide-head">
-      <h2 id="size-guide-title">Size guide</h2>
-      <button class="icon-button" type="button" data-close-size-guide aria-label="Close size guide"><i data-lucide="x" aria-hidden="true"></i></button>
-    </div>
-    <div class="size-guide-body">
-      <p>Jersey measurements in centimetres, taken flat. Garment is cut to an athletic regular fit &mdash; size up for a relaxed drape.</p>
-      <div class="size-guide-scroll">
-        <table class="size-guide-table">
-          <thead><tr><th scope="col">Size</th><th scope="col">Chest</th><th scope="col">Length</th><th scope="col">Shoulder</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">XS</th><td>48</td><td>66</td><td>42</td></tr>
-            <tr><th scope="row">S</th><td>51</td><td>68</td><td>44</td></tr>
-            <tr><th scope="row">M</th><td>54</td><td>70</td><td>46</td></tr>
-            <tr><th scope="row">L</th><td>57</td><td>72</td><td>48</td></tr>
-            <tr><th scope="row">XL</th><td>60</td><td>74</td><td>50</td></tr>
-            <tr><th scope="row">XXL</th><td>63</td><td>76</td><td>52</td></tr>
-          </tbody>
-        </table>
+    <div class="size-guide-panel">
+      <div class="size-guide-head">
+        <h2 id="size-guide-title">Size guide</h2>
+        <button class="icon-button" type="button" data-close-size-guide aria-label="Close size guide"><i data-lucide="x" aria-hidden="true"></i></button>
       </div>
+      <div class="size-guide-body">
+        <p>Jersey measurements in centimetres, taken flat. Garment is cut to an athletic regular fit &mdash; size up for a relaxed drape.</p>
+        <div class="size-guide-scroll">
+          <table class="size-guide-table">
+            <thead><tr><th scope="col">Size</th><th scope="col">Chest</th><th scope="col">Length</th><th scope="col">Shoulder</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">XS</th><td>48</td><td>66</td><td>42</td></tr>
+              <tr><th scope="row">S</th><td>51</td><td>68</td><td>44</td></tr>
+              <tr><th scope="row">M</th><td>54</td><td>70</td><td>46</td></tr>
+              <tr><th scope="row">L</th><td>57</td><td>72</td><td>48</td></tr>
+              <tr><th scope="row">XL</th><td>60</td><td>74</td><td>50</td></tr>
+              <tr><th scope="row">XXL</th><td>63</td><td>76</td><td>52</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="size-guide-media">
+      <img data-shot="" src="standout-assets/shop-products/idl-brotherhood-short-sleeve-red-jersey.jpg" alt="" width="1600" height="2400" loading="lazy">
     </div>
   </dialog>
 
@@ -5430,6 +6161,8 @@
   <button class="discount-close" type="button" aria-label="Close discount offer"><i data-lucide="x" aria-hidden="true"></i></button>
 
   <script src="product-catalog.js"></script>
+  <script src="product-image-zoom.js"></script>
+  <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>
   <script src="team-mega-menu-state.js"></script>
   <script src="currency-selector.js"></script>
@@ -5966,7 +6699,27 @@
       const cart = [];
       let toastTimer;
 
+      // Free-shipping threshold in IDR — mirrors the "$160" line in the promo
+      // banner, converted to a round rupiah figure. formatPrice() reformats the
+      // remainder into whatever currency the selector is on, since it converts
+      // from the IDR source rather than parsing text.
+      const FREE_SHIP_THRESHOLD = 2500000;
+      const MAX_QTY = 10;
+
+      const shipEl = document.querySelector('[data-ship]');
+      const shipFill = document.querySelector('[data-ship-fill]');
+      const shipMsg = document.querySelector('[data-ship-msg]');
+      const upsellEl = document.querySelector('[data-upsell]');
+      const upsellTrack = document.querySelector('[data-upsell-track]');
+      const upsellViewport = document.querySelector('[data-upsell-viewport]');
+      const upsellArrows = document.querySelector('[data-upsell-arrows]');
+      const upsellPrev = document.querySelector('[data-upsell-prev]');
+      const upsellNext = document.querySelector('[data-upsell-next]');
+
       const refreshIcons = () => { if (window.lucide) window.lucide.createIcons(); };
+      const cartQty = () => cart.reduce((n, item) => n + item.qty, 0);
+      const cartSubtotal = () => cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const inStockSizes = (product) => product ? product.sizes.filter(size => !product.out.includes(size)) : [];
 
       function showToast(message) {
         if (!toast) return;
@@ -5976,21 +6729,164 @@
         toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2600);
       }
 
+      // Merge on key + size so a repeat add bumps the quantity rather than
+      // stacking a second identical row. A different size is a different line.
+      function addItem({ key, name, price, image, size }) {
+        const existing = cart.find(item => item.key === key && item.size === size);
+        if (existing) {
+          existing.qty = Math.min(MAX_QTY, existing.qty + 1);
+        } else {
+          cart.push({ key, name, price, image, size: size || null, qty: 1 });
+        }
+      }
+
+      // Derive a colour from the product name so a line can carry a "COLOR: X"
+      // meta line the way Bandit's does — IDL kits have no colour variant axis,
+      // the colour is baked into the name (…Red Jersey, …Green Jersey).
+      const COLOR_WORDS = ['Red', 'Green', 'Grey', 'Gray', 'Black', 'Blue', 'Orange', 'White', 'Pink'];
+      function colorOf(product) {
+        if (!product) return null;
+        const found = COLOR_WORDS.find(word => new RegExp('\\b' + word + '\\b', 'i').test(product.name));
+        return found ? found.toUpperCase() : null;
+      }
+
+      // Two stacked meta lines — "Size: X" (a bare select so it can be switched
+      // in place) then "Color: X" — matching the Bandit line-item block.
+      function metaMarkup(item) {
+        const product = catalog && catalog.products[item.key];
+        const oneSize = product && product.sizes.length === 1;
+        let sizeLine;
+        if (!product || oneSize) {
+          sizeLine = `<span>Size: ${item.size || (product ? product.sizes[0] : '')}</span>`;
+        } else {
+          const sizes = inStockSizes(product);
+          // Keep the current size selectable even if it has since gone out, so
+          // the row never silently jumps to a different size on re-render.
+          if (item.size && !sizes.includes(item.size)) sizes.unshift(item.size);
+          const options = sizes.map(size =>
+            `<option value="${size}"${size === item.size ? ' selected' : ''}>${size}</option>`).join('');
+          sizeLine = `<span>Size: <span class="drawer-item-size"><select data-size-select aria-label="Change size for ${item.name}">${options}</select></span></span>`;
+        }
+        const color = colorOf(product);
+        const colorLine = color ? `<span>Color: ${color}</span>` : '';
+        return `<div class="drawer-item-meta">${sizeLine}${colorLine}</div>`;
+      }
+
+      function renderShip() {
+        if (!shipEl) return;
+        const subtotal = cartSubtotal();
+        if (!cart.length) { shipEl.hidden = true; return; }
+        shipEl.hidden = false;
+        const pct = Math.min(100, (subtotal / FREE_SHIP_THRESHOLD) * 100);
+        shipFill.style.width = pct + '%';
+        if (subtotal >= FREE_SHIP_THRESHOLD) {
+          shipEl.classList.add('is-met');
+          shipMsg.textContent = "You've unlocked free shipping";
+        } else {
+          shipEl.classList.remove('is-met');
+          shipMsg.textContent = `${formatPrice(FREE_SHIP_THRESHOLD - subtotal)} away from free shipping`;
+        }
+      }
+
+      function updateUpsellArrows() {
+        if (!upsellViewport || !upsellArrows) return;
+        const overflow = upsellViewport.scrollWidth - upsellViewport.clientWidth > 4;
+        upsellArrows.hidden = !overflow;
+        if (!overflow) return;
+        const x = upsellViewport.scrollLeft;
+        if (upsellPrev) upsellPrev.disabled = x <= 2;
+        if (upsellNext) upsellNext.disabled = x >= upsellViewport.scrollWidth - upsellViewport.clientWidth - 2;
+      }
+
+      function renderUpsell() {
+        if (!upsellEl || !catalog) return;
+        if (!cart.length) { upsellEl.hidden = true; return; }
+        const inCart = new Set(cart.map(item => item.key));
+        const current = catalog.products[productKey];
+        // The current product's other cut first (a jersey's long/short sibling),
+        // then the rest of its group, then the wider catalogue — the pieces that
+        // actually complete a kit lead.
+        const ranked = [
+          current && current.pair,
+          ...catalog.order.filter(k => catalog.products[k].group === (current && current.group)),
+          ...catalog.order,
+        ];
+        const seen = new Set();
+        const picks = [];
+        for (const k of ranked) {
+          if (!k || seen.has(k) || inCart.has(k) || k === productKey) continue;
+          const p = catalog.products[k];
+          if (!p || p.soldOut) continue;
+          seen.add(k);
+          picks.push(k);
+          if (picks.length >= 6) break;
+        }
+        if (!picks.length) { upsellEl.hidden = true; return; }
+        upsellEl.hidden = false;
+        upsellTrack.innerHTML = picks.map(k => {
+          const p = catalog.products[k];
+          const sizes = inStockSizes(p);
+          const oneSize = p.sizes.length === 1;
+          const sizeField = oneSize
+            ? `${p.sizes[0]}`
+            : `<span class="upsell-size"><select data-upsell-size aria-label="Size for ${p.name}">${sizes.map(s => `<option value="${s}">${s}</option>`).join('')}</select></span>`;
+          return `<div class="upsell-card" data-upsell-key="${k}">
+              <img src="${shotSrc(k, 'studio')}" alt="${p.name}" loading="lazy">
+              <div class="upsell-body">
+                <div class="upsell-top">
+                  <p class="upsell-name">${p.name}</p>
+                  <button type="button" class="upsell-add" data-upsell-add="${k}">Add</button>
+                </div>
+                <div class="upsell-meta">Size: ${sizeField}</div>
+                <p class="upsell-price">${formatPrice(p.price)}</p>
+              </div>
+            </div>`;
+        }).join('');
+        upsellViewport.scrollLeft = 0;
+        window.requestAnimationFrame(updateUpsellArrows);
+      }
+
       function renderBag() {
         if (!drawerItems) return;
-        bagCount.textContent = String(cart.length);
-        drawerTotal.textContent = formatPrice(cart.reduce((sum, item) => sum + item.price, 0));
+        document.querySelectorAll('[data-count]').forEach(node => { node.textContent = String(cartQty()); });
+        drawerTotal.textContent = formatPrice(cartSubtotal());
         if (!cart.length) {
-          drawerItems.innerHTML = '<p class="drawer-empty">Your cart is empty.</p>';
+          drawerItems.innerHTML = `
+            <div class="drawer-empty">
+              <p class="drawer-empty-head">Your cart is empty</p>
+              <p class="drawer-empty-sub">Nothing on the bench yet — go pull a kit.</p>
+              <div class="drawer-empty-links">
+                <a href="idl-merch-redesign-v2.html">Shop all →</a>
+                <a href="idl-lookbooks.html">Lookbooks →</a>
+              </div>
+            </div>`;
+          renderShip();
+          renderUpsell();
           return;
         }
-        drawerItems.innerHTML = cart.map((item, index) => `
-          <article class="drawer-item">
-            <img src="${item.image}" alt="">
-            <div><h3>${item.name}</h3><p>${formatPrice(item.price)} / Size ${item.size}</p></div>
-            <button class="remove-item" type="button" data-remove="${index}" aria-label="Remove ${item.name}"><i data-lucide="trash-2" aria-hidden="true"></i></button>
-          </article>
-        `).join('');
+        drawerItems.innerHTML = cart.map((item, index) => {
+          const dec = item.qty > 1
+            ? `<button type="button" data-qty-dec aria-label="Decrease quantity"><i data-lucide="minus" aria-hidden="true"></i></button>`
+            : `<button type="button" data-qty-dec aria-label="Remove ${item.name}"><i data-lucide="trash-2" aria-hidden="true"></i></button>`;
+          return `
+          <article class="drawer-item" data-index="${index}">
+            <img class="drawer-item-thumb" src="${item.image}" alt="">
+            <div class="drawer-item-main">
+              <div class="drawer-item-top">
+                <h3>${item.name}</h3>
+                <span class="drawer-item-price">${formatPrice(item.price * item.qty)}</span>
+              </div>
+              ${metaMarkup(item)}
+              <div class="qty-stepper">
+                ${dec}
+                <span class="qty-value">${item.qty}</span>
+                <button type="button" data-qty-inc aria-label="Increase quantity"${item.qty >= MAX_QTY ? ' disabled' : ''}><i data-lucide="plus" aria-hidden="true"></i></button>
+              </div>
+            </div>
+          </article>`;
+        }).join('');
+        renderShip();
+        renderUpsell();
         refreshIcons();
       }
 
@@ -6002,13 +6898,51 @@
       }
       bagButton.addEventListener('click', () => setDrawer(true));
       document.querySelectorAll('[data-close-drawer]').forEach(node => node.addEventListener('click', () => setDrawer(false)));
-      drawerItems.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-remove]');
-        if (!button) return;
-        const removed = cart.splice(Number(button.dataset.remove), 1)[0];
-        renderBag();
-        showToast(`${removed.name} removed`);
+
+      // One delegated click listener on the whole drawer: item quantity/remove,
+      // upsell add, and the carousel arrows all bubble up to here, so nothing
+      // needs re-binding when renderBag() rebuilds the item and upsell markup.
+      bagDrawer.addEventListener('click', (event) => {
+        const itemEl = event.target.closest('.drawer-item');
+        if (event.target.closest('[data-qty-inc]') && itemEl) {
+          const item = cart[Number(itemEl.dataset.index)];
+          if (item && item.qty < MAX_QTY) { item.qty += 1; renderBag(); }
+          return;
+        }
+        if (event.target.closest('[data-qty-dec]') && itemEl) {
+          const index = Number(itemEl.dataset.index);
+          const item = cart[index];
+          if (!item) return;
+          if (item.qty > 1) { item.qty -= 1; renderBag(); }
+          else { const [removed] = cart.splice(index, 1); renderBag(); showToast(`${removed.name} removed`); }
+          return;
+        }
+        const addButton = event.target.closest('[data-upsell-add]');
+        if (addButton) {
+          const key = addButton.dataset.upsellAdd;
+          const product = catalog.products[key];
+          if (!product) return;
+          const select = addButton.closest('.upsell-card').querySelector('[data-upsell-size]');
+          const size = select ? select.value : (inStockSizes(product)[0] || null);
+          addItem({ key, name: product.name, price: product.price, image: shotSrc(key, 'studio'), size });
+          renderBag();
+          showToast(`${product.name} added`);
+          return;
+        }
+        if (event.target.closest('[data-upsell-prev]')) { upsellViewport.scrollBy({ left: -264, behavior: 'smooth' }); return; }
+        if (event.target.closest('[data-upsell-next]')) { upsellViewport.scrollBy({ left: 264, behavior: 'smooth' }); }
       });
+
+      // Size switch on a line already in the cart: swap the row's size in place.
+      bagDrawer.addEventListener('change', (event) => {
+        const select = event.target.closest('[data-size-select]');
+        if (!select) return;
+        const itemEl = select.closest('.drawer-item');
+        const item = cart[Number(itemEl.dataset.index)];
+        if (item) { item.size = select.value; renderBag(); }
+      });
+
+      if (upsellViewport) upsellViewport.addEventListener('scroll', updateUpsellArrows, { passive: true });
 
       // ---- catalogue hydration -----------------------------------------
       // One template, any SKU: ?product=<key> picks the entry out of
@@ -6021,7 +6955,6 @@
 
       const cutBlock = el('[data-pdp-cut-block]');
       const cutsBox = el('[data-pdp-cuts]');
-      const cutLabel = el('[data-cut-label]');
       const sizesBox = el('[data-pdp-sizes]');
       const sizeNote = el('[data-size-note]');
       const addNote = el('[data-pdp-note]');
@@ -6046,22 +6979,11 @@
 
         document.title = `${product.name} — IDL Merch`;
         el('[data-pdp-title]').textContent = product.name;
-        el('[data-pdp-crumb-name]').textContent = product.name;
-        el('[data-pdp-crumb-group]').textContent = group.label;
         document.querySelectorAll('[data-pdp-group-label]').forEach(node => { node.textContent = group.label; });
         el('[data-pdp-place]').textContent = group.place;
 
         const price = el('[data-pdp-price]');
         price.dataset.price = product.price;
-
-        // The capsules have no crest or flag of their own — only the six crews
-        // do — so those two images are dropped rather than left broken.
-        const crest = el('[data-pdp-crest]');
-        const flag = el('[data-pdp-flag]');
-        crest.hidden = !group.crest;
-        if (group.crest) crest.src = group.crest;
-        flag.hidden = !group.flag;
-        if (group.flag) flag.src = group.flag;
 
         // Gallery: three product frames, then the two crew shots for the group.
         document.querySelectorAll('[data-shot]').forEach(img => {
@@ -6077,15 +6999,13 @@
         });
 
         const badges = el('[data-pdp-badges]');
-        badges.innerHTML = '<span class="pdp-badge">Season 01</span>'
-          + (product.soldOut ? '<span class="pdp-badge pdp-badge--out">Sold out</span>' : '');
+        badges.innerHTML = product.soldOut ? '<span class="pdp-badge pdp-badge--out">Sold out</span>' : '';
 
         // Cut control, only for the products that come in both sleeve lengths.
         const pair = product.pair ? catalog.products[product.pair] : null;
         cutBlock.hidden = !pair;
         cutsBox.innerHTML = '';
         if (pair) {
-          cutLabel.textContent = product.cut;
           [[key, product], [product.pair, pair]].forEach(([cutKey, cutProduct]) => {
             const button = document.createElement('button');
             button.type = 'button';
@@ -6130,8 +7050,10 @@
         }
 
         defaultSizeNote = product.soldOut ? 'Every size is gone — join the restock list.' : copy.sizeNote;
-        sizeNote.textContent = defaultSizeNote;
-        sizeNote.classList.toggle('is-warning', product.soldOut);
+        if (sizeNote) {
+          sizeNote.textContent = defaultSizeNote;
+          sizeNote.classList.toggle('is-warning', product.soldOut);
+        }
 
         addButton.dataset.product = product.name;
         addButton.dataset.price = product.price;
@@ -6142,9 +7064,6 @@
           `<i data-lucide="${product.soldOut ? 'bell' : 'plus'}" aria-hidden="true"></i>`;
         addNote.textContent = '';
 
-        const shopLink = el('[data-pdp-shop]');
-        shopLink.href = product.shop;
-
         el('[data-pdp-description]').innerHTML = copy.description.map(line => `<p>${line}</p>`).join('');
         el('[data-pdp-fabric]').innerHTML = copy.fabric.map(line => `<li>${line}</li>`).join('');
         el('[data-pdp-spec-headline]').textContent = copy.headline;
@@ -6152,22 +7071,56 @@
           `<div class="pdp-spec-item"><dt>${item.term}</dt><dd>${item.detail}</dd></div>`).join('');
 
         // Related: the rest of the group first — that is what actually completes
-        // a kit — then the front of the catalogue to top the row up to four.
+        // a kit — then the front of the catalogue to fill the rail out to
+        // eight, two pages of four at desktop width. The nav below only
+        // reveals itself once syncRelatedNav() confirms the rail overflows,
+        // so a group too small to fill even one page just never shows arrows.
         const skip = new Set([key, product.pair]);
         const sameGroup = catalog.order.filter(k => !skip.has(k) && catalog.products[k].group === product.group);
         const rest = catalog.order.filter(k => !skip.has(k) && catalog.products[k].group !== product.group);
-        el('[data-pdp-related]').innerHTML = [...sameGroup, ...rest].slice(0, 4).map(k => {
+        // Card markup mirrors the storefront's own kit-showcase-card /
+        // official-product-card verbatim (see idl-merch-redesign-v2.html and
+        // idl-lookbooks.html's "Shop the Vancouver Capsule"), down to the
+        // add-to-cart / notify buttons and the hover-swap lifestyle shot, so
+        // the interaction here is the same component rather than a lookalike.
+        const relatedGrid = el('[data-pdp-related]');
+        relatedGrid.innerHTML = [...sameGroup, ...rest].slice(0, 8).map(k => {
           const item = catalog.products[k];
           const href = `idl-product.html?product=${encodeURIComponent(k)}`;
-          return `<article class="pdp-rel-card">
-              <a class="pdp-rel-media" href="${href}"><img src="${shotSrc(k, 'studio')}" alt="${item.name}" loading="lazy"></a>
-              <div class="pdp-rel-copy">
-                <p class="pdp-rel-team">${catalog.groups[item.group].label}</p>
-                <h3><a href="${href}">${item.name}</a></h3>
-                <p class="pdp-rel-price" data-price="${item.price}"></p>
+          const studio = shotSrc(k, 'studio');
+          const action = item.soldOut
+            ? `<button class="add-button button primary" data-notify data-product="${item.name}" type="button"><span class="button-label">Notify me</span><span class="button-icon"><i data-lucide="bell" aria-hidden="true"></i></span></button>`
+            : `<button class="add-button button primary" data-key="${k}" data-product="${item.name}" data-price="${item.price}" data-image="${studio}" type="button"><span class="button-label">Add to cart</span><span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span></button>`;
+          return `<article class="kit-showcase-card official-product-card${item.soldOut ? ' is-sold-out' : ''}" data-showcase-card>
+              <div class="kit-showcase-grid">
+                <a class="kit-showcase-visual has-hover-media" href="${href}" aria-label="View ${item.name}">
+                  <img src="${studio}" alt="${item.name}" loading="lazy">
+                  <img class="kit-showcase-hover-media" src="${shotSrc(k, 'lifestyle')}" alt="" aria-hidden="true" loading="lazy">
+                  ${item.soldOut ? '<span class="kit-showcase-badges"><span class="kit-showcase-badge">Sold out</span></span>' : ''}
+                </a>
+                <div class="kit-showcase-details">
+                  <div class="kit-showcase-info">
+                    <h3>${item.name}</h3>
+                    <div class="kit-showcase-price"><span data-price="${item.price}"></span></div>
+                    <div class="kit-showcase-actions">
+                      ${action}
+                      <a class="kit-showcase-secondary button primary" href="${href}"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </article>`;
         }).join('');
+        // Re-bound on every render: the grid above is rebuilt from scratch
+        // each time (a cut switch included), so any listeners bindProductImageZoom
+        // attached to the previous nodes went with them.
+        if (window.IDLProductImageZoom) {
+          window.IDLProductImageZoom.bindProductImageZoom(relatedGrid.querySelectorAll('.kit-showcase-visual'));
+        }
+        // New set, so the rail starts back at its own first card rather than
+        // wherever the previous product's set happened to leave it scrolled.
+        relatedGrid.scrollLeft = 0;
+        if (typeof syncRelatedNav === 'function') syncRelatedNav();
 
         renderPrices();
         refreshIcons();
@@ -6181,14 +7134,18 @@
         // Sold-out sizes stay clickable so the reason is announced rather than
         // the click just doing nothing.
         if (button.classList.contains('is-out')) {
-          sizeNote.textContent = `${button.dataset.size} is sold out — join the restock list below.`;
-          sizeNote.classList.add('is-warning');
+          if (sizeNote) {
+            sizeNote.textContent = `${button.dataset.size} is sold out — join the restock list below.`;
+            sizeNote.classList.add('is-warning');
+          }
           return;
         }
         selectedSize = button.dataset.size;
         [...sizesBox.children].forEach(node => node.setAttribute('aria-checked', String(node === button)));
-        sizeNote.textContent = defaultSizeNote;
-        sizeNote.classList.remove('is-warning');
+        if (sizeNote) {
+          sizeNote.textContent = defaultSizeNote;
+          sizeNote.classList.remove('is-warning');
+        }
         addNote.textContent = '';
       });
 
@@ -6212,7 +7169,8 @@
           sizesBox.querySelector('.pdp-size:not(.is-out)')?.focus();
           return;
         }
-        cart.push({
+        addItem({
+          key: productKey,
           name: addButton.dataset.product,
           price: Number(addButton.dataset.price),
           image: addButton.dataset.image,
@@ -6225,13 +7183,79 @@
         setDrawer(true);
       });
 
-      const saveButton = el('[data-pdp-save]');
-      if (saveButton) {
-        saveButton.addEventListener('click', () => {
-          const saved = saveButton.getAttribute('aria-pressed') !== 'true';
-          saveButton.setAttribute('aria-pressed', String(saved));
-          showToast(saved ? 'Saved to wishlist' : 'Removed from wishlist');
+      // Related cards' own add-to-cart: delegated on the grid, not the cards,
+      // since the grid is rebuilt from scratch on every render. Quick-add from
+      // a tile skips the size step the PDP's own button requires — there is
+      // nowhere on the card to pick one — matching how the storefront's own
+      // catalogue grid adds from a tile: no size, a toast instead of the
+      // drawer opening.
+      el('[data-pdp-related]').addEventListener('click', (event) => {
+        const notifyButton = event.target.closest('.add-button[data-notify]');
+        if (notifyButton) {
+          showToast(`We will email you when ${notifyButton.dataset.product} is back`);
+          return;
+        }
+        const addBtn = event.target.closest('.add-button:not([data-notify])');
+        if (!addBtn) return;
+        // Quick-add from a tile has no size step, so default to the first size
+        // still in stock — the size can be swapped from the cart line itself.
+        const key = addBtn.dataset.key;
+        const product = catalog.products[key];
+        const size = inStockSizes(product)[0] || null;
+        addItem({ key, name: product.name, price: product.price, image: shotSrc(key, 'studio'), size });
+        renderBag();
+        showToast(`${product.name} added to cart`);
+      });
+
+      // Related rail paging: the exact scroll math the storefront's own
+      // capsule slider uses (idl-merch-redesign-v2.html's "Shop the Vancouver
+      // Capsule"), wired to this section's own class names. A function
+      // declaration, not const, so it is hoisted — render() above calls it
+      // after every rebuild, before this block has run.
+      const capsuleSliderApi = window.IDLCapsuleSlider;
+      const relatedRail = el('[data-pdp-related]');
+      const relatedNav = el('[data-pdp-related-nav]');
+      const relatedArrows = relatedNav ? [...relatedNav.querySelectorAll('[data-capsule-slide]')] : [];
+
+      function syncRelatedNav() {
+        if (!capsuleSliderApi || !relatedRail || !relatedNav) return;
+        const { scrollLeft, clientWidth, scrollWidth } = relatedRail;
+        relatedNav.hidden = !capsuleSliderApi.overflows(scrollWidth, clientWidth);
+        relatedArrows.forEach((arrow) => {
+          const back = Number(arrow.dataset.capsuleSlide) < 0;
+          arrow.disabled = back
+            ? capsuleSliderApi.atStart(scrollLeft)
+            : capsuleSliderApi.atEnd(scrollLeft, clientWidth, scrollWidth);
         });
+      }
+
+      // One card at a time, not one page: nextOffset steps by the "clientWidth"
+      // it is handed, which is how the storefront's own capsule slider pages a
+      // full viewport at a go. Handing it a single card's width instead — its
+      // own box plus the rail's column-gap — gets the same clamped-at-both-ends
+      // behaviour (still maxOffset from this module) but one card per click.
+      function relatedCardStep() {
+        const first = relatedRail.firstElementChild;
+        if (!first) return relatedRail.clientWidth;
+        const gap = parseFloat(getComputedStyle(relatedRail).columnGap) || 0;
+        return first.getBoundingClientRect().width + gap;
+      }
+
+      if (capsuleSliderApi && relatedRail && relatedNav) {
+        relatedArrows.forEach((arrow) => {
+          arrow.addEventListener('click', () => {
+            const { scrollLeft, clientWidth, scrollWidth } = relatedRail;
+            const step = relatedCardStep() * Number(arrow.dataset.capsuleSlide);
+            const target = Math.min(
+              capsuleSliderApi.maxOffset(scrollWidth, clientWidth),
+              Math.max(0, scrollLeft + step)
+            );
+            relatedRail.scrollTo({ left: target, behavior: 'smooth' });
+          });
+        });
+        relatedRail.addEventListener('scroll', syncRelatedNav, { passive: true });
+        window.addEventListener('resize', syncRelatedNav);
+        if (typeof ResizeObserver === 'function') new ResizeObserver(syncRelatedNav).observe(relatedRail);
       }
 
       // ---- size guide --------------------------------------------------
@@ -6276,12 +7300,179 @@
         syncDots();
       }
 
+      // ---- gallery lightbox --------------------------------------------
+      // The same viewer as idl-lookbooks.html: click any shot to open it full
+      // size, then walk the set with the arrows, the keyboard or a swipe. The
+      // gallery's images are rewritten by render() on every product and cut
+      // change, so the set is read fresh from the live figures each time it
+      // opens rather than cached at load.
+      (function galleryLightbox() {
+        const box = document.querySelector('[data-lightbox]');
+        const triggers = Array.from(document.querySelectorAll('[data-lightbox-open]'));
+        if (!box || !triggers.length) return;
+
+        const stage = box.querySelector('[data-lightbox-stage]');
+        const view = box.querySelector('[data-lightbox-image]');
+        const indexOut = box.querySelector('[data-lightbox-index]');
+        const totalOut = box.querySelector('[data-lightbox-total]');
+        const closeBtn = box.querySelector('[data-lightbox-close]');
+        const prevBtn = box.querySelector('[data-lightbox-prev]');
+        const nextBtn = box.querySelector('[data-lightbox-next]');
+
+        function collectShots() {
+          return triggers.map((btn) => {
+            const img = btn.closest('.pdp-shot').querySelector('img');
+            return { src: img.getAttribute('src'), alt: img.getAttribute('alt') || '' };
+          });
+        }
+        let shots = [];
+        let current = 0;
+        let lastFocused = null;
+
+        // Neighbours only, so the cost stays flat however many shots a product
+        // carries.
+        function preload(i) {
+          [i - 1, i + 1].forEach((n) => {
+            const warm = new Image();
+            warm.src = shots[(n + shots.length) % shots.length].src;
+          });
+        }
+
+        function show(i, immediate) {
+          current = (i + shots.length) % shots.length;
+          const shot = shots[current];
+          indexOut.textContent = String(current + 1);
+
+          function commit() {
+            view.src = shot.src;
+            view.alt = shot.alt;
+            view.classList.remove('is-swapping');
+            preload(current);
+          }
+          if (immediate) { commit(); return; }
+
+          // Hold the current frame down while the next decodes: a cached shot
+          // lands instantly, a cold one fades in instead of painting in bands.
+          view.classList.add('is-swapping');
+          const next = new Image();
+          next.src = shot.src;
+          if (next.decode) next.decode().then(commit).catch(commit);
+          else commit();
+        }
+
+        // Lock scroll on <html> so the page behind the overlay holds still; the
+        // scrollbar-width pad keeps the layout from shifting as it disappears.
+        function lockScroll() {
+          const bar = window.innerWidth - document.documentElement.clientWidth;
+          document.documentElement.style.overflow = 'hidden';
+          if (bar > 0) document.documentElement.style.paddingRight = bar + 'px';
+        }
+        function unlockScroll() {
+          document.documentElement.style.overflow = '';
+          document.documentElement.style.paddingRight = '';
+        }
+
+        function open(i, trigger) {
+          lastFocused = trigger || document.activeElement;
+          shots = collectShots();
+          totalOut.textContent = String(shots.length);
+          box.removeAttribute('inert');
+          show(i, true);
+          lockScroll();
+          box.classList.add('is-open');
+          requestAnimationFrame(() => closeBtn.focus());
+          document.addEventListener('keydown', onKey);
+        }
+
+        function close() {
+          box.classList.remove('is-open');
+          box.setAttribute('inert', '');
+          unlockScroll();
+          document.removeEventListener('keydown', onKey);
+          if (lastFocused && lastFocused.focus) lastFocused.focus();
+          lastFocused = null;
+        }
+
+        function trapFocus(event) {
+          const order = [closeBtn, prevBtn, nextBtn];
+          const first = order[0];
+          const last = order[order.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+
+        function onKey(event) {
+          if (event.key === 'Escape') { event.preventDefault(); close(); }
+          else if (event.key === 'Tab') trapFocus(event);
+          else if (event.key === 'ArrowRight') { event.preventDefault(); show(current + 1); }
+          else if (event.key === 'ArrowLeft') { event.preventDefault(); show(current - 1); }
+        }
+
+        triggers.forEach((btn, i) => btn.addEventListener('click', () => open(i, btn)));
+        closeBtn.addEventListener('click', close);
+        prevBtn.addEventListener('click', () => show(current - 1));
+        nextBtn.addEventListener('click', () => show(current + 1));
+        // Only the field around the shot dismisses; the shot itself does not.
+        stage.addEventListener('click', (event) => { if (event.target === stage) close(); });
+        box.addEventListener('click', (event) => { if (event.target === box) close(); });
+
+        let startX = 0;
+        let startY = 0;
+        let tracking = false;
+        stage.addEventListener('touchstart', (event) => {
+          tracking = event.touches.length === 1;
+          if (!tracking) return;
+          startX = event.touches[0].clientX;
+          startY = event.touches[0].clientY;
+        }, { passive: true });
+        stage.addEventListener('touchend', (event) => {
+          if (!tracking) return;
+          tracking = false;
+          const dx = event.changedTouches[0].clientX - startX;
+          const dy = event.changedTouches[0].clientY - startY;
+          // Horizontal intent only: a mostly-vertical drag is a scroll attempt.
+          if (Math.abs(dx) < 44 || Math.abs(dx) < Math.abs(dy)) return;
+          show(current + (dx < 0 ? 1 : -1));
+        }, { passive: true });
+      })();
+
       // render() paints the prices and icons itself; the bare calls are the
       // no-catalogue path, where the static markup is what stays on screen.
       render(productKey);
       renderPrices();
       renderBag();
       refreshIcons();
+    }());
+  </script>
+
+  <script>
+    // Model-size badge — toggle the measurement popup, mirroring adidas:
+    // click flips the badge open/closed (ruler <-> X via the aria-expanded
+    // CSS above); a click anywhere else, or Escape, closes it.
+    (function () {
+      const wrap = document.querySelector('[data-modelsize]');
+      if (!wrap) return;
+      const toggle = wrap.querySelector('[data-modelsize-toggle]');
+      const popup = wrap.querySelector('.pdp-modelsize-popup');
+      const setOpen = (open) => {
+        toggle.setAttribute('aria-expanded', String(open));
+        popup.setAttribute('aria-hidden', String(!open));
+      };
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+      });
+      document.addEventListener('click', (e) => {
+        if (!wrap.contains(e.target)) setOpen(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
+      });
     }());
   </script>
 
