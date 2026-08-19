@@ -1,0 +1,501 @@
+/* ============================================================
+   IDL cart-v2 — shared cart drawer (light Bandit-style rebuild)
+   Extracted from idl-product.html so every page renders one
+   identical cart. Relies on each page's own IDL design tokens
+   (--idl-*), .button and .partner-card components, which are
+   inline in every page's <style>.
+   ============================================================ */
+
+/* Navbar count badge turns red once the cart holds something. */
+    .site-header .bag-count.has-items {
+      border-color: rgb(89, 13, 13);
+      background: linear-gradient(90deg, rgb(89, 13, 13) 0%, rgb(151, 8, 8) 100%);
+      color: #fff;
+    }
+
+    /* Cart drawer + toast, lifted verbatim from the storefront stylesheet so
+       the ported markup keeps its behaviour and tokens. */
+    .bag-drawer {
+      position: fixed;
+      z-index: 80;
+      top: 0;
+      right: 0;
+      width: min(440px, 100%);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      visibility: hidden;
+      transform: translateX(100%);
+      background: var(--idl-bg-deep);
+      border-left: 1px solid var(--idl-line);
+      transition: transform 180ms ease, visibility 180ms;
+    }
+    .bag-drawer.open { visibility: visible; transform: translateX(0); }
+    .drawer-scrim { position: fixed; z-index: 70; inset: 0; visibility: hidden; opacity: 0; background: rgba(0, 0, 0, 0.7); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); transition: opacity 180ms ease; }
+    .drawer-scrim.open { visibility: visible; opacity: 1; }
+    .drawer-header { min-height: 82px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--idl-line); }
+    .drawer-header h2 { margin: 0; font-size: 24px; line-height: 24px; text-transform: uppercase; }
+    .icon-button { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--idl-line); background: transparent; color: var(--idl-white); cursor: pointer; }
+    .icon-button:hover { color: var(--idl-go-gold); border-color: var(--idl-go-gold); }
+    .icon-button svg { width: 20px; height: 20px; }
+    .drawer-items { flex: 1; overflow-y: auto; }
+    .drawer-empty { padding: 28px 22px; color: var(--idl-muted); }
+    .drawer-item { padding: 18px 22px; display: grid; grid-template-columns: 70px 1fr auto; gap: 16px; align-items: center; border-bottom: 1px solid var(--idl-line); }
+    .drawer-item img { width: 70px; height: 86px; object-fit: contain; background: var(--idl-panel-alt); }
+    .drawer-item h3 { margin: 0 0 6px; font-size: 16px; line-height: 18px; text-transform: uppercase; }
+    .drawer-item p { margin: 0; color: var(--idl-muted); font: 400 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
+    .remove-item { border: 0; background: transparent; color: var(--idl-muted); cursor: pointer; }
+    .remove-item:hover { color: var(--idl-go-gold); }
+    .remove-item svg { width: 18px; height: 18px; }
+    .drawer-footer { padding: 22px; border-top: 1px solid var(--idl-line); }
+    .drawer-total { margin-bottom: 18px; display: flex; justify-content: space-between; font: 700 13px/14px CarbonPlus, monospace; text-transform: uppercase; }
+    .drawer-footer .button { width: 100%; justify-content: space-between; }
+    .toast {
+      position: fixed;
+      z-index: 100;
+      right: 20px;
+      bottom: 20px;
+      max-width: calc(100% - 40px);
+      padding: 14px 18px;
+      border-left: 3px solid var(--idl-go-gold);
+      background: var(--idl-panel);
+      color: var(--idl-white);
+      font: 700 12px/14px CarbonPlus, monospace;
+      text-transform: uppercase;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ===================================================================
+       Cart drawer — light rebuild (cart-v2)
+       Structure and behaviour ported from banditrunning.com's minicart:
+       free-shipping progress, per-item quantity stepper, in-cart size
+       switch, and a "Pair it with" upsell rail. The drawer flips to a light
+       surface (the rest of the chrome stays dark), so it carries its own
+       token set rather than the inverted --idl-* ones. Selectors are scoped
+       under .cart-v2 so they win over the two older .bag-drawer blocks above
+       without those needing to be torn out.
+       =================================================================== */
+    .bag-drawer.cart-v2 {
+      --c-paper: #ffffff;
+      --c-soft: #f2f2f0;
+      --c-footer: #ffffff;
+      --c-ink: #0a0a0a;
+      --c-muted: #767676;
+      --c-line: rgba(10, 10, 10, 0.16);
+      --c-track: #676769;
+      --c-accent: #d67400;
+      width: min(680px, 100%);
+      background: var(--c-paper);
+      color: var(--c-ink);
+      border-left: 0;
+      font-family: NeueHaas, "Helvetica Neue", Arial, sans-serif;
+    }
+    .cart-v2 * { box-sizing: border-box; }
+
+    /* ---- header (scaled to the IDL navbar: 20px bag glyph, 13px label, the
+       small black count circle from .bag-count rather than a big amber pill) ---- */
+    .cart-v2 .drawer-header {
+      min-height: 56px;
+      padding: 0 22px;
+    }
+    .cart-v2 .drawer-head-left { display: flex; align-items: center; gap: 8px; }
+    .cart-v2 .drawer-head-left > svg { width: 20px; height: 20px; stroke-width: 1.5; }
+    .cart-v2 .drawer-header h2 {
+      margin: 0;
+      font: 500 16px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--c-ink);
+    }
+    .cart-v2 .drawer-count {
+      display: grid;
+      place-items: center;
+      min-width: 20px;
+      height: 20px;
+      /* CarbonPlus's digits carry no descender, so centering the line box
+         (which reserves descender space the glyph never uses) reads as the
+         numeral sitting high in the circle. An asymmetric top/bottom padding
+         nudges the glyph itself down to land its ink on the visual centre —
+         padding rather than transform, because border-box keeps the circle's
+         own footprint (and so its alignment with the bag icon and "Cart"
+         label beside it) untouched; a transform would shift the whole circle
+         instead of just what's drawn inside it. */
+      padding: 2.46px 3px 0;
+      border: 1px solid #6e7276;
+      border-radius: 50%;
+      background: #6e7276;
+      color: #fff;
+      font: 600 12px/1 CarbonPlus, monospace;
+    }
+    /* Same red as the sold-out "Notify me" button — the badge only earns
+       that colour once the cart actually holds something. */
+    .cart-v2 .drawer-count.has-items {
+      border-color: rgb(89, 13, 13);
+      background: linear-gradient(90deg, rgb(89, 13, 13) 0%, rgb(151, 8, 8) 100%);
+    }
+    .cart-v2 .drawer-close-icon {
+      width: 34px;
+      height: 34px;
+      margin-right: -7px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      background: transparent;
+      color: var(--c-ink);
+      cursor: pointer;
+    }
+    .cart-v2 .drawer-close-icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
+
+    /* ---- body / scroll ---- */
+    .cart-v2 .drawer-body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
+    .cart-v2 .drawer-items { flex: 0 0 auto; overflow: visible; }
+    /* Empty state grows to fill the body and centres vertically, rather than
+       sitting pinned to the top under the free-shipping bar — populated carts
+       keep the default (content-height, top-anchored) sizing above. */
+    .cart-v2 .drawer-items:has(.drawer-empty) { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    /* ---- free-shipping progress: full-bleed bar, IDL lime fill (same token as
+       the checkout button) on a light track. Message ink rather than white so
+       it stays legible over both the lime fill and the empty track. ---- */
+    .cart-v2 .cart-ship { padding: 0; }
+    .cart-v2 .cart-ship-track {
+      position: relative;
+      height: 24px;
+      background: #c9cbcc;
+      overflow: hidden;
+    }
+    .cart-v2 .cart-ship-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0;
+      /* Same red plate as the "Take 10% off" corner teaser. */
+      background: linear-gradient(90deg, rgb(89, 13, 13) 0%, rgb(151, 8, 8) 100%);
+      transition: width 420ms cubic-bezier(0.22, 0.8, 0.2, 1);
+      overflow: hidden;
+    }
+    /* Diagonal shine sweep lifted from .discount-teaser::after, minus the
+       triangular clip — a light streak crossing the red fill on a loop. */
+    .cart-v2 .cart-ship-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          115deg,
+          transparent 12%,
+          rgba(255, 255, 255, 0.04) 34%,
+          rgba(255, 255, 255, 0.34) 47%,
+          rgba(255, 255, 255, 0.08) 58%,
+          transparent 76%
+        );
+      background-size: 240% 240%;
+      background-position: 190% 100%;
+      mix-blend-mode: screen;
+      opacity: 0.82;
+      animation: cart-ship-shine 3.8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+    @keyframes cart-ship-shine {
+      0%, 18% { background-position: 190% 100%; opacity: 0; }
+      28% { opacity: 0.82; }
+      68% { opacity: 0.82; }
+      82%, 100% { background-position: -90% 0%; opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cart-v2 .cart-ship-fill::after { animation: none; opacity: 0; }
+    }
+    .cart-v2 .cart-ship-msg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font: 400 12px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    /* ---- line item ---- */
+    .cart-v2 .drawer-item {
+      position: relative;
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      /* stretch, not start: the right column grows to the row height (at least
+         the 124px photo) so the stepper can pin to its bottom edge. */
+      align-items: stretch;
+    }
+    /* An inset divider, not a border-bottom: a real border sits on the box
+       edge and runs the drawer's full width, past the item's own left/right
+       padding. This stops flush with the content instead. */
+    .cart-v2 .drawer-item::after {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 0;
+      height: 1px;
+      background: var(--c-line);
+    }
+    .cart-v2 .drawer-item-thumb {
+      align-self: start;
+      width: auto;
+      height: 124px;
+      background: var(--c-soft);
+    }
+    .cart-v2 .drawer-item-main { min-width: 0; min-height: 124px; display: flex; flex-direction: column; }
+    .cart-v2 .drawer-item-top { display: flex; align-items: flex-start; gap: 14px; }
+    .cart-v2 .drawer-item h3 {
+      flex: 1;
+      margin: 0;
+      font: 500 14px/1.33 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--c-ink);
+    }
+    .cart-v2 .drawer-item-price {
+      flex: 0 0 auto;
+      font: 500 14px/1.33 CarbonPlus, monospace;
+      color: var(--c-ink);
+      white-space: nowrap;
+    }
+    .cart-v2 .drawer-item-meta {
+      margin: 7px 0 0;
+      font: 400 12px/1.55 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+    }
+    .cart-v2 .drawer-item-meta > span { display: block; }
+    /* Loosen the gap between the Size and Cut lines (added between lines only,
+       so it doesn't push the first line off the title above). */
+    .cart-v2 .drawer-item-meta > span + span { margin-top: 3px; }
+
+    /* quantity stepper — three bordered cells [trash|qty|plus] with collapsed
+       shared borders, Bandit's exact shape */
+    /* One border per line, not two stacked: the frame carries the outer edge
+       and each cell after the first carries a single divider on its left —
+       the previous version gave every cell its own full border and
+       collapsed them with a negative margin, which stacks two translucent
+       1px lines on every internal divider and renders it visibly darker
+       than the (single-line) outer edge. */
+    /* margin-top:auto pins the stepper to the bottom of the column, which is
+       the photo's height (min-height:124px on .drawer-item-main) — so the
+       stepper's bottom edge lines up with the bottom of the product photo. */
+    .cart-v2 .qty-stepper { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: stretch; border: 1px solid var(--c-line); }
+    .cart-v2 .qty-stepper button,
+    .cart-v2 .qty-stepper .qty-value {
+      height: 34px;
+      min-width: 36px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      background: transparent;
+    }
+    .cart-v2 .qty-stepper > *:not(:first-child) { border-left: 1px solid var(--c-line); }
+    .cart-v2 .qty-stepper button { color: var(--c-ink); cursor: pointer; padding: 0; }
+    .cart-v2 .qty-stepper button:hover { background: var(--c-soft); }
+    .cart-v2 .qty-stepper button svg { width: 15px; height: 15px; }
+    .cart-v2 .qty-stepper button:disabled { color: rgba(10,10,10,0.26); cursor: not-allowed; background: transparent; }
+    .cart-v2 .qty-stepper .qty-value { font: 500 13px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif; }
+
+    /* ---- upsell rail ---- */
+    /* Pinned to the bottom of the scroll body (flush against the footer)
+       rather than sitting right under the last item — margin-top:auto eats
+       whatever slack drawer-body has left once the item list is short. */
+    .cart-v2 .cart-upsell { margin-top: auto; padding: 22px 24px 24px; border-top: 1px solid var(--c-line); }
+    .cart-v2 .cart-upsell-top {
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .cart-v2 .cart-upsell-head {
+      margin: 0;
+      font: 500 14px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-ink);
+    }
+    .cart-v2 .cart-upsell-viewport { overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; }
+    .cart-v2 .cart-upsell-viewport::-webkit-scrollbar { display: none; }
+    .cart-v2 .cart-upsell-track { display: flex; gap: 20px; }
+    .cart-v2 .upsell-card {
+      /* Exactly two cards per viewport width, splitting it evenly around the
+         track's 20px gap — not a fixed card width that happens to leave a
+         sliver of a third card (or dead space) at the edge. */
+      flex: 0 0 calc((100% - 20px) / 2);
+      scroll-snap-align: start;
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 14px;
+      /* stretch (not start) so every card matches the tallest one in the row;
+         the body then bottom-aligns its price, keeping prices on one line no
+         matter which cards do or don't carry a size row. */
+      align-items: stretch;
+    }
+    /* No align-self here — the card's own align-items:stretch already runs
+       the image the full row height, so its bottom lands on the price's
+       baseline the same way the thumbnail does against the cart line's own
+       stepper. */
+    .cart-v2 .upsell-card img { width: 84px; height: 100%; object-fit: cover; background: var(--c-soft); }
+    .cart-v2 .upsell-body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .cart-v2 .upsell-top { display: flex; align-items: flex-start; gap: 10px; }
+    .cart-v2 .upsell-name {
+      flex: 1;
+      margin: 0;
+      font: 500 14px/1.3 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--c-ink);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cart-v2 .upsell-add {
+      flex: 0 0 auto;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid var(--c-ink);
+      background: transparent;
+      color: var(--c-ink);
+      cursor: pointer;
+      transition: background 140ms ease, color 140ms ease;
+    }
+    .cart-v2 .upsell-add svg { width: 15px; height: 15px; }
+    .cart-v2 .upsell-add:hover { background: var(--c-ink); color: #fff; }
+    .cart-v2 .upsell-meta {
+      font: 400 12px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cart-v2 .upsell-size { position: relative; display: inline-flex; }
+    .cart-v2 .upsell-size select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 3px 22px 3px 8px;
+      border: 1px solid var(--c-line);
+      background: var(--c-paper);
+      color: var(--c-ink);
+      font: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .cart-v2 .upsell-size::after {
+      content: "";
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-right: 1.3px solid var(--c-ink);
+      border-bottom: 1.3px solid var(--c-ink);
+      transform: translateY(-75%) rotate(45deg);
+      pointer-events: none;
+    }
+    .cart-v2 .upsell-price { margin: auto 0 0; font: 500 14px/1 CarbonPlus, monospace; color: var(--c-ink); }
+    .cart-v2 .cart-upsell-arrows { display: flex; justify-content: flex-start; gap: 10px; }
+    .cart-v2 .cart-upsell-arrow {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--c-line);
+      background: var(--c-paper);
+      color: var(--c-ink);
+      cursor: pointer;
+    }
+    .cart-v2 .cart-upsell-arrow:hover:not(:disabled) { border-color: var(--c-ink); }
+    .cart-v2 .cart-upsell-arrow:disabled { color: rgba(10,10,10,0.22); cursor: not-allowed; }
+    .cart-v2 .cart-upsell-arrow svg { width: 16px; height: 16px; }
+
+    /* ---- empty state ---- */
+    .cart-v2 .drawer-empty { padding: 40px 24px; text-align: center; color: var(--c-muted); }
+    .cart-v2 .drawer-empty-head { margin: 0 0 22px; font: 500 22px/1.2 NeueHaas, "Helvetica Neue", Arial, sans-serif; color: var(--c-ink); }
+    /* Two "Crews & Teams" / "Events & Retail" cards, the same component the
+       homepage's .partner-grid uses, shrunk to fit the drawer column. Only the
+       type/box scale is re-pointed — the media, scrim and CTA behaviour ride
+       on the shared .partner-card rules. */
+    .cart-v2 .drawer-empty-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      text-align: left;
+    }
+    /* justify-content:center overrides the base .partner-card's flex-end —
+       the copy block sits centred in the card instead of pinned to its
+       bottom edge. */
+    .cart-v2 .drawer-empty-cards .partner-card { aspect-ratio: 1; padding: 16px; border-radius: 6px; justify-content: center; }
+    /* The base .partner-card-scrim is a bottom-loaded gradient built for copy
+       pinned to the card's bottom edge (dark at 100%, clear through the
+       middle). Centring the copy above moved the text into that clear band,
+       so it needs its own scrim here — darkest at the centre where the text
+       actually sits, easing out top and bottom. */
+    .cart-v2 .drawer-empty-cards .partner-card-scrim {
+      background: radial-gradient(ellipse at center, rgba(5, 5, 8, 0.66) 0%, rgba(5, 5, 8, 0.5) 45%, rgba(5, 5, 8, 0.22) 100%);
+    }
+    .cart-v2 .drawer-empty-cards .partner-card-copy { align-items: center; text-align: center; }
+    .cart-v2 .drawer-empty-cards .partner-card-heading { font-size: 24px; line-height: 0.96; letter-spacing: -0.02em; }
+    /* Balances the wrap so a 2+ line sub never strands its last word alone —
+       see the .pdp-title note above for the same treatment. */
+    .cart-v2 .drawer-empty-cards .partner-card-sub { margin-top: 8px; font-size: 12px; line-height: 16px; letter-spacing: 0.05em; text-wrap: balance; }
+    .cart-v2 .drawer-empty-cards .partner-card-cta { margin-top: 14px; height: 40px; min-height: 40px; }
+    .cart-v2 .drawer-empty-cards .partner-card-cta .button-icon { width: 40px; height: 40px; }
+
+    /* ---- footer ---- */
+    .cart-v2 .drawer-footer { padding: 18px 24px 20px; border-top: 1px solid var(--c-line); background: var(--c-footer); }
+    .cart-v2 .drawer-subtotal {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font: 500 15px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--c-ink);
+    }
+    .cart-v2 .drawer-subtotal span:last-child { font-size: 16px; }
+
+    /* Checkout is IDL's own .button.primary component (lime fill, ink text,
+       CarbonPlus, right-hand icon plate + hover swap) — just stretched full
+       width here. Only the hover is re-pointed: the stock button hovers to
+       white, which would vanish against this light footer, so it inverts to
+       ink instead. */
+    /* Taking the icon plate out of flow (absolute, pinned right) so the label
+       can span the button's full width — flex:1 alone still centres "Checkout"
+       only within the leftover space next to the 44px icon box, landing the
+       word visibly off the button's true centre by half the icon's width. */
+    .cart-v2 .cart-checkout { position: relative; width: 100%; height: 48px; min-height: 48px; justify-content: flex-start; }
+    /* The shared .button-label rule pads 16px left / 10px right (built for a
+       label-left, icon-right layout), which biases the centred text 3px off
+       true centre once the label spans the full button width. Zeroed here
+       since the icon is absolute now and isn't sharing the row with it. */
+    .cart-v2 .cart-checkout .button-label { flex: 1; width: 100%; padding: 0; }
+    .cart-v2 .cart-checkout .button-icon { position: absolute; top: 0; right: 0; width: 48px; height: 48px; }
+    .cart-v2 .cart-checkout:hover { background: var(--idl-button-ink); color: var(--idl-go-gold); }
+    .cart-v2 .cart-checkout:hover .button-icon svg { background: #12242c; }
+    .cart-v2 .cart-trust {
+      margin: 14px 0 2px;
+      text-align: left;
+      font: 400 14px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0;
+      color: var(--c-muted);
+    }

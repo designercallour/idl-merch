@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#061015">
   <title>IDL Brotherhood Short Sleeve Red Jersey — IDL Merch</title>
   <link rel="stylesheet" href="standout-assets/fonts.css">
+  <link rel="stylesheet" href="cart-v2.css">
   <script src="standout-assets/lucide.min.js" defer></script>
   <style>
     :root {
@@ -81,8 +82,8 @@
       position: absolute;
       z-index: 1;
       background: var(--idl-go-gold);
-      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
-      mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
+      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
+      mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
       opacity: 0;
       pointer-events: none;
     }
@@ -484,8 +485,8 @@
        technique the announcement bar's mark already uses. */
     .site-header.is-light .brand-mark {
       background: var(--idl-button-ink);
-      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
-      mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
+      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
+      mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
     }
     .site-header.is-light .brand-mark img { visibility: hidden; }
     /* The badge inherits its ink from the bar, so on white it would end up
@@ -504,27 +505,30 @@
        two read as one sheet rather than a white strip sitting on a dark menu.
        Every .is-light override has to be undone here, not just the fill --
        over a light section the trigger would otherwise stay dark-on-dark. */
-    body.team-menu-open .site-header,
-    body.team-menu-open .site-header.scrolled,
-    body.team-menu-open .site-header.is-light,
-    body.team-menu-open .site-header.scrolled.is-light {
+    /* ...but only when the bar is over a DARK section. Over a light section
+       (body.header-is-light) the bar stays white and the menu goes white to
+       match, so every override here is gated on :not(.header-is-light). */
+    body.team-menu-open:not(.header-is-light) .site-header,
+    body.team-menu-open:not(.header-is-light) .site-header.scrolled,
+    body.team-menu-open:not(.header-is-light) .site-header.is-light,
+    body.team-menu-open:not(.header-is-light) .site-header.scrolled.is-light {
       background: #061015;
       color: var(--idl-white);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
-    body.team-menu-open .site-header.is-light .nav-link,
-    body.team-menu-open .site-header.is-light .nav-button,
-    body.team-menu-open .site-header.is-light .icon-button { color: var(--idl-white); }
-    body.team-menu-open .site-header.is-light .icon-button { border-color: var(--idl-line); }
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .nav-link,
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .nav-button,
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .icon-button { color: var(--idl-white); }
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .icon-button { border-color: var(--idl-line); }
     /* Drop the mask and show the shipped white wordmark again. */
-    body.team-menu-open .site-header.is-light .brand-mark {
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .brand-mark {
       background: none;
       -webkit-mask: none;
       mask: none;
     }
-    body.team-menu-open .site-header.is-light .brand-mark img { visibility: visible; }
-    body.team-menu-open .site-header.is-light .bag-count {
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .brand-mark img { visibility: visible; }
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .bag-count {
       border-color: currentColor;
       background: #000000;
       color: inherit;
@@ -564,6 +568,25 @@
     .team-trigger svg { width: 15px; height: 15px; transition: transform 100ms ease; }
     .team-nav.open .team-trigger svg { transform: rotate(180deg); }
     .team-nav.open .team-trigger::after { opacity: 1; }
+    /* Dim + blur the page behind the mega menu — the same overlay standard the
+       promo popup uses (black 0.7 + blur 5px). Sits under the menu (39) and
+       header (40) but over the page content, so only the hero dims. */
+    .team-menu-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 38;
+      background: rgba(0, 0, 0, 0.7);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 140ms ease, visibility 140ms ease;
+    }
+    body.team-menu-open .team-menu-overlay {
+      opacity: 1;
+      visibility: visible;
+    }
     .team-menu {
       position: fixed;
       z-index: 39;
@@ -572,153 +595,130 @@
       left: 0;
       width: 100%;
       max-height: calc(100vh - var(--chrome-top));
-      padding: 20px max(30px, calc((100vw - 1380px) / 2)) 24px;
+      /* Horizontal padding matches the navbar's own inset (.header-inner is
+         full-bleed with 20px sides on desktop, line ~230), so the card row's
+         left/right edges line up exactly with "Shop by team" and the cart. */
+      padding: 20px 20px 24px;
       overflow-y: auto;
       visibility: hidden;
       opacity: 0;
       transform: translateY(-10px);
       pointer-events: none;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(19, 43, 53, 0.34), transparent 44%),
-        rgb(9, 19, 29);
-      border-top: 1px solid rgba(35, 52, 59, 0.95);
+      /* Flat #061015 — the same fill the header bar takes while the menu is
+         open (body.team-menu-open .site-header), so the two read as one
+         continuous surface instead of the menu sitting a shade lighter under
+         a seam. The old radial lift brightened exactly the top edge where the
+         two meet, which is what made the join show. */
+      background: #061015;
+      /* No border-top: header and menu share #061015 now, so a hairline here
+         reads as a seam splitting one surface. The bottom border stays — that
+         is a real edge between the menu and the hero below. */
       border-bottom: 1px solid rgba(35, 52, 59, 0.95);
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
       transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
     }
-    body.team-menu-open .team-menu {
+    /* A menu shows when it carries .is-open; the shared body.team-menu-open flag
+       (set whenever EITHER the team or collections menu is open) still drives the
+       overlay, header seam and light/dark sync for both. */
+    .team-menu.is-open {
       visibility: visible;
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
-    .team-menu-grid {
-      width: min(100%, 1380px);
-      margin-inline: auto;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      /* Measured off idl.pro: 446px cards at 30 / 496 / 962 on a 1440 viewport. */
-      gap: 20px;
+    /* Light treatment: when the bar is white (over a light section) the menu
+       switches to white too, so the two still read as one continuous sheet. */
+    body.header-is-light.team-menu-open .team-menu {
+      background: var(--idl-white);
+      border-bottom-color: rgba(12, 15, 19, 0.14);
     }
-    .team-menu-card {
-      --team-accent: var(--idl-go-gold);
-      --team-glow: rgba(192, 231, 0, 0.14);
+    body.header-is-light.team-menu-open .team-menu-team { color: var(--idl-button-ink); }
+    body.header-is-light.team-menu-open .team-menu-team-place { color: #5c6165; }
+    body.header-is-light.team-menu-open .team-menu-team-media { background: #e6e8ea; }
+    /* ---- Shop-by-team mega menu: one image card per team --------------
+       Six teams, six cards across the panel — each the team's lifestyle shot
+       with its name, home city and a Shop link. The card style (photo cover,
+       bottom scrim, hover zoom, corner labels) is the image-block treatment
+       from banditrunning.com's Collections menu, turned into a full 6-up grid
+       for the teams. */
+    .team-menu-teams {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 16px;
+    }
+    /* Collections holds the capsules. They use the SAME six-column track as the
+       team cards so each capsule card is exactly a team card's width; the two
+       that exist fill the first two columns and the rest stay empty. */
+    .team-menu-teams.team-menu-capsules {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .team-menu-team {
       position: relative;
-      height: 180px;
-      min-width: 0;
-      overflow: hidden;
-      /* Inset shadow, not a border: a 1px border would push the crest and copy
-         in by 1px, and idl.pro's card has no border at all. */
-      border: 0;
-      box-shadow: inset 0 0 0 1px rgba(41, 61, 71, 0.9);
-      background:
-        linear-gradient(90deg, rgba(6, 16, 21, 0.98) 0%, rgba(6, 16, 21, 0.82) 49%, rgba(6, 16, 21, 0.18) 100%),
-        radial-gradient(circle at 82% 46%, var(--team-glow), transparent 58%),
-        #0b1820;
+      display: flex;
+      flex-direction: column;
       color: var(--idl-white);
       text-decoration: none;
-      transition: box-shadow 140ms ease, transform 140ms ease;
     }
-    .team-menu-card::after {
-      content: "";
+    /* Photo in its own clipped box; name + city caption sit below it. */
+    .team-menu-team-media {
+      position: relative;
+      display: block;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #0b1820;
+    }
+    .team-menu-team-media img {
       position: absolute;
       inset: 0;
-      background: linear-gradient(110deg, transparent 52%, var(--team-glow) 100%);
-      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Anchor the crop near the top so the models' heads/faces stay in
+         frame — a centred crop was slicing the top off every card. */
+      object-position: center 10%;
+      transition: transform 500ms cubic-bezier(0.22, 0.8, 0.2, 1);
     }
-    .team-menu-card:hover,
-    .team-menu-card:focus-visible {
-      box-shadow: inset 0 0 0 1px var(--team-accent);
-      transform: translateY(-2px);
-    }
-    .team-menu-card:focus-visible {
-      outline: 2px solid var(--idl-white);
-      outline-offset: 2px;
-    }
-    .team-menu-card-image {
-      position: absolute;
-      z-index: 1;
-      right: 3%;
-      bottom: -18px;
-      width: 46%;
-      height: 116%;
-      object-fit: contain;
-      object-position: center bottom;
-      filter: saturate(0.96) contrast(1.06);
-    }
-    .team-menu-crest,
-    .team-menu-card-copy {
-      position: absolute;
-      z-index: 2;
-      left: 16px;
-    }
-    .team-menu-crest {
-      top: 16px;
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-    }
-    .team-menu-card-copy {
-      right: 18px;
-      bottom: 11px;
-    }
-    .team-menu-card-copy strong {
-      display: block;
-      max-width: 68%;
-      /* 24px/900, no tracking — idl.pro sets none on this one. */
-      font: 900 24px/1 NeueHaas, Arial, sans-serif;
-      letter-spacing: normal;
+    .team-menu-team:hover .team-menu-team-media img { transform: scale(1.05); }
+    .team-menu-team:focus-visible { outline: 2px solid var(--idl-white); outline-offset: 2px; }
+    .team-menu-team-name {
+      margin-top: 12px;
+      font: 600 14px/1 NeueHaas, Arial, sans-serif;
       text-transform: uppercase;
     }
-    /* 16x10 image, not an emoji: the glyph renders at a different size on every
-       platform and idl.pro ships a real flag. */
-    .team-menu-flag {
-      flex: 0 0 auto;
+    .team-menu-team-place {
+      margin-top: 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--idl-silver);
+      font: 400 14px/1 CarbonPlus, monospace;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .team-menu-team-place img {
       width: 16px;
       height: 10px;
       object-fit: cover;
     }
-    .team-menu-card-copy small {
-      margin-top: 17px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      /* Sentence case at 16px, not the uppercase mono the rest of the nav uses. */
-      color: var(--idl-silver);
-      font: 400 16px/1.2 NeueHaas, Arial, sans-serif;
-      text-transform: none;
+    /* Hovering a card summons a round "Shop" button that tracks the cursor
+       across the photo (position set from JS via left/top; the transform
+       just centres it on the pointer and runs the pop-in). */
+    .team-menu-team-media { cursor: none; }
+    .team-menu-team-cursor {
+      position: absolute;
+      z-index: 3;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+      transition: opacity 160ms ease, transform 160ms ease;
+      will-change: left, top, transform;
     }
-    .team-menu-footer {
-      width: min(100%, 1380px);
-      margin: 18px auto 0;
-    }
-    .team-menu-cta {
-      width: max-content;
-      height: 54px;
-      display: inline-grid;
-      grid-template-columns: auto 54px;
-      align-items: stretch;
-      border: 1px solid var(--idl-go-gold);
-      color: var(--idl-go-gold);
-      font: 700 16px/18px CarbonPlus, monospace;
-      text-transform: uppercase;
-      text-decoration: none;
-    }
-    .team-menu-cta span {
-      padding: 0 30px;
-      display: grid;
-      place-items: center;
-    }
-    .team-menu-cta svg {
-      width: 54px;
-      height: 54px;
-      padding: 17px;
-      background: var(--idl-go-gold);
-      color: var(--idl-button-ink);
-    }
-    .team-menu-cta:hover {
-      background: var(--idl-go-gold);
-      color: var(--idl-button-ink);
+    .team-menu-team:hover .team-menu-team-cursor {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
     .bag-button {
       position: relative;
@@ -755,6 +755,14 @@
       background: #000000;
       color: inherit;
       font: 600 9px/1 CarbonPlus, monospace;
+    }
+    /* Once the cart holds something the navbar count flips to the same red
+       gradient the drawer badge uses. Scoped through .site-header so it beats
+       the .site-header.is-light .bag-count background in both header tones. */
+    .site-header .bag-count.has-items {
+      border-color: rgb(89, 13, 13);
+      background: linear-gradient(90deg, rgb(89, 13, 13) 0%, rgb(151, 8, 8) 100%);
+      color: #fff;
     }
     .mobile-toggle { display: none; }
 
@@ -2667,7 +2675,7 @@
       transition: transform 180ms ease, visibility 180ms;
     }
     .bag-drawer.open { visibility: visible; transform: translateX(0); }
-    .drawer-scrim { position: fixed; z-index: 70; inset: 0; visibility: hidden; opacity: 0; background: rgba(6, 14, 18, 0.72); transition: opacity 180ms ease; }
+    .drawer-scrim { position: fixed; z-index: 70; inset: 0; visibility: hidden; opacity: 0; background: rgba(0, 0, 0, 0.7); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); transition: opacity 180ms ease; }
     .drawer-scrim.open { visibility: visible; opacity: 1; }
     .drawer-header { min-height: 82px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--idl-line); }
     .drawer-header h2 { margin: 0; font-size: 24px; line-height: 24px; text-transform: uppercase; }
@@ -3343,6 +3351,41 @@
       .header-side.right > .nav-link,
       .header-side.right > .currency-control { display: none; }
       .team-menu { display: none; }
+      .mobile-acc-trigger {
+        width: 100%;
+        min-height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0;
+        border: 0;
+        border-bottom: 1px solid var(--idl-line);
+        background: none;
+        color: var(--idl-white);
+        font: 400 20px/22px CarbonPlus, monospace;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .mobile-acc-trigger svg { width: 18px; height: 18px; transition: transform 160ms ease; }
+      .mobile-acc-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+      .mobile-acc-panel { display: none; }
+      .mobile-acc-panel.is-open { display: block; padding: 16px 0 22px; }
+      .mobile-acc-panel .team-menu-teams,
+      .mobile-acc-panel .team-menu-teams.team-menu-capsules {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      /* The cards are <a>, so the generic .mobile-menu a rule (row flex, centred,
+         62px min-height, hairline) would flatten the media to 0. Restore the
+         card's own column layout. */
+      .mobile-acc-panel .team-menu-team {
+        min-height: 0;
+        align-items: stretch;
+        justify-content: flex-start;
+        border-bottom: 0;
+      }
+      .mobile-acc-panel .team-menu-team-cursor { display: none; }
+      .mobile-acc-panel .team-menu-team-media { cursor: pointer; }
       .mobile-toggle { position: relative; display: inline-flex; align-items: center; gap: 8px; }
       /* align-items centres the boxes, but the label only inks to its cap
          height — the descender room under the baseline stays empty, so the
@@ -4453,404 +4496,6 @@
     }
 
 
-    /* Cart drawer + toast, lifted verbatim from the storefront stylesheet so
-       the ported markup keeps its behaviour and tokens. */
-    .bag-drawer {
-      position: fixed;
-      z-index: 80;
-      top: 0;
-      right: 0;
-      width: min(440px, 100%);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      visibility: hidden;
-      transform: translateX(100%);
-      background: var(--idl-bg-deep);
-      border-left: 1px solid var(--idl-line);
-      transition: transform 180ms ease, visibility 180ms;
-    }
-    .bag-drawer.open { visibility: visible; transform: translateX(0); }
-    .drawer-scrim { position: fixed; z-index: 70; inset: 0; visibility: hidden; opacity: 0; background: rgba(6, 14, 18, 0.72); transition: opacity 180ms ease; }
-    .drawer-scrim.open { visibility: visible; opacity: 1; }
-    .drawer-header { min-height: 82px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--idl-line); }
-    .drawer-header h2 { margin: 0; font-size: 24px; line-height: 24px; text-transform: uppercase; }
-    .icon-button { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--idl-line); background: transparent; color: var(--idl-white); cursor: pointer; }
-    .icon-button:hover { color: var(--idl-go-gold); border-color: var(--idl-go-gold); }
-    .icon-button svg { width: 20px; height: 20px; }
-    .drawer-items { flex: 1; overflow-y: auto; }
-    .drawer-empty { padding: 28px 22px; color: var(--idl-muted); }
-    .drawer-item { padding: 18px 22px; display: grid; grid-template-columns: 70px 1fr auto; gap: 16px; align-items: center; border-bottom: 1px solid var(--idl-line); }
-    .drawer-item img { width: 70px; height: 86px; object-fit: contain; background: var(--idl-panel-alt); }
-    .drawer-item h3 { margin: 0 0 6px; font-size: 16px; line-height: 18px; text-transform: uppercase; }
-    .drawer-item p { margin: 0; color: var(--idl-muted); font: 400 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
-    .remove-item { border: 0; background: transparent; color: var(--idl-muted); cursor: pointer; }
-    .remove-item:hover { color: var(--idl-go-gold); }
-    .remove-item svg { width: 18px; height: 18px; }
-    .drawer-footer { padding: 22px; border-top: 1px solid var(--idl-line); }
-    .drawer-total { margin-bottom: 18px; display: flex; justify-content: space-between; font: 700 13px/14px CarbonPlus, monospace; text-transform: uppercase; }
-    .drawer-footer .button { width: 100%; justify-content: space-between; }
-    .toast {
-      position: fixed;
-      z-index: 100;
-      right: 20px;
-      bottom: 20px;
-      max-width: calc(100% - 40px);
-      padding: 14px 18px;
-      border-left: 3px solid var(--idl-go-gold);
-      background: var(--idl-panel);
-      color: var(--idl-white);
-      font: 700 12px/14px CarbonPlus, monospace;
-      text-transform: uppercase;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: transform 180ms ease, opacity 180ms ease;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-
-    /* ===================================================================
-       Cart drawer — light rebuild (cart-v2)
-       Structure and behaviour ported from banditrunning.com's minicart:
-       free-shipping progress, per-item quantity stepper, in-cart size
-       switch, and a "Pair it with" upsell rail. The drawer flips to a light
-       surface (the rest of the chrome stays dark), so it carries its own
-       token set rather than the inverted --idl-* ones. Selectors are scoped
-       under .cart-v2 so they win over the two older .bag-drawer blocks above
-       without those needing to be torn out.
-       =================================================================== */
-    .bag-drawer.cart-v2 {
-      --c-paper: #ffffff;
-      --c-soft: #f2f2f0;
-      --c-footer: #ffffff;
-      --c-ink: #0a0a0a;
-      --c-muted: #767676;
-      --c-line: rgba(10, 10, 10, 0.16);
-      --c-track: #676769;
-      --c-accent: #d67400;
-      width: min(680px, 100%);
-      background: var(--c-paper);
-      color: var(--c-ink);
-      border-left: 0;
-      font-family: NeueHaas, "Helvetica Neue", Arial, sans-serif;
-    }
-    .cart-v2 * { box-sizing: border-box; }
-
-    /* ---- header (scaled to the IDL navbar: 20px bag glyph, 13px label, the
-       small black count circle from .bag-count rather than a big amber pill) ---- */
-    .cart-v2 .drawer-header {
-      min-height: 56px;
-      padding: 0 22px;
-    }
-    .cart-v2 .drawer-head-left { display: flex; align-items: center; gap: 8px; }
-    .cart-v2 .drawer-head-left > svg { width: 20px; height: 20px; stroke-width: 1.5; }
-    .cart-v2 .drawer-header h2 {
-      margin: 0;
-      font: 500 13px/1 inherit;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--c-ink);
-    }
-    .cart-v2 .drawer-count {
-      display: grid;
-      place-items: center;
-      min-width: 15px;
-      height: 15px;
-      padding: 0 3px;
-      border: 1px solid #6e7276;
-      border-radius: 50%;
-      background: #6e7276;
-      color: #fff;
-      font: 600 9px/1 CarbonPlus, monospace;
-    }
-    .cart-v2 .drawer-close-icon {
-      width: 34px;
-      height: 34px;
-      margin-right: -7px;
-      display: grid;
-      place-items: center;
-      border: 0;
-      background: transparent;
-      color: var(--c-ink);
-      cursor: pointer;
-    }
-    .cart-v2 .drawer-close-icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
-    .cart-v2 .drawer-close-icon:hover { color: var(--c-accent); }
-
-    /* ---- body / scroll ---- */
-    .cart-v2 .drawer-body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
-    .cart-v2 .drawer-items { flex: 0 0 auto; overflow: visible; }
-
-    /* ---- free-shipping progress: full-bleed bar, IDL lime fill (same token as
-       the checkout button) on a light track. Message ink rather than white so
-       it stays legible over both the lime fill and the empty track. ---- */
-    .cart-v2 .cart-ship { padding: 0; }
-    .cart-v2 .cart-ship-track {
-      position: relative;
-      height: 26px;
-      background: #e7e7e3;
-      overflow: hidden;
-    }
-    .cart-v2 .cart-ship-fill {
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: 0;
-      background: var(--idl-go-gold);
-      transition: width 420ms cubic-bezier(0.22, 0.8, 0.2, 1);
-    }
-    .cart-v2 .cart-ship-msg {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--idl-button-ink);
-      font: 500 12px/1 inherit;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      pointer-events: none;
-    }
-
-    /* ---- line item ---- */
-    .cart-v2 .drawer-item {
-      padding: 20px 24px;
-      display: grid;
-      grid-template-columns: 84px 1fr;
-      gap: 16px;
-      align-items: start;
-      border-bottom: 1px solid var(--c-line);
-    }
-    .cart-v2 .drawer-item-thumb {
-      width: 84px;
-      height: 100px;
-      object-fit: cover;
-      background: var(--c-soft);
-    }
-    .cart-v2 .drawer-item-main { min-width: 0; }
-    .cart-v2 .drawer-item-top { display: flex; align-items: flex-start; gap: 14px; }
-    .cart-v2 .drawer-item h3 {
-      flex: 1;
-      margin: 0;
-      font: 500 14px/1.33 inherit;
-      letter-spacing: 0;
-      text-transform: none;
-      color: var(--c-ink);
-    }
-    .cart-v2 .drawer-item-price {
-      flex: 0 0 auto;
-      font: 500 14px/1.33 inherit;
-      color: var(--c-ink);
-      white-space: nowrap;
-    }
-    .cart-v2 .drawer-item-meta {
-      margin: 7px 0 0;
-      font: 400 12px/1.55 inherit;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: var(--c-muted);
-    }
-    .cart-v2 .drawer-item-meta > span { display: block; }
-
-    /* In-cart size switch styled to read as Bandit's "SIZE: XS" text line: a
-       bare select in the meta colour with a small caret, not a boxed control. */
-    .cart-v2 .drawer-item-size {
-      position: relative;
-      display: inline-flex;
-      vertical-align: baseline;
-    }
-    .cart-v2 .drawer-item-size select {
-      appearance: none;
-      -webkit-appearance: none;
-      margin: 0;
-      padding: 0 14px 0 0;
-      border: 0;
-      background: transparent;
-      color: var(--c-ink);
-      font: inherit;
-      text-transform: uppercase;
-      letter-spacing: inherit;
-      cursor: pointer;
-      border-radius: 0;
-    }
-    .cart-v2 .drawer-item-size::after {
-      content: "";
-      position: absolute;
-      right: 3px;
-      top: 50%;
-      width: 6px;
-      height: 6px;
-      border-right: 1.3px solid var(--c-ink);
-      border-bottom: 1.3px solid var(--c-ink);
-      transform: translateY(-75%) rotate(45deg);
-      pointer-events: none;
-    }
-
-    /* quantity stepper — three bordered cells [trash|qty|plus] with collapsed
-       shared borders, Bandit's exact shape */
-    .cart-v2 .qty-stepper { margin-top: 14px; display: inline-flex; align-items: stretch; }
-    .cart-v2 .qty-stepper button,
-    .cart-v2 .qty-stepper .qty-value {
-      height: 34px;
-      min-width: 36px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--c-line);
-      margin-left: -1px;
-      background: transparent;
-    }
-    .cart-v2 .qty-stepper button { color: var(--c-ink); cursor: pointer; padding: 0; }
-    .cart-v2 .qty-stepper button:first-child { margin-left: 0; }
-    .cart-v2 .qty-stepper button:hover { background: var(--c-soft); }
-    .cart-v2 .qty-stepper button svg { width: 15px; height: 15px; }
-    .cart-v2 .qty-stepper button:disabled { color: rgba(10,10,10,0.26); cursor: not-allowed; background: transparent; }
-    .cart-v2 .qty-stepper .qty-value { font: 500 13px/1 inherit; }
-
-    /* ---- upsell rail ---- */
-    .cart-v2 .cart-upsell { padding: 22px 24px 24px; border-top: 1px solid var(--c-line); }
-    .cart-v2 .cart-upsell-head {
-      margin: 0 0 16px;
-      font: 500 14px/1 inherit;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: var(--c-ink);
-    }
-    .cart-v2 .cart-upsell-viewport { overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; }
-    .cart-v2 .cart-upsell-viewport::-webkit-scrollbar { display: none; }
-    .cart-v2 .cart-upsell-track { display: flex; gap: 20px; }
-    .cart-v2 .upsell-card {
-      flex: 0 0 300px;
-      scroll-snap-align: start;
-      display: grid;
-      grid-template-columns: 64px 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-    .cart-v2 .upsell-card img { width: 64px; height: 76px; object-fit: cover; background: var(--c-soft); }
-    .cart-v2 .upsell-body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-    .cart-v2 .upsell-top { display: flex; align-items: flex-start; gap: 10px; }
-    .cart-v2 .upsell-name {
-      flex: 1;
-      margin: 0;
-      font: 500 13px/1.3 inherit;
-      letter-spacing: 0;
-      text-transform: none;
-      color: var(--c-ink);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .cart-v2 .upsell-add {
-      flex: 0 0 auto;
-      padding: 6px 14px;
-      border: 1px solid var(--c-ink);
-      border-radius: 999px;
-      background: transparent;
-      color: var(--c-ink);
-      font: 500 11px/1 inherit;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 140ms ease, color 140ms ease;
-    }
-    .cart-v2 .upsell-add:hover { background: var(--c-ink); color: #fff; }
-    .cart-v2 .upsell-meta {
-      font: 400 12px/1 inherit;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: var(--c-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .cart-v2 .upsell-size { position: relative; display: inline-flex; }
-    .cart-v2 .upsell-size select {
-      appearance: none;
-      -webkit-appearance: none;
-      padding: 3px 22px 3px 8px;
-      border: 1px solid var(--c-line);
-      background: var(--c-paper);
-      color: var(--c-ink);
-      font: inherit;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      border-radius: 0;
-    }
-    .cart-v2 .upsell-size::after {
-      content: "";
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      width: 6px;
-      height: 6px;
-      border-right: 1.3px solid var(--c-ink);
-      border-bottom: 1.3px solid var(--c-ink);
-      transform: translateY(-75%) rotate(45deg);
-      pointer-events: none;
-    }
-    .cart-v2 .upsell-price { font: 400 13px/1 inherit; color: var(--c-ink); }
-    .cart-v2 .cart-upsell-arrows { margin-top: 18px; display: flex; justify-content: flex-start; gap: 10px; }
-    .cart-v2 .cart-upsell-arrow {
-      width: 34px;
-      height: 34px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--c-line);
-      border-radius: 999px;
-      background: var(--c-paper);
-      color: var(--c-ink);
-      cursor: pointer;
-    }
-    .cart-v2 .cart-upsell-arrow:hover:not(:disabled) { border-color: var(--c-ink); }
-    .cart-v2 .cart-upsell-arrow:disabled { color: rgba(10,10,10,0.22); cursor: not-allowed; }
-    .cart-v2 .cart-upsell-arrow svg { width: 16px; height: 16px; }
-
-    /* ---- empty state ---- */
-    .cart-v2 .drawer-empty { padding: 44px 24px; color: var(--c-muted); }
-    .cart-v2 .drawer-empty-head { margin: 0; font: 500 22px/1.2 inherit; color: var(--c-ink); }
-    .cart-v2 .drawer-empty-sub { margin: 10px 0 22px; font-size: 14px; }
-    .cart-v2 .drawer-empty-links { display: flex; flex-direction: column; gap: 10px; }
-    .cart-v2 .drawer-empty-links a {
-      font: 500 13px/1 inherit;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: var(--c-ink);
-      text-decoration: none;
-    }
-    .cart-v2 .drawer-empty-links a:hover { text-decoration: underline; }
-
-    /* ---- footer ---- */
-    .cart-v2 .drawer-footer { padding: 18px 24px 20px; border-top: 1px solid var(--c-line); background: var(--c-footer); }
-    .cart-v2 .drawer-subtotal {
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      font: 500 15px/1 inherit;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: var(--c-ink);
-    }
-    .cart-v2 .drawer-subtotal span:last-child { font-size: 16px; }
-
-    /* Checkout is IDL's own .button.primary component (lime fill, ink text,
-       CarbonPlus, right-hand icon plate + hover swap) — just stretched full
-       width here. Only the hover is re-pointed: the stock button hovers to
-       white, which would vanish against this light footer, so it inverts to
-       ink instead. */
-    .cart-v2 .cart-checkout { width: 100%; justify-content: space-between; }
-    .cart-v2 .cart-checkout:hover { background: var(--idl-button-ink); color: var(--idl-go-gold); }
-    .cart-v2 .cart-checkout:hover .button-icon svg { background: #12242c; }
-    .cart-v2 .cart-trust {
-      margin: 14px 0 2px;
-      text-align: center;
-      font: 400 14px/1 inherit;
-      letter-spacing: 0;
-      color: var(--c-ink);
-    }
-
     /* ===================================================================
        Product detail page
        The chrome above and below stays on the dark palette; everything
@@ -5146,7 +4791,7 @@
       font-weight: 500;
       line-height: 24px;
       letter-spacing: -0.03em;
-      text-transform: uppercase;
+      text-transform: none;
       /* Every product name comes from JS (textContent from the catalog), so
          there's no markup to hand-place a &nbsp; in — this has to be a pure
          CSS fix. Balances line lengths instead of just wrapping greedily, so
@@ -5584,7 +5229,7 @@
     <header class="site-header">
       <div class="header-inner content">
         <a class="brand-mark" href="idl-merch-redesign-v2.html#top" aria-label="IDL Merch home">
-          <img src="fieldbook-assets/idl-live-logo.svg" alt="IDL">
+          <img src="fieldbook-assets/idl-live-logo.svg?v=3" alt="IDL">
         </a>
 
         <div class="header-side left">
@@ -5596,9 +5241,11 @@
               Shop by team <i data-lucide="chevron-down" aria-hidden="true"></i>
             </button>
           </div>
-          <a class="nav-link has-chevron" href="idl-merch-redesign-v2.html#team-kits">
-            Collections <i data-lucide="chevron-down" aria-hidden="true"></i>
-          </a>
+          <div class="team-nav collections-nav">
+            <button class="nav-button team-trigger collections-trigger" type="button" aria-expanded="false" aria-controls="collections-mega-menu">
+              Series <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+          </div>
           <a class="nav-link" href="idl-lookbooks-index.html">
             Lookbooks
           </a>
@@ -5634,49 +5281,81 @@
       </div>
     </header>
 
+    <div class="team-menu-overlay" aria-hidden="true"></div>
+
     <div class="team-menu" id="team-mega-menu" aria-label="Shop by team" aria-hidden="true">
-      <div class="team-menu-grid">
-        <a class="team-menu-card" href="idl-merch-redesign-v2.html#team-kits" data-menu-team="brotherhood" style="--team-accent:#e32833;--team-glow:rgba(227,40,51,0.28)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/brotherhood.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Brotherhood</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/canada.webp" alt="Canada" width="512" height="303">Vancouver, CAN</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-brotherhood.png" alt="">
-        </a>
-        <a class="team-menu-card" href="idl-merch-redesign-v2.html#team-kits" data-menu-team="grv" style="--team-accent:#54745f;--team-glow:rgba(50,112,74,0.3)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/grv.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>GRV</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/usa.webp" alt="United States" width="512" height="303">Los Angeles, USA</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-grv.png" alt="">
-        </a>
-        <a class="team-menu-card" href="idl-merch-redesign-v2.html#team-kits" data-menu-team="1million" style="--team-accent:#aeb8c2;--team-glow:rgba(80,120,150,0.28)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/1million.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>1MILLION</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/korea.webp" alt="South Korea" width="512" height="303">Seoul, KOR</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-1million.png" alt="">
-        </a>
-        <a class="team-menu-card" href="idl-merch-redesign-v2.html#team-kits" data-menu-team="royal-family" style="--team-accent:#d2a51f;--team-glow:rgba(210,165,31,0.3)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/royal-family.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Royal Family</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/new-zealand.webp" alt="New Zealand" width="512" height="303">Auckland, NZL</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-royal-family.png" alt="">
-        </a>
-        <a class="team-menu-card" href="idl-merch-redesign-v2.html#team-kits" data-menu-team="jam-republic" style="--team-accent:#ff7a19;--team-glow:rgba(255,122,25,0.3)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/jam-republic.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Jam Republic</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/sea.webp" alt="Singapore" width="512" height="303">South East Asia, SEA</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-jam-republic.png" alt="">
-        </a>
-        <a class="team-menu-card" href="idl-merch-redesign-v2.html#team-kits" data-menu-team="quick-style" style="--team-accent:#4a8fc4;--team-glow:rgba(48,130,189,0.32)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/quick-style.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Quick Style</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/norway.webp" alt="Norway" width="512" height="303">Oslo, NOR</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-quick-style.png" alt="">
-        </a>
+      <div class="team-menu-teams">
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#team-kits">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-brotherhood-short-sleeve-red-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Brotherhood</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/canada.webp" alt="" width="512" height="303">Vancouver, CAN</span>        </a>
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#team-kits">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-grv-short-sleeve-green-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">GRV</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/usa.webp" alt="" width="512" height="303">Los Angeles, USA</span>        </a>
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#team-kits">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-1million-short-sleeve-grey-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">1MILLION</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/korea.webp" alt="" width="512" height="303">Seoul, KOR</span>        </a>
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#team-kits">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-royal-family-short-sleeve-black-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Royal Family</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/new-zealand.webp" alt="" width="512" height="303">Auckland, NZL</span>        </a>
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#team-kits">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-jam-republic-short-sleeve-orange-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Jam Republic</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/sea.webp" alt="" width="512" height="303">South East Asia, SEA</span>        </a>
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#team-kits">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-quick-style-short-sleeve-blue-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Quick Style</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/norway.webp" alt="" width="512" height="303">Oslo, NOR</span>        </a>
       </div>
-      <div class="team-menu-footer">
-        <a class="team-menu-cta" href="https://www.idl.pro/teams"><span>Learn About the Teams</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+    </div>
+
+    <div class="team-menu" id="collections-mega-menu" aria-label="Collections" aria-hidden="true">
+      <div class="team-menu-teams team-menu-capsules">
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#look-title">
+          <span class="team-menu-team-media" data-cycle="idl-vancouver-utility-vest-lifestyle.jpg|idl-vancouver-long-sleeve-jersey-lifestyle.jpg|idl-vancouver-convertible-pants-lifestyle.jpg|idl-vancouver-series-tee-lifestyle.jpg">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-vancouver-utility-vest-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Vancouver Series</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/canada.webp" alt="" width="512" height="303">Vancouver, CAN</span>        </a>
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html#look-title">
+          <span class="team-menu-team-media" data-cycle="idl-nyc-metro-shirt-lifestyle.jpg|idl-nyc-series-tee-lifestyle.jpg|idl-nyc-distressed-practice-jersey-lifestyle.jpg|idl-nyc-distressed-beanie-lifestyle.jpg">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-nyc-metro-shirt-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">New York Series</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/usa.webp" alt="" width="512" height="303">New York, USA</span>        </a>
       </div>
     </div>
 
     <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation">
       <div class="mobile-menu-inner">
-        <a href="idl-merch-redesign-v2.html#team-kits">Shop by team <i data-lucide="arrow-right" aria-hidden="true"></i></a>
-        <a href="idl-merch-redesign-v2.html#look-title">Capsule 2026 <i data-lucide="arrow-right" aria-hidden="true"></i></a>
-        <a href="idl-lookbooks-index.html">Season 01 lookbooks <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        <button class="mobile-acc-trigger" type="button" data-mobile-acc="team" aria-expanded="false">Shop by team <i data-lucide="chevron-down" aria-hidden="true"></i></button>
+        <div class="mobile-acc-panel" data-mobile-acc-panel="team"></div>
+        <button class="mobile-acc-trigger" type="button" data-mobile-acc="collections" aria-expanded="false">Series <i data-lucide="chevron-down" aria-hidden="true"></i></button>
+        <div class="mobile-acc-panel" data-mobile-acc-panel="collections"></div>
+        <a href="idl-lookbooks-index.html">Lookbooks <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
     </nav>
 
@@ -6032,63 +5711,6 @@
     </div>
   </div>
 
-  <!-- Cart drawer + toast, ported from the storefront so Add to cart on this
-       page lands somewhere real instead of bouncing the visitor back to the
-       grid. Same markup and same classes, so it inherits the storefront's CSS. -->
-  <div class="drawer-scrim" data-close-drawer></div>
-  <aside class="bag-drawer cart-v2" id="bag-drawer" aria-hidden="true" aria-labelledby="bag-title">
-    <header class="drawer-header">
-      <div class="drawer-head-left">
-        <i data-lucide="shopping-bag" aria-hidden="true"></i>
-        <h2 id="bag-title">Cart</h2>
-        <span class="drawer-count" data-count>0</span>
-      </div>
-      <button class="drawer-close-icon" type="button" data-close-drawer aria-label="Close cart"><i data-lucide="x" aria-hidden="true"></i></button>
-    </header>
-
-    <div class="drawer-body">
-      <!-- Free-shipping progress: threshold read off the cart total, the fill
-           and message ported from banditrunning.com's minicart. -->
-      <div class="cart-ship" data-ship hidden>
-        <div class="cart-ship-track">
-          <div class="cart-ship-fill" data-ship-fill></div>
-          <p class="cart-ship-msg" data-ship-msg></p>
-        </div>
-      </div>
-
-      <div class="drawer-items">
-        <div class="drawer-empty">
-          <p class="drawer-empty-head">Your cart is empty</p>
-          <p class="drawer-empty-sub">Nothing on the bench yet — go pull a kit.</p>
-          <div class="drawer-empty-links">
-            <a href="idl-merch-redesign-v2.html" data-close-drawer>Shop all →</a>
-            <a href="idl-lookbooks.html" data-close-drawer>Lookbooks →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Upsell rail: one add-to-cart control per card, size picked inline,
-           the "Pair it with" pattern lifted from the Bandit minicart. -->
-      <section class="cart-upsell" data-upsell hidden>
-        <p class="cart-upsell-head">Pair it with</p>
-        <div class="cart-upsell-viewport" data-upsell-viewport>
-          <div class="cart-upsell-track" data-upsell-track></div>
-        </div>
-        <div class="cart-upsell-arrows" data-upsell-arrows hidden>
-          <button type="button" class="cart-upsell-arrow" data-upsell-prev aria-label="Previous"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
-          <button type="button" class="cart-upsell-arrow" data-upsell-next aria-label="Next"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
-        </div>
-      </section>
-    </div>
-
-    <footer class="drawer-footer">
-      <div class="drawer-subtotal"><span>Subtotal</span><span data-total>Rp 0</span></div>
-
-      <button class="button primary cart-checkout" type="button"><span class="button-label">Checkout</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button>
-      <p class="cart-trust">Free returns. Fast shipping.</p>
-    </footer>
-  </aside>
-  <div class="toast" role="status" aria-live="polite"></div>
 
   <!-- Size guide, opened from the panel. A dialog rather than a fourth
        accordion: it is a reference table, not part of the read-down. -->
@@ -6167,6 +5789,10 @@
   <script src="team-mega-menu-state.js"></script>
   <script src="currency-selector.js"></script>
   <script src="header-tone.js"></script>
+  <!-- The PDP tells the shared cart which product is on screen, so the upsell
+       can lead with its sibling cut / team. Updated on cut switch below. -->
+  <script>window.IDL_CART_CONTEXT = { productKey: null };</script>
+  <script src="cart-v2.js"></script>
   <script>
     (function lookbooksPage() {
       const body = document.body;
@@ -6213,7 +5839,9 @@
         if (headerToneApi) {
           const band = header.offsetHeight;
           const rects = lightSections.map(section => section.getBoundingClientRect());
-          header.classList.toggle('is-light', !docked || headerToneApi.anyOverlapsBand(rects, band));
+          const headerLight = !docked || headerToneApi.anyOverlapsBand(rects, band);
+          header.classList.toggle('is-light', headerLight);
+          body.classList.toggle('header-is-light', headerLight);
         }
         // A sticky row is pinned once its top reaches where it sticks (the header
         // height). Same test as header-tone.js's isPinned — the pinned styles
@@ -6225,24 +5853,41 @@
       window.addEventListener('scroll', syncHeader, { passive: true });
       window.addEventListener('resize', syncHeader);
 
-      let teamMenuOpen = false;
-      function setTeamMenu(action) {
-        teamMenuOpen = megaMenuApi ? megaMenuApi.nextMenuState(teamMenuOpen, action) : action === 'open';
-        teamNav.classList.toggle('open', teamMenuOpen);
-        teamTrigger.setAttribute('aria-expanded', String(teamMenuOpen));
-        teamMenu.setAttribute('aria-hidden', String(!teamMenuOpen));
-        body.classList.toggle('team-menu-open', teamMenuOpen);
+      // Two mega menus (Shop by team + Collections) share one system: only one
+      // is open at a time, both drive the shared body.team-menu-open flag (for
+      // the overlay + header seam), and each panel shows via its own .is-open.
+      const collectionsNav = document.querySelector('.collections-nav');
+      const collectionsTrigger = document.querySelector('.collections-trigger');
+      const collectionsMenu = document.querySelector('#collections-mega-menu');
+      const megaMenus = [
+        { nav: teamNav, trigger: teamTrigger, panel: teamMenu },
+        { nav: collectionsNav, trigger: collectionsTrigger, panel: collectionsMenu }
+      ].filter(m => m.trigger && m.panel);
+      let openMega = null;
+      function setMega(target, action) {
+        const shouldOpen = action === 'toggle' ? openMega !== target : action === 'open';
+        megaMenus.forEach(m => {
+          const on = shouldOpen && m === target;
+          m.panel.classList.toggle('is-open', on);
+          m.panel.setAttribute('aria-hidden', String(!on));
+          if (m.nav) m.nav.classList.toggle('open', on);
+          m.trigger.setAttribute('aria-expanded', String(on));
+        });
+        openMega = shouldOpen ? target : null;
+        body.classList.toggle('team-menu-open', !!openMega);
       }
-      teamTrigger.addEventListener('click', () => setTeamMenu('toggle'));
-      teamMenu.addEventListener('mouseleave', () => setTeamMenu('close'));
+      megaMenus.forEach(m => {
+        m.trigger.addEventListener('click', () => setMega(m, 'toggle'));
+        m.panel.addEventListener('mouseleave', () => setMega(m, 'close'));
+      });
       document.addEventListener('click', (event) => {
-        if (!teamMenuOpen) return;
-        if (teamNav.contains(event.target) || teamMenu.contains(event.target)) return;
-        setTeamMenu('close');
+        if (!openMega) return;
+        if ((openMega.nav && openMega.nav.contains(event.target)) || openMega.panel.contains(event.target)) return;
+        setMega(openMega, 'close');
       });
       document.addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') return;
-        if (teamMenuOpen) setTeamMenu('close');
+        if (openMega) setMega(openMega, 'close');
         if (header.classList.contains('search-open')) closeSearch();
       });
 
@@ -6685,264 +6330,14 @@
       document.addEventListener('idl:currencychange', (event) => {
         currency = event.detail.currency;
         renderPrices();
-        renderBag();
+        // (cart-v2.js re-renders the drawer on this same event.)
       });
 
-      // ---- cart ------------------------------------------------------
-      const bagButton = document.querySelector('.bag-button');
-      const bagCount = document.querySelector('[data-count]');
-      const bagDrawer = document.querySelector('.bag-drawer');
-      const drawerScrim = document.querySelector('.drawer-scrim');
-      const drawerItems = document.querySelector('.drawer-items');
-      const drawerTotal = document.querySelector('[data-total]');
-      const toast = document.querySelector('.toast');
-      const cart = [];
-      let toastTimer;
-
-      // Free-shipping threshold in IDR — mirrors the "$160" line in the promo
-      // banner, converted to a round rupiah figure. formatPrice() reformats the
-      // remainder into whatever currency the selector is on, since it converts
-      // from the IDR source rather than parsing text.
-      const FREE_SHIP_THRESHOLD = 2500000;
-      const MAX_QTY = 10;
-
-      const shipEl = document.querySelector('[data-ship]');
-      const shipFill = document.querySelector('[data-ship-fill]');
-      const shipMsg = document.querySelector('[data-ship-msg]');
-      const upsellEl = document.querySelector('[data-upsell]');
-      const upsellTrack = document.querySelector('[data-upsell-track]');
-      const upsellViewport = document.querySelector('[data-upsell-viewport]');
-      const upsellArrows = document.querySelector('[data-upsell-arrows]');
-      const upsellPrev = document.querySelector('[data-upsell-prev]');
-      const upsellNext = document.querySelector('[data-upsell-next]');
-
+      // The cart drawer itself now lives in cart-v2.js (shared across pages).
+      // These two helpers stay because the PDP hydration below still uses
+      // them for its own icon refresh and size filtering.
       const refreshIcons = () => { if (window.lucide) window.lucide.createIcons(); };
-      const cartQty = () => cart.reduce((n, item) => n + item.qty, 0);
-      const cartSubtotal = () => cart.reduce((sum, item) => sum + item.price * item.qty, 0);
       const inStockSizes = (product) => product ? product.sizes.filter(size => !product.out.includes(size)) : [];
-
-      function showToast(message) {
-        if (!toast) return;
-        toast.textContent = message;
-        toast.classList.add('show');
-        window.clearTimeout(toastTimer);
-        toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2600);
-      }
-
-      // Merge on key + size so a repeat add bumps the quantity rather than
-      // stacking a second identical row. A different size is a different line.
-      function addItem({ key, name, price, image, size }) {
-        const existing = cart.find(item => item.key === key && item.size === size);
-        if (existing) {
-          existing.qty = Math.min(MAX_QTY, existing.qty + 1);
-        } else {
-          cart.push({ key, name, price, image, size: size || null, qty: 1 });
-        }
-      }
-
-      // Derive a colour from the product name so a line can carry a "COLOR: X"
-      // meta line the way Bandit's does — IDL kits have no colour variant axis,
-      // the colour is baked into the name (…Red Jersey, …Green Jersey).
-      const COLOR_WORDS = ['Red', 'Green', 'Grey', 'Gray', 'Black', 'Blue', 'Orange', 'White', 'Pink'];
-      function colorOf(product) {
-        if (!product) return null;
-        const found = COLOR_WORDS.find(word => new RegExp('\\b' + word + '\\b', 'i').test(product.name));
-        return found ? found.toUpperCase() : null;
-      }
-
-      // Two stacked meta lines — "Size: X" (a bare select so it can be switched
-      // in place) then "Color: X" — matching the Bandit line-item block.
-      function metaMarkup(item) {
-        const product = catalog && catalog.products[item.key];
-        const oneSize = product && product.sizes.length === 1;
-        let sizeLine;
-        if (!product || oneSize) {
-          sizeLine = `<span>Size: ${item.size || (product ? product.sizes[0] : '')}</span>`;
-        } else {
-          const sizes = inStockSizes(product);
-          // Keep the current size selectable even if it has since gone out, so
-          // the row never silently jumps to a different size on re-render.
-          if (item.size && !sizes.includes(item.size)) sizes.unshift(item.size);
-          const options = sizes.map(size =>
-            `<option value="${size}"${size === item.size ? ' selected' : ''}>${size}</option>`).join('');
-          sizeLine = `<span>Size: <span class="drawer-item-size"><select data-size-select aria-label="Change size for ${item.name}">${options}</select></span></span>`;
-        }
-        const color = colorOf(product);
-        const colorLine = color ? `<span>Color: ${color}</span>` : '';
-        return `<div class="drawer-item-meta">${sizeLine}${colorLine}</div>`;
-      }
-
-      function renderShip() {
-        if (!shipEl) return;
-        const subtotal = cartSubtotal();
-        if (!cart.length) { shipEl.hidden = true; return; }
-        shipEl.hidden = false;
-        const pct = Math.min(100, (subtotal / FREE_SHIP_THRESHOLD) * 100);
-        shipFill.style.width = pct + '%';
-        if (subtotal >= FREE_SHIP_THRESHOLD) {
-          shipEl.classList.add('is-met');
-          shipMsg.textContent = "You've unlocked free shipping";
-        } else {
-          shipEl.classList.remove('is-met');
-          shipMsg.textContent = `${formatPrice(FREE_SHIP_THRESHOLD - subtotal)} away from free shipping`;
-        }
-      }
-
-      function updateUpsellArrows() {
-        if (!upsellViewport || !upsellArrows) return;
-        const overflow = upsellViewport.scrollWidth - upsellViewport.clientWidth > 4;
-        upsellArrows.hidden = !overflow;
-        if (!overflow) return;
-        const x = upsellViewport.scrollLeft;
-        if (upsellPrev) upsellPrev.disabled = x <= 2;
-        if (upsellNext) upsellNext.disabled = x >= upsellViewport.scrollWidth - upsellViewport.clientWidth - 2;
-      }
-
-      function renderUpsell() {
-        if (!upsellEl || !catalog) return;
-        if (!cart.length) { upsellEl.hidden = true; return; }
-        const inCart = new Set(cart.map(item => item.key));
-        const current = catalog.products[productKey];
-        // The current product's other cut first (a jersey's long/short sibling),
-        // then the rest of its group, then the wider catalogue — the pieces that
-        // actually complete a kit lead.
-        const ranked = [
-          current && current.pair,
-          ...catalog.order.filter(k => catalog.products[k].group === (current && current.group)),
-          ...catalog.order,
-        ];
-        const seen = new Set();
-        const picks = [];
-        for (const k of ranked) {
-          if (!k || seen.has(k) || inCart.has(k) || k === productKey) continue;
-          const p = catalog.products[k];
-          if (!p || p.soldOut) continue;
-          seen.add(k);
-          picks.push(k);
-          if (picks.length >= 6) break;
-        }
-        if (!picks.length) { upsellEl.hidden = true; return; }
-        upsellEl.hidden = false;
-        upsellTrack.innerHTML = picks.map(k => {
-          const p = catalog.products[k];
-          const sizes = inStockSizes(p);
-          const oneSize = p.sizes.length === 1;
-          const sizeField = oneSize
-            ? `${p.sizes[0]}`
-            : `<span class="upsell-size"><select data-upsell-size aria-label="Size for ${p.name}">${sizes.map(s => `<option value="${s}">${s}</option>`).join('')}</select></span>`;
-          return `<div class="upsell-card" data-upsell-key="${k}">
-              <img src="${shotSrc(k, 'studio')}" alt="${p.name}" loading="lazy">
-              <div class="upsell-body">
-                <div class="upsell-top">
-                  <p class="upsell-name">${p.name}</p>
-                  <button type="button" class="upsell-add" data-upsell-add="${k}">Add</button>
-                </div>
-                <div class="upsell-meta">Size: ${sizeField}</div>
-                <p class="upsell-price">${formatPrice(p.price)}</p>
-              </div>
-            </div>`;
-        }).join('');
-        upsellViewport.scrollLeft = 0;
-        window.requestAnimationFrame(updateUpsellArrows);
-      }
-
-      function renderBag() {
-        if (!drawerItems) return;
-        document.querySelectorAll('[data-count]').forEach(node => { node.textContent = String(cartQty()); });
-        drawerTotal.textContent = formatPrice(cartSubtotal());
-        if (!cart.length) {
-          drawerItems.innerHTML = `
-            <div class="drawer-empty">
-              <p class="drawer-empty-head">Your cart is empty</p>
-              <p class="drawer-empty-sub">Nothing on the bench yet — go pull a kit.</p>
-              <div class="drawer-empty-links">
-                <a href="idl-merch-redesign-v2.html">Shop all →</a>
-                <a href="idl-lookbooks.html">Lookbooks →</a>
-              </div>
-            </div>`;
-          renderShip();
-          renderUpsell();
-          return;
-        }
-        drawerItems.innerHTML = cart.map((item, index) => {
-          const dec = item.qty > 1
-            ? `<button type="button" data-qty-dec aria-label="Decrease quantity"><i data-lucide="minus" aria-hidden="true"></i></button>`
-            : `<button type="button" data-qty-dec aria-label="Remove ${item.name}"><i data-lucide="trash-2" aria-hidden="true"></i></button>`;
-          return `
-          <article class="drawer-item" data-index="${index}">
-            <img class="drawer-item-thumb" src="${item.image}" alt="">
-            <div class="drawer-item-main">
-              <div class="drawer-item-top">
-                <h3>${item.name}</h3>
-                <span class="drawer-item-price">${formatPrice(item.price * item.qty)}</span>
-              </div>
-              ${metaMarkup(item)}
-              <div class="qty-stepper">
-                ${dec}
-                <span class="qty-value">${item.qty}</span>
-                <button type="button" data-qty-inc aria-label="Increase quantity"${item.qty >= MAX_QTY ? ' disabled' : ''}><i data-lucide="plus" aria-hidden="true"></i></button>
-              </div>
-            </div>
-          </article>`;
-        }).join('');
-        renderShip();
-        renderUpsell();
-        refreshIcons();
-      }
-
-      function setDrawer(open) {
-        bagDrawer.classList.toggle('open', open);
-        drawerScrim.classList.toggle('open', open);
-        bagDrawer.setAttribute('aria-hidden', String(!open));
-        body.classList.toggle('locked', open);
-      }
-      bagButton.addEventListener('click', () => setDrawer(true));
-      document.querySelectorAll('[data-close-drawer]').forEach(node => node.addEventListener('click', () => setDrawer(false)));
-
-      // One delegated click listener on the whole drawer: item quantity/remove,
-      // upsell add, and the carousel arrows all bubble up to here, so nothing
-      // needs re-binding when renderBag() rebuilds the item and upsell markup.
-      bagDrawer.addEventListener('click', (event) => {
-        const itemEl = event.target.closest('.drawer-item');
-        if (event.target.closest('[data-qty-inc]') && itemEl) {
-          const item = cart[Number(itemEl.dataset.index)];
-          if (item && item.qty < MAX_QTY) { item.qty += 1; renderBag(); }
-          return;
-        }
-        if (event.target.closest('[data-qty-dec]') && itemEl) {
-          const index = Number(itemEl.dataset.index);
-          const item = cart[index];
-          if (!item) return;
-          if (item.qty > 1) { item.qty -= 1; renderBag(); }
-          else { const [removed] = cart.splice(index, 1); renderBag(); showToast(`${removed.name} removed`); }
-          return;
-        }
-        const addButton = event.target.closest('[data-upsell-add]');
-        if (addButton) {
-          const key = addButton.dataset.upsellAdd;
-          const product = catalog.products[key];
-          if (!product) return;
-          const select = addButton.closest('.upsell-card').querySelector('[data-upsell-size]');
-          const size = select ? select.value : (inStockSizes(product)[0] || null);
-          addItem({ key, name: product.name, price: product.price, image: shotSrc(key, 'studio'), size });
-          renderBag();
-          showToast(`${product.name} added`);
-          return;
-        }
-        if (event.target.closest('[data-upsell-prev]')) { upsellViewport.scrollBy({ left: -264, behavior: 'smooth' }); return; }
-        if (event.target.closest('[data-upsell-next]')) { upsellViewport.scrollBy({ left: 264, behavior: 'smooth' }); }
-      });
-
-      // Size switch on a line already in the cart: swap the row's size in place.
-      bagDrawer.addEventListener('change', (event) => {
-        const select = event.target.closest('[data-size-select]');
-        if (!select) return;
-        const itemEl = select.closest('.drawer-item');
-        const item = cart[Number(itemEl.dataset.index)];
-        if (item) { item.size = select.value; renderBag(); }
-      });
-
-      if (upsellViewport) upsellViewport.addEventListener('scroll', updateUpsellArrows, { passive: true });
 
       // ---- catalogue hydration -----------------------------------------
       // One template, any SKU: ?product=<key> picks the entry out of
@@ -6963,6 +6358,7 @@
 
       const askedFor = new URLSearchParams(window.location.search).get('product');
       let productKey = catalog && catalog.products[askedFor] ? askedFor : (catalog ? catalog.order[0] : null);
+      if (window.IDL_CART_CONTEXT) window.IDL_CART_CONTEXT.productKey = productKey;
       let selectedSize = null;
       let defaultSizeNote = sizeNote ? sizeNote.textContent : '';
 
@@ -6975,6 +6371,7 @@
         const group = catalog.groups[product.group];
         const copy = catalog.copy[product.kind];
         productKey = key;
+        if (window.IDL_CART_CONTEXT) window.IDL_CART_CONTEXT.productKey = productKey;
         selectedSize = null;
 
         document.title = `${product.name} — IDL Merch`;
@@ -7048,6 +6445,14 @@
           selectedSize = only[0];
           sizesBox.querySelector(`[data-size="${only[0]}"]`).setAttribute('aria-checked', 'true');
         }
+
+        // One-size items (hats) have nothing to choose, so the Size block and the
+        // model-size overlay are just noise — hide both. The single size is still
+        // selected above, so Add to cart keeps working.
+        const noRealSize = product.sizes.length === 1;
+        const sizeBlock = sizesBox.closest('.pdp-block');
+        if (sizeBlock) sizeBlock.hidden = noRealSize;
+        document.querySelectorAll('.pdp-modelsize').forEach(node => { node.hidden = noRealSize; });
 
         defaultSizeNote = product.soldOut ? 'Every size is gone — join the restock list.' : copy.sizeNote;
         if (sizeNote) {
@@ -7169,18 +6574,16 @@
           sizesBox.querySelector('.pdp-size:not(.is-out)')?.focus();
           return;
         }
-        addItem({
+        window.IDLCart.add({
           key: productKey,
           name: addButton.dataset.product,
           price: Number(addButton.dataset.price),
           image: addButton.dataset.image,
           size: selectedSize,
-        });
-        renderBag();
+        }, { open: true });
         addNote.textContent = '';
         // No toast here: the drawer sliding open is the confirmation, and the
         // two would otherwise land on top of each other in the same corner.
-        setDrawer(true);
       });
 
       // Related cards' own add-to-cart: delegated on the grid, not the cards,
@@ -7192,7 +6595,7 @@
       el('[data-pdp-related]').addEventListener('click', (event) => {
         const notifyButton = event.target.closest('.add-button[data-notify]');
         if (notifyButton) {
-          showToast(`We will email you when ${notifyButton.dataset.product} is back`);
+          window.IDLCart.toast(`We will email you when ${notifyButton.dataset.product} is back`);
           return;
         }
         const addBtn = event.target.closest('.add-button:not([data-notify])');
@@ -7202,9 +6605,7 @@
         const key = addBtn.dataset.key;
         const product = catalog.products[key];
         const size = inStockSizes(product)[0] || null;
-        addItem({ key, name: product.name, price: product.price, image: shotSrc(key, 'studio'), size });
-        renderBag();
-        showToast(`${product.name} added to cart`);
+        window.IDLCart.add({ key, name: product.name, price: product.price, image: shotSrc(key, 'studio'), size }, { toast: `${product.name} added to cart` });
       });
 
       // Related rail paging: the exact scroll math the storefront's own
@@ -7276,10 +6677,7 @@
         });
       }
 
-      document.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape') return;
-        if (bagDrawer.classList.contains('open')) setDrawer(false);
-      });
+      // (Escape-to-close for the cart drawer now lives in cart-v2.js.)
 
       // ---- gallery rail indicator (phones) ------------------------------
       const gallery = document.querySelector('[data-pdp-gallery]');
@@ -7443,9 +6841,9 @@
 
       // render() paints the prices and icons itself; the bare calls are the
       // no-catalogue path, where the static markup is what stays on screen.
+      // (The cart drawer renders its own initial state in cart-v2.js.)
       render(productKey);
       renderPrices();
-      renderBag();
       refreshIcons();
     }());
   </script>
@@ -7474,6 +6872,148 @@
         if (e.key === 'Escape') setOpen(false);
       });
     }());
+  </script>
+
+  <script>
+    /* Shop-by-team cards: (1) a "Shop" button trails the cursor across the
+       photo, and (2) hovering cycles the photo through that team's other
+       products (short sleeve -> long sleeve -> hat), returning to the default
+       shot on leave. */
+    (function () {
+      var BASE = 'standout-assets/shop-products/';
+      var CYCLE = {
+        'brotherhood': [
+          'idl-brotherhood-short-sleeve-red-jersey-lifestyle.jpg',
+          'idl-brotherhood-long-sleeve-red-jersey-lifestyle.jpg',
+          'team-brotherhood-hat-lifestyle.jpg'
+        ],
+        'grv': [
+          'idl-grv-short-sleeve-green-jersey-lifestyle.jpg',
+          'idl-grv-long-sleeve-green-jersey-lifestyle.jpg',
+          'team-grv-hat-lifestyle.jpg'
+        ],
+        '1million': [
+          'idl-1million-short-sleeve-grey-jersey-lifestyle.jpg',
+          'idl-1million-long-sleeve-grey-jersey-lifestyle.jpg',
+          'team-1million-hat-lifestyle.jpg'
+        ],
+        'royal-family': [
+          'idl-royal-family-short-sleeve-black-jersey-lifestyle.jpg',
+          'idl-royal-family-long-sleeve-black-jersey-lifestyle.jpg',
+          'team-royal-family-hat-lifestyle.jpg'
+        ],
+        'jam-republic': [
+          'idl-jam-republic-short-sleeve-orange-jersey-lifestyle.jpg',
+          'idl-jam-republic-short-sleeve-orange-jersey-studio.jpg'
+        ],
+        'quick-style': [
+          'idl-quick-style-short-sleeve-blue-jersey-lifestyle.jpg',
+          'idl-quick-style-long-sleeve-blue-jersey-lifestyle.jpg',
+          'team-quick-style-hat-lifestyle.jpg'
+        ]
+      };
+      // Longer keys first so 'royal-family' matches before any shorter token.
+      var KEYS = Object.keys(CYCLE).sort(function (a, b) { return b.length - a.length; });
+
+      document.querySelectorAll('.team-menu-team').forEach(function (card) {
+        var media = card.querySelector('.team-menu-team-media');
+        var btn = card.querySelector('.team-menu-team-cursor');
+        var img = media && media.querySelector('img');
+        if (!media) return;
+
+        // Cursor-following Shop button.
+        if (btn) {
+          media.addEventListener('pointermove', function (e) {
+            var r = media.getBoundingClientRect();
+            btn.style.left = (e.clientX - r.left) + 'px';
+            btn.style.top = (e.clientY - r.top) + 'px';
+          });
+        }
+
+        // Product cycling on hover. An explicit data-cycle (used by the
+        // Collections capsules) wins; otherwise the team is read off the src.
+        if (!img) return;
+        var list = null;
+        var explicit = media.getAttribute('data-cycle');
+        if (explicit) {
+          list = explicit.split('|');
+        } else {
+          var src = img.getAttribute('src') || '';
+          var key = null;
+          for (var i = 0; i < KEYS.length; i++) {
+            if (src.indexOf(KEYS[i]) !== -1) { key = KEYS[i]; break; }
+          }
+          list = key ? CYCLE[key] : null;
+        }
+        if (!list || list.length < 2) return;
+
+        list.forEach(function (u) { var p = new Image(); p.src = BASE + u; });
+
+        var timer = null, idx = 0;
+        card.addEventListener('pointerenter', function () {
+          if (timer) return;
+          timer = setInterval(function () {
+            idx = (idx + 1) % list.length;
+            img.src = BASE + list[idx];
+          }, 650);
+        });
+        card.addEventListener('pointerleave', function () {
+          if (timer) { clearInterval(timer); timer = null; }
+          idx = 0;
+          img.src = BASE + list[0];
+        });
+      });
+    })();
+  </script>
+
+  <script>
+    /* Point each Shop-by-team card at the storefront with that team's filter
+       pre-selected: idl-merch-redesign-v2.html?team=<slug>#team-kits. The slug
+       is read off the card's image filename, so no per-card markup is needed. */
+    (function () {
+      var TEAMS = ['brotherhood', 'grv', '1million', 'royal-family', 'quick-style', 'jam-republic'];
+      document.querySelectorAll('#team-mega-menu .team-menu-team').forEach(function (card) {
+        var img = card.querySelector('img');
+        var src = img ? img.getAttribute('src') : '';
+        var slug = TEAMS.find(function (t) { return src.indexOf(t) !== -1; });
+        if (slug) card.setAttribute('href', 'idl-merch-redesign-v2.html?team=' + slug + '#team-kits');
+      });
+
+      // Collections capsules deep-link to the capsule section with that city
+      // pre-selected: idl-merch-redesign-v2.html?capsule=<slug>#look-title.
+      var CAPSULES = ['vancouver', 'nyc'];
+      document.querySelectorAll('#collections-mega-menu .team-menu-team').forEach(function (card) {
+        var img = card.querySelector('img');
+        var src = img ? img.getAttribute('src') : '';
+        var slug = CAPSULES.find(function (c) { return src.indexOf(c) !== -1; });
+        if (slug) card.setAttribute('href', 'idl-merch-redesign-v2.html?capsule=' + slug + '#look-title');
+      });
+    })();
+  </script>
+
+  <script>
+    /* Mobile: the desktop mega panels are hidden, so clone their card grids into
+       the hamburger's "Shop by team" / "Collections" accordions. Runs last, so
+       the clones inherit the final hrefs and carry no hover/cycling handlers. */
+    (function () {
+      function fill(key, gridSelector) {
+        var panel = document.querySelector('[data-mobile-acc-panel="' + key + '"]');
+        var grid = document.querySelector(gridSelector);
+        if (panel && grid && !panel.childElementCount) panel.appendChild(grid.cloneNode(true));
+      }
+      fill('team', '#team-mega-menu .team-menu-teams');
+      fill('collections', '#collections-mega-menu .team-menu-teams');
+
+      document.querySelectorAll('.mobile-acc-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-mobile-acc');
+          var panel = document.querySelector('[data-mobile-acc-panel="' + key + '"]');
+          var open = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!open));
+          if (panel) panel.classList.toggle('is-open', !open);
+        });
+      });
+    })();
   </script>
 
 </body>

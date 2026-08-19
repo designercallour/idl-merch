@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#061015">
   <title>IDL Merch - Live Website Redesign</title>
   <link rel="stylesheet" href="standout-assets/fonts.css">
+  <link rel="stylesheet" href="cart-v2.css">
   <script src="standout-assets/lucide.min.js" defer></script>
   <style>
     :root {
@@ -81,8 +82,8 @@
       position: absolute;
       z-index: 1;
       background: var(--idl-go-gold);
-      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
-      mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
+      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
+      mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
       opacity: 0;
       pointer-events: none;
     }
@@ -517,8 +518,8 @@
        technique the announcement bar's mark already uses. */
     .site-header.is-light .brand-mark {
       background: var(--idl-button-ink);
-      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
-      mask: url("fieldbook-assets/idl-live-logo.svg") center / contain no-repeat;
+      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
+      mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
     }
     .site-header.is-light .brand-mark img { visibility: hidden; }
     /* The badge inherits its ink from the bar, so on white it would end up
@@ -537,27 +538,30 @@
        two read as one sheet rather than a white strip sitting on a dark menu.
        Every .is-light override has to be undone here, not just the fill --
        over a light section the trigger would otherwise stay dark-on-dark. */
-    body.team-menu-open .site-header,
-    body.team-menu-open .site-header.scrolled,
-    body.team-menu-open .site-header.is-light,
-    body.team-menu-open .site-header.scrolled.is-light {
+    /* ...but only when the bar is over a DARK section. Over a light section
+       (body.header-is-light) the bar stays white and the menu goes white to
+       match, so every override here is gated on :not(.header-is-light). */
+    body.team-menu-open:not(.header-is-light) .site-header,
+    body.team-menu-open:not(.header-is-light) .site-header.scrolled,
+    body.team-menu-open:not(.header-is-light) .site-header.is-light,
+    body.team-menu-open:not(.header-is-light) .site-header.scrolled.is-light {
       background: #061015;
       color: var(--idl-white);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
-    body.team-menu-open .site-header.is-light .nav-link,
-    body.team-menu-open .site-header.is-light .nav-button,
-    body.team-menu-open .site-header.is-light .icon-button { color: var(--idl-white); }
-    body.team-menu-open .site-header.is-light .icon-button { border-color: var(--idl-line); }
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .nav-link,
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .nav-button,
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .icon-button { color: var(--idl-white); }
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .icon-button { border-color: var(--idl-line); }
     /* Drop the mask and show the shipped white wordmark again. */
-    body.team-menu-open .site-header.is-light .brand-mark {
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .brand-mark {
       background: none;
       -webkit-mask: none;
       mask: none;
     }
-    body.team-menu-open .site-header.is-light .brand-mark img { visibility: visible; }
-    body.team-menu-open .site-header.is-light .bag-count {
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .brand-mark img { visibility: visible; }
+    body.team-menu-open:not(.header-is-light) .site-header.is-light .bag-count {
       border-color: currentColor;
       background: #000000;
       color: inherit;
@@ -597,6 +601,25 @@
     .team-trigger svg { width: 15px; height: 15px; transition: transform 100ms ease; }
     .team-nav.open .team-trigger svg { transform: rotate(180deg); }
     .team-nav.open .team-trigger::after { opacity: 1; }
+    /* Dim + blur the page behind the mega menu — the same overlay standard the
+       promo popup uses (black 0.7 + blur 5px). Sits under the menu (39) and
+       header (40) but over the page content, so only the hero dims. */
+    .team-menu-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 38;
+      background: rgba(0, 0, 0, 0.7);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 140ms ease, visibility 140ms ease;
+    }
+    body.team-menu-open .team-menu-overlay {
+      opacity: 1;
+      visibility: visible;
+    }
     .team-menu {
       position: fixed;
       z-index: 39;
@@ -605,121 +628,130 @@
       left: 0;
       width: 100%;
       max-height: calc(100vh - var(--chrome-top));
-      padding: 20px max(30px, calc((100vw - 1380px) / 2)) 24px;
+      /* Horizontal padding matches the navbar's own inset (.header-inner is
+         full-bleed with 20px sides on desktop, line ~230), so the card row's
+         left/right edges line up exactly with "Shop by team" and the cart. */
+      padding: 20px 20px 24px;
       overflow-y: auto;
       visibility: hidden;
       opacity: 0;
       transform: translateY(-10px);
       pointer-events: none;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(19, 43, 53, 0.34), transparent 44%),
-        rgb(9, 19, 29);
-      border-top: 1px solid rgba(35, 52, 59, 0.95);
+      /* Flat #061015 — the same fill the header bar takes while the menu is
+         open (body.team-menu-open .site-header), so the two read as one
+         continuous surface instead of the menu sitting a shade lighter under
+         a seam. The old radial lift brightened exactly the top edge where the
+         two meet, which is what made the join show. */
+      background: #061015;
+      /* No border-top: header and menu share #061015 now, so a hairline here
+         reads as a seam splitting one surface. The bottom border stays — that
+         is a real edge between the menu and the hero below. */
       border-bottom: 1px solid rgba(35, 52, 59, 0.95);
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
       transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
     }
-    body.team-menu-open .team-menu {
+    /* A menu shows when it carries .is-open; the shared body.team-menu-open flag
+       (set whenever EITHER the team or collections menu is open) still drives the
+       overlay, header seam and light/dark sync for both. */
+    .team-menu.is-open {
       visibility: visible;
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
-    .team-menu-grid {
-      width: min(100%, 1380px);
-      margin-inline: auto;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      /* Measured off idl.pro: 446px cards at 30 / 496 / 962 on a 1440 viewport. */
-      gap: 20px;
+    /* Light treatment: when the bar is white (over a light section) the menu
+       switches to white too, so the two still read as one continuous sheet. */
+    body.header-is-light.team-menu-open .team-menu {
+      background: var(--idl-white);
+      border-bottom-color: rgba(12, 15, 19, 0.14);
     }
-    .team-menu-card {
-      --team-accent: var(--idl-go-gold);
-      --team-glow: rgba(192, 231, 0, 0.14);
+    body.header-is-light.team-menu-open .team-menu-team { color: var(--idl-button-ink); }
+    body.header-is-light.team-menu-open .team-menu-team-place { color: #5c6165; }
+    body.header-is-light.team-menu-open .team-menu-team-media { background: #e6e8ea; }
+    /* ---- Shop-by-team mega menu: one image card per team --------------
+       Six teams, six cards across the panel — each the team's lifestyle shot
+       with its name, home city and a Shop link. The card style (photo cover,
+       bottom scrim, hover zoom, corner labels) is the image-block treatment
+       from banditrunning.com's Collections menu, turned into a full 6-up grid
+       for the teams. */
+    .team-menu-teams {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 16px;
+    }
+    /* Collections holds the capsules. They use the SAME six-column track as the
+       team cards so each capsule card is exactly a team card's width; the two
+       that exist fill the first two columns and the rest stay empty. */
+    .team-menu-teams.team-menu-capsules {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .team-menu-team {
       position: relative;
-      height: 180px;
-      min-width: 0;
-      overflow: hidden;
-      /* Inset shadow, not a border: a 1px border would push the crest and copy
-         in by 1px, and idl.pro's card has no border at all. */
-      border: 0;
-      box-shadow: inset 0 0 0 1px rgba(41, 61, 71, 0.9);
-      background:
-        linear-gradient(90deg, rgba(6, 16, 21, 0.98) 0%, rgba(6, 16, 21, 0.82) 49%, rgba(6, 16, 21, 0.18) 100%),
-        radial-gradient(circle at 82% 46%, var(--team-glow), transparent 58%),
-        #0b1820;
+      display: flex;
+      flex-direction: column;
       color: var(--idl-white);
       text-decoration: none;
-      transition: box-shadow 140ms ease, transform 140ms ease;
     }
-    .team-menu-card::after {
-      content: "";
+    /* Photo in its own clipped box; name + city caption sit below it. */
+    .team-menu-team-media {
+      position: relative;
+      display: block;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #0b1820;
+    }
+    .team-menu-team-media img {
       position: absolute;
       inset: 0;
-      background: linear-gradient(110deg, transparent 52%, var(--team-glow) 100%);
-      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Anchor the crop near the top so the models' heads/faces stay in
+         frame — a centred crop was slicing the top off every card. */
+      object-position: center 10%;
+      transition: transform 500ms cubic-bezier(0.22, 0.8, 0.2, 1);
     }
-    .team-menu-card:hover,
-    .team-menu-card:focus-visible {
-      box-shadow: inset 0 0 0 1px var(--team-accent);
-      transform: translateY(-2px);
-    }
-    .team-menu-card:focus-visible {
-      outline: 2px solid var(--idl-white);
-      outline-offset: 2px;
-    }
-    .team-menu-card-image {
-      position: absolute;
-      z-index: 1;
-      right: 3%;
-      bottom: -18px;
-      width: 46%;
-      height: 116%;
-      object-fit: contain;
-      object-position: center bottom;
-      filter: saturate(0.96) contrast(1.06);
-    }
-    .team-menu-crest,
-    .team-menu-card-copy {
-      position: absolute;
-      z-index: 2;
-      left: 16px;
-    }
-    .team-menu-crest {
-      top: 16px;
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-    }
-    .team-menu-card-copy {
-      right: 18px;
-      bottom: 11px;
-    }
-    .team-menu-card-copy strong {
-      display: block;
-      max-width: 68%;
-      /* 24px/900, no tracking — idl.pro sets none on this one. */
-      font: 900 24px/1 NeueHaas, Arial, sans-serif;
-      letter-spacing: normal;
+    .team-menu-team:hover .team-menu-team-media img { transform: scale(1.05); }
+    .team-menu-team:focus-visible { outline: 2px solid var(--idl-white); outline-offset: 2px; }
+    .team-menu-team-name {
+      margin-top: 12px;
+      font: 600 14px/1 NeueHaas, Arial, sans-serif;
       text-transform: uppercase;
     }
-    /* 16x10 image, not an emoji: the glyph renders at a different size on every
-       platform and idl.pro ships a real flag. */
-    .team-menu-flag {
-      flex: 0 0 auto;
+    .team-menu-team-place {
+      margin-top: 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--idl-silver);
+      font: 400 14px/1 CarbonPlus, monospace;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .team-menu-team-place img {
       width: 16px;
       height: 10px;
       object-fit: cover;
     }
-    .team-menu-card-copy small {
-      margin-top: 17px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      /* Sentence case at 16px, not the uppercase mono the rest of the nav uses. */
-      color: var(--idl-silver);
-      font: 400 16px/1.2 NeueHaas, Arial, sans-serif;
-      text-transform: none;
+    /* Hovering a card summons a round "Shop" button that tracks the cursor
+       across the photo (position set from JS via left/top; the transform
+       just centres it on the pointer and runs the pop-in). */
+    .team-menu-team-media { cursor: none; }
+    .team-menu-team-cursor {
+      position: absolute;
+      z-index: 3;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+      transition: opacity 160ms ease, transform 160ms ease;
+      will-change: left, top, transform;
+    }
+    .team-menu-team:hover .team-menu-team-cursor {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
     .bag-button {
       position: relative;
@@ -2815,41 +2847,6 @@
       pointer-events: none;
     }
 
-    .bag-drawer {
-      position: fixed;
-      z-index: 80;
-      top: 0;
-      right: 0;
-      width: min(440px, 100%);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      visibility: hidden;
-      transform: translateX(100%);
-      background: var(--idl-bg-deep);
-      border-left: 1px solid var(--idl-line);
-      transition: transform 180ms ease, visibility 180ms;
-    }
-    .bag-drawer.open { visibility: visible; transform: translateX(0); }
-    .drawer-scrim { position: fixed; z-index: 70; inset: 0; visibility: hidden; opacity: 0; background: rgba(6, 14, 18, 0.72); transition: opacity 180ms ease; }
-    .drawer-scrim.open { visibility: visible; opacity: 1; }
-    .drawer-header { min-height: 82px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--idl-line); }
-    .drawer-header h2 { margin: 0; font-size: 24px; line-height: 24px; text-transform: uppercase; }
-    .icon-button { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--idl-line); background: transparent; color: var(--idl-white); cursor: pointer; }
-    .icon-button:hover { color: var(--idl-go-gold); border-color: var(--idl-go-gold); }
-    .icon-button svg { width: 20px; height: 20px; }
-    .drawer-items { flex: 1; overflow-y: auto; }
-    .drawer-empty { padding: 28px 22px; color: var(--idl-muted); }
-    .drawer-item { padding: 18px 22px; display: grid; grid-template-columns: 70px 1fr auto; gap: 16px; align-items: center; border-bottom: 1px solid var(--idl-line); }
-    .drawer-item img { width: 70px; height: 86px; object-fit: contain; background: var(--idl-panel-alt); }
-    .drawer-item h3 { margin: 0 0 6px; font-size: 16px; line-height: 18px; text-transform: uppercase; }
-    .drawer-item p { margin: 0; color: var(--idl-muted); font: 400 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
-    .remove-item { border: 0; background: transparent; color: var(--idl-muted); cursor: pointer; }
-    .remove-item:hover { color: var(--idl-go-gold); }
-    .remove-item svg { width: 18px; height: 18px; }
-    .drawer-footer { padding: 22px; border-top: 1px solid var(--idl-line); }
-    .drawer-total { margin-bottom: 18px; display: flex; justify-content: space-between; font: 700 13px/14px CarbonPlus, monospace; text-transform: uppercase; }
-    .drawer-footer .button { width: 100%; justify-content: space-between; }
 
     .film-dialog {
       width: min(920px, calc(100% - 32px));
@@ -3506,7 +3503,44 @@
       .header-side.left > :not(.mobile-toggle),
       .header-side.right > .nav-link,
       .header-side.right > .currency-control { display: none; }
+      /* The desktop mega panels stay hidden on mobile; their cards are cloned
+         into these hamburger accordions instead (see the clone script). */
       .team-menu { display: none; }
+      .mobile-acc-trigger {
+        width: 100%;
+        min-height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0;
+        border: 0;
+        border-bottom: 1px solid var(--idl-line);
+        background: none;
+        color: var(--idl-white);
+        font: 400 20px/22px CarbonPlus, monospace;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .mobile-acc-trigger svg { width: 18px; height: 18px; transition: transform 160ms ease; }
+      .mobile-acc-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+      .mobile-acc-panel { display: none; }
+      .mobile-acc-panel.is-open { display: block; padding: 16px 0 22px; }
+      .mobile-acc-panel .team-menu-teams,
+      .mobile-acc-panel .team-menu-teams.team-menu-capsules {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      /* The cards are <a>, so the generic .mobile-menu a rule (row flex, centred,
+         62px min-height, hairline) would flatten the media to 0. Restore the
+         card's own column layout. */
+      .mobile-acc-panel .team-menu-team {
+        min-height: 0;
+        align-items: stretch;
+        justify-content: flex-start;
+        border-bottom: 0;
+      }
+      .mobile-acc-panel .team-menu-team-cursor { display: none; }
+      .mobile-acc-panel .team-menu-team-media { cursor: pointer; }
       .mobile-toggle { position: relative; display: inline-flex; align-items: center; gap: 8px; }
       /* align-items centres the boxes, but the label only inks to its cap
          height — the descender room under the baseline stays empty, so the
@@ -4142,7 +4176,7 @@
     <header class="site-header">
       <div class="header-inner content">
         <a class="brand-mark" href="#top" aria-label="IDL Merch home">
-          <img src="fieldbook-assets/idl-live-logo.svg" alt="IDL">
+          <img src="fieldbook-assets/idl-live-logo.svg?v=3" alt="IDL">
         </a>
 
         <div class="header-side left">
@@ -4154,9 +4188,11 @@
               Shop by team <i data-lucide="chevron-down" aria-hidden="true"></i>
             </button>
           </div>
-          <a class="nav-link has-chevron" href="#team-kits">
-            Collections <i data-lucide="chevron-down" aria-hidden="true"></i>
-          </a>
+          <div class="team-nav collections-nav">
+            <button class="nav-button team-trigger collections-trigger" type="button" aria-expanded="false" aria-controls="collections-mega-menu">
+              Series <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+          </div>
           <a class="nav-link" href="idl-lookbooks-index.html">
             Lookbooks
           </a>
@@ -4192,45 +4228,80 @@
       </div>
     </header>
 
+    <div class="team-menu-overlay" aria-hidden="true"></div>
+
     <div class="team-menu" id="team-mega-menu" aria-label="Shop by team" aria-hidden="true">
-      <div class="team-menu-grid">
-        <a class="team-menu-card" href="#team-kits" data-menu-team="brotherhood" style="--team-accent:#e32833;--team-glow:rgba(227,40,51,0.28)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/brotherhood.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Brotherhood</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/canada.webp" alt="Canada" width="512" height="303">Vancouver, CAN</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-brotherhood.png" alt="">
-        </a>
-        <a class="team-menu-card" href="#team-kits" data-menu-team="grv" style="--team-accent:#54745f;--team-glow:rgba(50,112,74,0.3)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/grv.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>GRV</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/usa.webp" alt="United States" width="512" height="303">Los Angeles, USA</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-grv.png" alt="">
-        </a>
-        <a class="team-menu-card" href="#team-kits" data-menu-team="1million" style="--team-accent:#aeb8c2;--team-glow:rgba(80,120,150,0.28)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/1million.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>1MILLION</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/korea.webp" alt="South Korea" width="512" height="303">Seoul, KOR</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-1million.png" alt="">
-        </a>
-        <a class="team-menu-card" href="#team-kits" data-menu-team="royal-family" style="--team-accent:#d2a51f;--team-glow:rgba(210,165,31,0.3)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/royal-family.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Royal Family</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/new-zealand.webp" alt="New Zealand" width="512" height="303">Auckland, NZL</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-royal-family.png" alt="">
-        </a>
-        <a class="team-menu-card" href="#team-kits" data-menu-team="jam-republic" style="--team-accent:#ff7a19;--team-glow:rgba(255,122,25,0.3)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/jam-republic.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Jam Republic</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/sea.webp" alt="Singapore" width="512" height="303">South East Asia, SEA</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-jam-republic.png" alt="">
-        </a>
-        <a class="team-menu-card" href="#team-kits" data-menu-team="quick-style" style="--team-accent:#4a8fc4;--team-glow:rgba(48,130,189,0.32)">
-          <img class="team-menu-crest" src="standout-assets/team-logos/quick-style.webp" alt="" width="512" height="512">
-          <span class="team-menu-card-copy"><strong>Quick Style</strong><small><img class="team-menu-flag" src="standout-assets/team-flags/norway.webp" alt="Norway" width="512" height="303">Oslo, NOR</small></span>
-          <img class="team-menu-card-image" src="fieldbook-assets/hero-lineup-quick-style.png" alt="">
-        </a>
+      <div class="team-menu-teams">
+        <a class="team-menu-team" href="#team-kits" data-menu-team="brotherhood">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-brotherhood-short-sleeve-red-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Brotherhood</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/canada.webp" alt="" width="512" height="303">Vancouver, CAN</span>        </a>
+        <a class="team-menu-team" href="#team-kits" data-menu-team="grv">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-grv-short-sleeve-green-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">GRV</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/usa.webp" alt="" width="512" height="303">Los Angeles, USA</span>        </a>
+        <a class="team-menu-team" href="#team-kits" data-menu-team="1million">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-1million-short-sleeve-grey-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">1MILLION</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/korea.webp" alt="" width="512" height="303">Seoul, KOR</span>        </a>
+        <a class="team-menu-team" href="#team-kits" data-menu-team="royal-family">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-royal-family-short-sleeve-black-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Royal Family</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/new-zealand.webp" alt="" width="512" height="303">Auckland, NZL</span>        </a>
+        <a class="team-menu-team" href="#team-kits" data-menu-team="jam-republic">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-jam-republic-short-sleeve-orange-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Jam Republic</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/sea.webp" alt="" width="512" height="303">South East Asia, SEA</span>        </a>
+        <a class="team-menu-team" href="#team-kits" data-menu-team="quick-style">
+          <span class="team-menu-team-media">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-quick-style-short-sleeve-blue-jersey-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Quick Style</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/norway.webp" alt="" width="512" height="303">Oslo, NOR</span>        </a>
+      </div>
+    </div>
+
+    <div class="team-menu" id="collections-mega-menu" aria-label="Collections" aria-hidden="true">
+      <div class="team-menu-teams team-menu-capsules">
+        <a class="team-menu-team" href="#look-title" data-menu-capsule="vancouver">
+          <span class="team-menu-team-media" data-cycle="idl-vancouver-utility-vest-lifestyle.jpg|idl-vancouver-long-sleeve-jersey-lifestyle.jpg|idl-vancouver-convertible-pants-lifestyle.jpg|idl-vancouver-series-tee-lifestyle.jpg">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-vancouver-utility-vest-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Vancouver Series</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/canada.webp" alt="" width="512" height="303">Vancouver, CAN</span>        </a>
+        <a class="team-menu-team" href="#look-title" data-menu-capsule="nyc">
+          <span class="team-menu-team-media" data-cycle="idl-nyc-metro-shirt-lifestyle.jpg|idl-nyc-series-tee-lifestyle.jpg|idl-nyc-distressed-practice-jersey-lifestyle.jpg|idl-nyc-distressed-beanie-lifestyle.jpg">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-nyc-metro-shirt-lifestyle.jpg" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">New York Series</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/usa.webp" alt="" width="512" height="303">New York, USA</span>        </a>
       </div>
     </div>
 
     <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation">
       <div class="mobile-menu-inner">
-        <a href="#team-kits">Shop by team <i data-lucide="arrow-right" aria-hidden="true"></i></a>
-        <a href="#team-kits">Team kits <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        <button class="mobile-acc-trigger" type="button" data-mobile-acc="team" aria-expanded="false">Shop by team <i data-lucide="chevron-down" aria-hidden="true"></i></button>
+        <div class="mobile-acc-panel" data-mobile-acc-panel="team"></div>
+        <button class="mobile-acc-trigger" type="button" data-mobile-acc="collections" aria-expanded="false">Series <i data-lucide="chevron-down" aria-hidden="true"></i></button>
+        <div class="mobile-acc-panel" data-mobile-acc-panel="collections"></div>
         <a href="idl-lookbooks-index.html">Lookbooks <i data-lucide="arrow-right" aria-hidden="true"></i></a>
         <a href="#campaign">Season 01 film <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
@@ -4245,7 +4316,7 @@
             </video>
             <div class="hero-split-scrim" aria-hidden="true"></div>
             <div class="hero-split-content">
-              <h1 class="hero-split-title">The League Wears IDL</h1>
+              <h1 class="hero-split-title">Official Team Kits</h1>
               <p class="hero-split-subtitle">Built for every crew</p>
               <a class="hero-split-cta button primary" href="#team-kits"><span class="button-label">Shop by team</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>
             </div>
@@ -4271,7 +4342,7 @@
         <div class="kit-showcase-sticky">
           <div class="kit-collection-intro">
             <div class="kit-collection-headline">
-              <h2>2026 IDL Team Kit</h2>
+              <h2>Shop By Team</h2>
             </div>
             <p class="kit-collection-mobile-copy">2026 IDL team kit. Official jerseys &amp; hats for every <span class="kit-inline-media" aria-hidden="true"><img src="Asset Photo/ACTION/ACT_GRV2.webp" alt=""></span> supporter.</p>
           </div>
@@ -4493,8 +4564,8 @@
         </div>
         <div class="look-intro-row" data-pinned-row>
             <div class="team-filter-tabs capsule-filter-tabs" role="tablist" aria-label="Filter capsule by city">
-              <button class="team-filter-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-capsule-filter="vancouver"><img class="team-filter-logo" src="standout-assets/capsule-flags/canada.webp" alt="" aria-hidden="true">Vancouver<span class="team-filter-count">4</span></button>
-              <button class="team-filter-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-capsule-filter="nyc"><img class="team-filter-logo" src="standout-assets/capsule-flags/usa.webp" alt="" aria-hidden="true">NYC<span class="team-filter-count">5</span></button>
+              <button class="team-filter-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-capsule-filter="vancouver"><img class="team-filter-logo" src="standout-assets/capsule-flags/canada.webp" alt="" aria-hidden="true">Vancouver Series<span class="team-filter-count">4</span></button>
+              <button class="team-filter-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-capsule-filter="nyc"><img class="team-filter-logo" src="standout-assets/capsule-flags/usa.webp" alt="" aria-hidden="true">New York Series<span class="team-filter-count">5</span></button>
             </div>
             <div class="kit-collection-meta">
               <div class="kit-sort-control" data-sort-control>
@@ -4816,12 +4887,7 @@
     </footer>
   </div>
 
-  <div class="drawer-scrim" data-close-drawer></div>
-  <aside class="bag-drawer" id="bag-drawer" aria-hidden="true" aria-labelledby="bag-title">
-    <header class="drawer-header"><h2 id="bag-title">Your cart</h2><button class="icon-button" type="button" data-close-drawer aria-label="Close cart"><i data-lucide="x" aria-hidden="true"></i></button></header>
-    <div class="drawer-items"><p class="drawer-empty">Your cart is empty.</p></div>
-    <footer class="drawer-footer"><div class="drawer-total"><span>Total</span><span data-total>Rp 0</span></div><button class="button primary" type="button"><span class="button-label">Checkout</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button></footer>
-  </aside>
+  <!-- The cart drawer, scrim and toast are injected by cart-v2.js. -->
 
   <dialog class="film-dialog">
     <div class="dialog-media"><img src="fieldbook-assets/feature-motion.jpeg" alt="Season 01 film still"><button class="icon-button dialog-close" type="button" aria-label="Close film"><i data-lucide="x" aria-hidden="true"></i></button></div>
@@ -4859,8 +4925,6 @@
   </a>
   <button class="discount-close" type="button" aria-label="Close discount offer"><i data-lucide="x" aria-hidden="true"></i></button>
 
-  <div class="toast" role="status" aria-live="polite"></div>
-
   <script src="product-team-filter.js"></script>
   <script src="product-catalog-sort.js"></script>
   <script src="product-image-zoom.js"></script>
@@ -4871,6 +4935,13 @@
   <script src="header-tone.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>
+  <!-- Shared cart drawer — same drawer/upsell/state as the PDP. No PDP
+       context here (not a product page), so the upsell just leads with the
+       wider catalogue. product-catalog.js must load first: the inline
+       script below reads window.IDL_CATALOG synchronously to map this
+       page's add-button product names to catalogue keys. -->
+  <script src="product-catalog.js"></script>
+  <script src="cart-v2.js"></script>
   <script>
     const body = document.body;
 
@@ -4886,10 +4957,10 @@
     const headerSearchInput = headerSearch.querySelector('input');
     const headerSearchClose = document.querySelector('.header-search-close');
     const bagButton = document.querySelector('.bag-button');
+    // cart-v2.js injects the drawer before this script runs, so this still
+    // resolves to the real (shared) drawer — kept only for the body-lock
+    // check below; the drawer's own open/close is cart-v2.js's job now.
     const bagDrawer = document.querySelector('.bag-drawer');
-    const drawerScrim = document.querySelector('.drawer-scrim');
-    const drawerItems = document.querySelector('.drawer-items');
-    const toast = document.querySelector('.toast');
     const filmDialog = document.querySelector('.film-dialog');
     const promoPopup = document.querySelector('.promo-popup');
     const discountTeaser = document.querySelector('.discount-teaser');
@@ -4907,9 +4978,17 @@
       price: Number(card.querySelector('[data-price]')?.dataset.price) || 0
     }));
     const productImageVisuals = Array.from(document.querySelectorAll('.official-product-card .kit-showcase-visual'));
-    const cart = [];
-    let toastTimer;
     const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // name -> product-catalog.js key, so this page's .add-button markup (which
+    // only carries a human name/price/image) can still add a real catalogue
+    // item — with size, cut and the upsell rail all working the same as they
+    // do from the PDP's own add-to-cart.
+    const catalogKeyByName = {};
+    if (window.IDL_CATALOG) {
+      Object.keys(window.IDL_CATALOG.products).forEach(key => {
+        catalogKeyByName[window.IDL_CATALOG.products[key].name] = key;
+      });
+    }
 
     function initIdlPreloader() {
       const preloader = document.querySelector('.idl-preloader');
@@ -4919,7 +4998,7 @@
 
       body.classList.add('preloader-active');
 
-      const markSource = 'fieldbook-assets/idl-live-logo.svg';
+      const markSource = 'fieldbook-assets/idl-live-logo.svg?v=3';
       const markRatio = 87 / 26;
       // The site's own white token, so the loader backdrop and the page agree.
       const paper = 'var(--idl-white)';
@@ -5475,10 +5554,9 @@
 
       if (headerToneApi) {
         const rects = lightSections.map(section => section.getBoundingClientRect());
-        siteHeader.classList.toggle(
-          'is-light',
-          headerToneApi.anyOverlapsBand(rects, siteHeader.offsetHeight)
-        );
+        const headerLight = headerToneApi.anyOverlapsBand(rects, siteHeader.offsetHeight);
+        siteHeader.classList.toggle('is-light', headerLight);
+        document.body.classList.toggle('header-is-light', headerLight);
 
         pinnedRows.forEach(row => {
           row.classList.toggle(
@@ -5551,6 +5629,12 @@
     teamFilterTabs.forEach(tab => tab.addEventListener('click', () => {
       selectProductTeam(tab.dataset.teamFilter);
     }));
+
+    // Deep link from the lookbooks "Shop by team" mega menu:
+    // idl-merch-redesign-v2.html?team=<slug>#team-kits. Applied at the very end
+    // of init (see the load sequence) so it wins over the default 'all' filter.
+    const deepTeam = new URLSearchParams(window.location.search).get('team');
+    const validDeepTeam = deepTeam && teamFilterTabs.some(tab => tab.dataset.teamFilter === deepTeam);
     productSortSelect?.addEventListener('change', event => {
       sortProductCatalog(event.currentTarget.value);
     });
@@ -5679,6 +5763,10 @@
     function setBodyLock() {
       body.classList.toggle('locked', mobileMenu.classList.contains('open') || bagDrawer.classList.contains('open') || filmDialog.open || promoPopup.open);
     }
+    // cart-v2.js calls this (if present) instead of naively toggling 'locked'
+    // itself, so opening/closing the cart doesn't stomp on another overlay
+    // (mobile menu, film dialog, promo popup) that also wants scroll locked.
+    window.IDL_SET_BODY_LOCK = setBodyLock;
 
     function closeMobileMenu() {
       mobileMenu.classList.remove('open');
@@ -5701,55 +5789,50 @@
 
     mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMobileMenu));
 
-    let hoverTimer = null;
-
-    function setTeamMenu(open) {
-      // Any explicit change wins over a hover still waiting out its delay —
-      // otherwise a pending open lands after Esc or an outside click.
-      window.clearTimeout(hoverTimer);
-      teamNav.classList.toggle('open', open);
-      body.classList.toggle('team-menu-open', open);
-      teamTrigger.setAttribute('aria-expanded', String(open));
-      teamMenu.setAttribute('aria-hidden', String(!open));
+    // Two mega menus (Shop by team + Collections) share one system: only one
+    // is open at a time, both drive the shared body.team-menu-open flag (for
+    // the overlay + header seam), and each panel shows via its own .is-open.
+    const collectionsNav = document.querySelector('.collections-nav');
+    const collectionsTrigger = document.querySelector('.collections-trigger');
+    const collectionsMenu = document.querySelector('#collections-mega-menu');
+    const megaMenus = [
+      { nav: teamNav, trigger: teamTrigger, panel: teamMenu },
+      { nav: collectionsNav, trigger: collectionsTrigger, panel: collectionsMenu }
+    ].filter(m => m.trigger && m.panel);
+    let openMega = null;
+    function setMega(target, action) {
+      const shouldOpen = action === 'toggle' ? openMega !== target : action === 'open';
+      megaMenus.forEach(m => {
+        const on = shouldOpen && m === target;
+        m.panel.classList.toggle('is-open', on);
+        m.panel.setAttribute('aria-hidden', String(!on));
+        if (m.nav) m.nav.classList.toggle('open', on);
+        m.trigger.setAttribute('aria-expanded', String(on));
+      });
+      openMega = shouldOpen ? target : null;
+      body.classList.toggle('team-menu-open', !!openMega);
     }
-
-    teamTrigger.addEventListener('click', () => {
-      const open = window.IDLTeamMegaMenu.nextMenuState(teamNav.classList.contains('open'), 'toggle');
-      setTeamMenu(open);
+    megaMenus.forEach(m => {
+      m.trigger.addEventListener('click', () => setMega(m, 'toggle'));
+      m.panel.addEventListener('mouseleave', () => setMega(m, 'close'));
+    });
+    document.addEventListener('click', (event) => {
+      if (!openMega) return;
+      if ((openMega.nav && openMega.nav.contains(event.target)) || openMega.panel.contains(event.target)) return;
+      setMega(openMega, 'close');
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (openMega) setMega(openMega, 'close');
+      if (siteHeader.classList.contains('search-open')) closeHeaderSearch();
     });
 
-    // Hover to open.
-    // ------------------------------------------------------------------
-    // The trigger and the panel are siblings, not nested, so neither one can
-    // own the hover on its own: leaving the trigger for the panel would read as
-    // leaving the menu. Both feed one intent instead, and the close is delayed
-    // long enough to cross the gap between them.
-    //
-    // Guarded on a fine pointer: on touch, hover fires on first tap and would
-    // open the menu on the same tap that should follow a link. Click stays wired
-    // above, so touch and keyboard keep working.
-    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const OPEN_DELAY = 90;    // long enough to ignore a cursor sweeping past
-    const CLOSE_DELAY = 220;  // long enough to travel from trigger to panel
-
-    function scheduleTeamMenu(open) {
-      if (!finePointer.matches) return;
-      window.clearTimeout(hoverTimer);
-      hoverTimer = window.setTimeout(
-        () => setTeamMenu(open),
-        open ? OPEN_DELAY : CLOSE_DELAY
-      );
-    }
-
-    [teamNav, teamMenu].forEach(region => {
-      region.addEventListener('pointerenter', () => scheduleTeamMenu(true));
-      region.addEventListener('pointerleave', () => scheduleTeamMenu(false));
+    document.querySelectorAll('#team-mega-menu [data-menu-team]').forEach(function (a) {
+      a.addEventListener('click', function () { selectProductTeam(a.dataset.menuTeam); if (openMega) setMega(openMega, 'close'); });
     });
-
-    teamMenu.querySelectorAll('[data-menu-team]').forEach(link => link.addEventListener('click', () => {
-      selectProductTeam(link.dataset.menuTeam);
-      setTeamMenu(false);
-    }));
+    document.querySelectorAll('#collections-mega-menu [data-menu-capsule]').forEach(function (a) {
+      a.addEventListener('click', function () { selectCapsuleCity(a.dataset.menuCapsule); if (openMega) setMega(openMega, 'close'); });
+    });
     // Footer shortcuts jump to the catalog with a team already selected. They
     // use their own hook so they never inherit the mega menu's open/close state.
     document.querySelectorAll('[data-team-link]').forEach(link => link.addEventListener('click', () => {
@@ -5779,65 +5862,26 @@
     });
 
     document.addEventListener('click', event => {
-      if (!teamNav.contains(event.target) && !teamMenu.contains(event.target)) setTeamMenu(false);
       if (!headerSearch.contains(event.target) && !searchTrigger.contains(event.target)) closeHeaderSearch();
     });
 
-    function openDrawer() {
-      bagDrawer.classList.add('open');
-      drawerScrim.classList.add('open');
-      bagDrawer.setAttribute('aria-hidden', 'false');
-      bagButton.setAttribute('aria-expanded', 'true');
-      setBodyLock();
-      bagDrawer.querySelector('[data-close-drawer]').focus();
-    }
-
-    function closeDrawer() {
-      bagDrawer.classList.remove('open');
-      drawerScrim.classList.remove('open');
-      bagDrawer.setAttribute('aria-hidden', 'true');
-      bagButton.setAttribute('aria-expanded', 'false');
-      setBodyLock();
-    }
-
+    // The drawer itself (open/close, render, state) is cart-v2.js's job now —
+    // this page only needs to feed it items. showToast stays as a thin
+    // wrapper so the search and quick-add call sites below don't all need
+    // rewiring individually.
     function showToast(message) {
-      window.clearTimeout(toastTimer);
-      toast.textContent = message;
-      toast.classList.add('show');
-      toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1800);
+      window.IDLCart.toast(message);
     }
 
-    function formatCatalogPrice(value) {
-      const currency = window.IDLCurrency?.normalizeCurrency(localStorage.getItem('idl-currency')) || 'IDR';
-      return window.IDLCurrency?.formatPrice(value, currency) || `Rp ${new Intl.NumberFormat('id-ID').format(value)}`;
-    }
-
-    function renderBag() {
-      const count = cart.length;
-      document.querySelectorAll('[data-count]').forEach(node => { node.textContent = count; });
-      document.querySelector('[data-total]').textContent = formatCatalogPrice(cart.reduce((total, item) => total + item.price, 0));
-
-      if (!count) {
-        drawerItems.innerHTML = '<p class="drawer-empty">Your cart is empty.</p>';
-        return;
-      }
-
-      drawerItems.innerHTML = cart.map((item, index) => `
-        <article class="drawer-item">
-          <img src="${item.image}" alt="">
-          <div><h3>${item.name}</h3><p>${formatCatalogPrice(item.price)} / 2026 Team Kit</p></div>
-          <button class="remove-item" type="button" data-remove="${index}" aria-label="Remove ${item.name}"><i data-lucide="trash-2" aria-hidden="true"></i></button>
-        </article>
-      `).join('');
-      refreshIcons();
-    }
-
-    bagButton.addEventListener('click', openDrawer);
-    document.querySelectorAll('[data-close-drawer]').forEach(button => button.addEventListener('click', closeDrawer));
     document.querySelectorAll('.add-button:not(:disabled):not([data-notify])').forEach(button => button.addEventListener('click', () => {
-      cart.push({ name: button.dataset.product, price: Number(button.dataset.price), image: button.dataset.image });
-      renderBag();
-      showToast(`${button.dataset.product} added to cart`);
+      const key = catalogKeyByName[button.dataset.product];
+      const product = key && window.IDL_CATALOG.products[key];
+      if (!product) return; // no catalogue entry for this card — nothing to add
+      const size = window.IDL_CATALOG ? product.sizes.filter(s => !product.out.includes(s))[0] || null : null;
+      window.IDLCart.add(
+        { key, name: product.name, price: product.price, image: `standout-assets/shop-products/${key}-studio.jpg`, size },
+        { toast: `${product.name} added to cart` }
+      );
     }));
     // Sold-out kit still takes a restock signup — it must never reach the cart.
     document.querySelectorAll('.add-button[data-notify]').forEach(button => button.addEventListener('click', () => {
@@ -5904,14 +5948,14 @@
         button.textContent = size;
 
         button.addEventListener('click', () => {
-          cart.push({
-            name: `${addButton.dataset.product} — ${size}`,
-            price: Number(addButton.dataset.price),
-            image: addButton.dataset.image,
-            size,
-          });
-          renderBag();
-          showToast(`${addButton.dataset.product} (${size}) added to cart`);
+          const key = catalogKeyByName[addButton.dataset.product];
+          const product = key && window.IDL_CATALOG.products[key];
+          if (product) {
+            window.IDLCart.add(
+              { key, name: product.name, price: product.price, image: `standout-assets/shop-products/${key}-studio.jpg`, size },
+              { toast: `${product.name} (${size}) added to cart` }
+            );
+          }
           closeQuickAdds();
           trigger.focus();
         });
@@ -5966,14 +6010,7 @@
       }
       badge.textContent = `${stock} left`;
     });
-    drawerItems.addEventListener('click', event => {
-      const button = event.target.closest('[data-remove]');
-      if (!button) return;
-      const removed = cart.splice(Number(button.dataset.remove), 1)[0];
-      renderBag();
-      showToast(`${removed.name} removed`);
-    });
-    document.addEventListener('idl:currencychange', renderBag);
+    // (Cart item removal, quantity, and currency re-render are cart-v2.js's.)
 
     document.querySelectorAll('.open-film').forEach(button => button.addEventListener('click', () => {
       filmDialog.showModal();
@@ -6354,6 +6391,12 @@
     const capsuleCards = Array.from(document.querySelectorAll('[data-capsule]'));
     const capsuleEmpty = document.querySelector('.capsule-empty');
 
+    // Deep link from the lookbooks Collections mega menu:
+    // idl-merch-redesign-v2.html?capsule=<slug>#look-title lands on the capsule
+    // section with that city already selected.
+    const deepCapsule = new URLSearchParams(window.location.search).get('capsule');
+    const validDeepCapsule = deepCapsule && capsuleTabs.some(tab => tab.dataset.capsuleFilter === deepCapsule);
+
     // The stage height is a plain viewport calc in CSS now — the screen minus the
     // header and the pinned tab row. It used to be measured from the first two
     // card rows and written here as an inline style, which no stylesheet rule
@@ -6402,7 +6445,7 @@
       selectCapsuleCity(link.dataset.capsuleLink);
     }));
 
-    if (capsuleTabs.length) selectCapsuleCity('vancouver');
+    if (capsuleTabs.length) selectCapsuleCity(validDeepCapsule ? deepCapsule : 'vancouver');
 
     const discountGrid = document.querySelector('.discount-teaser-grid');
     const discountGridApi = window.IDLDiscountTeaserGrid;
@@ -6434,9 +6477,9 @@
 
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') {
-        const teamMenuWasOpen = teamNav.classList.contains('open');
-        setTeamMenu(false);
-        if (teamMenuWasOpen) teamTrigger.focus();
+        const megaWasOpen = openMega;
+        if (openMega) setMega(openMega, 'close');
+        if (megaWasOpen) megaWasOpen.trigger.focus();
         closeMobileMenu();
         closeDrawer();
         closeHeaderSearch();
@@ -6573,9 +6616,170 @@
     }
 
     window.addEventListener('load', refreshIcons);
-    selectProductTeam('all');
+    selectProductTeam(validDeepTeam ? deepTeam : 'all');
+
+    // Land on the deep-linked section (team kits or the capsule section). Two
+    // things get in the way: the preloader holds body{overflow:hidden} until it
+    // finishes, and the page keeps growing as images below the hero load — so an
+    // early scroll lands short. Wait for load + the preloader to drop, then
+    // re-assert the scroll a few times as the layout settles.
+    const deepSectionId = validDeepTeam ? 'team-kits' : (validDeepCapsule ? 'look-title' : null);
+    if (deepSectionId) {
+      const landOnSection = () => {
+        const section = document.getElementById(deepSectionId);
+        if (!section) return;
+        // Stop once the section is at the top so we never fight a user who has
+        // already scrolled away.
+        let tries = 0;
+        const tick = () => {
+          if (Math.abs(section.getBoundingClientRect().top) < 80) return;
+          section.scrollIntoView({ behavior: 'auto', block: 'start' });
+          if (++tries < 10) setTimeout(tick, 150);
+        };
+        tick();
+      };
+      const whenReady = () => {
+        if (!document.body.classList.contains('preloader-active')) { landOnSection(); return; }
+        const preObserver = new MutationObserver(() => {
+          if (!document.body.classList.contains('preloader-active')) {
+            preObserver.disconnect();
+            landOnSection();
+          }
+        });
+        preObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      };
+      if (document.readyState === 'complete') whenReady();
+      else window.addEventListener('load', whenReady, { once: true });
+    }
     syncHeaderState();
-    renderBag();
+    // (cart-v2.js renders its own initial state.)
+  </script>
+
+  <script>
+    /* Shop-by-team cards: (1) a "Shop" button trails the cursor across the
+       photo, and (2) hovering cycles the photo through that team's other
+       products (short sleeve -> long sleeve -> hat), returning to the default
+       shot on leave. */
+    (function () {
+      var BASE = 'standout-assets/shop-products/';
+      var CYCLE = {
+        'brotherhood': [
+          'idl-brotherhood-short-sleeve-red-jersey-lifestyle.jpg',
+          'idl-brotherhood-long-sleeve-red-jersey-lifestyle.jpg',
+          'team-brotherhood-hat-lifestyle.jpg'
+        ],
+        'grv': [
+          'idl-grv-short-sleeve-green-jersey-lifestyle.jpg',
+          'idl-grv-long-sleeve-green-jersey-lifestyle.jpg',
+          'team-grv-hat-lifestyle.jpg'
+        ],
+        '1million': [
+          'idl-1million-short-sleeve-grey-jersey-lifestyle.jpg',
+          'idl-1million-long-sleeve-grey-jersey-lifestyle.jpg',
+          'team-1million-hat-lifestyle.jpg'
+        ],
+        'royal-family': [
+          'idl-royal-family-short-sleeve-black-jersey-lifestyle.jpg',
+          'idl-royal-family-long-sleeve-black-jersey-lifestyle.jpg',
+          'team-royal-family-hat-lifestyle.jpg'
+        ],
+        'jam-republic': [
+          'idl-jam-republic-short-sleeve-orange-jersey-lifestyle.jpg',
+          'idl-jam-republic-short-sleeve-orange-jersey-studio.jpg'
+        ],
+        'quick-style': [
+          'idl-quick-style-short-sleeve-blue-jersey-lifestyle.jpg',
+          'idl-quick-style-long-sleeve-blue-jersey-lifestyle.jpg',
+          'team-quick-style-hat-lifestyle.jpg'
+        ]
+      };
+      // Longer keys first so 'royal-family' matches before any shorter token.
+      var KEYS = Object.keys(CYCLE).sort(function (a, b) { return b.length - a.length; });
+
+      document.querySelectorAll('.team-menu-team').forEach(function (card) {
+        var media = card.querySelector('.team-menu-team-media');
+        var btn = card.querySelector('.team-menu-team-cursor');
+        var img = media && media.querySelector('img');
+        if (!media) return;
+
+        // Cursor-following Shop button.
+        if (btn) {
+          media.addEventListener('pointermove', function (e) {
+            var r = media.getBoundingClientRect();
+            btn.style.left = (e.clientX - r.left) + 'px';
+            btn.style.top = (e.clientY - r.top) + 'px';
+          });
+        }
+
+        // Product cycling on hover. An explicit data-cycle (used by the
+        // Collections capsules) wins; otherwise the team is read off the src.
+        if (!img) return;
+        var list = null;
+        var explicit = media.getAttribute('data-cycle');
+        if (explicit) {
+          list = explicit.split('|');
+        } else {
+          var src = img.getAttribute('src') || '';
+          var key = null;
+          for (var i = 0; i < KEYS.length; i++) {
+            if (src.indexOf(KEYS[i]) !== -1) { key = KEYS[i]; break; }
+          }
+          list = key ? CYCLE[key] : null;
+        }
+        if (!list || list.length < 2) return;
+
+        list.forEach(function (u) { var p = new Image(); p.src = BASE + u; });
+
+        var timer = null, idx = 0;
+        card.addEventListener('pointerenter', function () {
+          if (timer) return;
+          timer = setInterval(function () {
+            idx = (idx + 1) % list.length;
+            img.src = BASE + list[idx];
+          }, 650);
+        });
+        card.addEventListener('pointerleave', function () {
+          if (timer) { clearInterval(timer); timer = null; }
+          idx = 0;
+          img.src = BASE + list[0];
+        });
+      });
+    })();
+  </script>
+
+  <script>
+    /* Mobile: the desktop mega panels are hidden, so clone their card grids into
+       the hamburger's "Shop by team" / "Collections" accordions. On this
+       storefront the cloned cards deep-link (reload with the filter applied) so
+       a tap on mobile still lands on that team/capsule — the desktop in-page
+       click handlers only cover the original, still-hidden panels. */
+    (function () {
+      function fill(key, gridSelector) {
+        var panel = document.querySelector('[data-mobile-acc-panel="' + key + '"]');
+        var grid = document.querySelector(gridSelector);
+        if (panel && grid && !panel.childElementCount) panel.appendChild(grid.cloneNode(true));
+      }
+      fill('team', '#team-mega-menu .team-menu-teams');
+      fill('collections', '#collections-mega-menu .team-menu-teams');
+
+      // Rewrite the cloned cards to deep links so mobile taps filter on load.
+      document.querySelectorAll('[data-mobile-acc-panel="team"] [data-menu-team]').forEach(function (a) {
+        a.setAttribute('href', 'idl-merch-redesign-v2.html?team=' + a.getAttribute('data-menu-team') + '#team-kits');
+      });
+      document.querySelectorAll('[data-mobile-acc-panel="collections"] [data-menu-capsule]').forEach(function (a) {
+        a.setAttribute('href', 'idl-merch-redesign-v2.html?capsule=' + a.getAttribute('data-menu-capsule') + '#look-title');
+      });
+
+      document.querySelectorAll('.mobile-acc-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-mobile-acc');
+          var panel = document.querySelector('[data-mobile-acc-panel="' + key + '"]');
+          var open = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!open));
+          if (panel) panel.classList.toggle('is-open', !open);
+        });
+      });
+    })();
   </script>
 </body>
 </html>

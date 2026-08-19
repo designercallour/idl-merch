@@ -1,0 +1,1148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#061015">
+  <title>IDL Merch - Live Website Redesign</title>
+  <link rel="stylesheet" href="standout-assets/fonts.css">
+  <script src="standout-assets/lucide.min.js" defer></script>
+  <style>
+    :root {
+      --idl-bg: #061015;
+      --idl-bg-deep: #060e12;
+      --idl-panel: #0d222d;
+      --idl-panel-alt: #0c202b;
+      --idl-panel-soft: #121d22;
+      --idl-go-gold: #c0e700;
+      --idl-white: #ffffff;
+      --idl-silver: #d5d7d9;
+      --idl-muted: #90999f;
+      --idl-button-ink: #0c0f13;
+      --idl-line: rgba(255, 255, 255, 0.12);
+      --idl-line-soft: rgba(255, 255, 255, 0.05);
+      --content: 1276px;
+      --gutter: 82px;
+      --header-height: 82px;
+      --announcement-height: 36px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--idl-bg-deep); }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--idl-bg);
+      color: var(--idl-white);
+      font-family: NeueHaas, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    body.locked { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    img { display: block; width: 100%; }
+    svg { display: block; }
+    :focus-visible { outline: 2px solid var(--idl-go-gold); outline-offset: 3px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+    .site-shell {
+      width: 100%;
+      min-height: 100vh;
+      overflow: hidden;
+      background: var(--idl-bg);
+    }
+    .content { width: min(calc(100% - (var(--gutter) * 2)), var(--content)); margin-inline: auto; }
+    .carbon { font-family: CarbonPlus, monospace; text-transform: uppercase; }
+
+    .announcement-bar {
+      height: var(--announcement-height);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      background: var(--idl-go-gold);
+      color: var(--idl-button-ink);
+    }
+    .announcement-track {
+      width: max-content;
+      display: flex;
+      align-items: center;
+      animation: announcement-marquee 28s linear infinite;
+      will-change: transform;
+    }
+    .announcement-bar:hover .announcement-track { animation-play-state: paused; }
+    .announcement-group { flex: none; display: flex; align-items: center; }
+    .announcement-group span {
+      padding-inline: 28px;
+      white-space: nowrap;
+      font-family: CarbonPlus, sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 14px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+    @keyframes announcement-marquee { to { transform: translateX(-50%); } }
+
+    .site-header {
+      position: relative;
+      z-index: 40;
+      height: var(--header-height);
+      border-bottom: 1px solid var(--idl-line);
+      background: rgba(6, 16, 21, 0.97);
+    }
+    .header-inner {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 96px 1fr;
+      align-items: center;
+      gap: 24px;
+    }
+    .header-side { display: flex; align-items: center; gap: 34px; }
+    .header-side.right { justify-content: flex-end; }
+    .nav-link,
+    .nav-button {
+      border: 0;
+      padding: 6px 0;
+      background: transparent;
+      color: var(--idl-white);
+      font-family: CarbonPlus, sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      font-style: normal;
+      line-height: 16px;
+      letter-spacing: 0;
+      font-synthesis: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 100ms ease;
+    }
+    .nav-link:hover,
+    .nav-button:hover { color: var(--idl-go-gold); }
+    .brand-mark { width: 150px; height: 44px; display: block; justify-self: center; }
+    .brand-mark img { width: 150px; height: 44px; object-fit: contain; }
+    .team-nav { position: relative; }
+    .team-trigger { display: inline-flex; align-items: center; gap: 8px; }
+    .team-trigger svg { width: 15px; height: 15px; transition: transform 100ms ease; }
+    .team-nav.open .team-trigger svg { transform: rotate(180deg); }
+    .team-menu {
+      position: absolute;
+      top: 52px;
+      left: 0;
+      width: 540px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      background: var(--idl-bg-deep);
+      border: 1px solid var(--idl-line);
+      transition: opacity 100ms ease, transform 100ms ease;
+    }
+    .team-nav:hover .team-menu,
+    .team-nav:focus-within .team-menu,
+    .team-nav.open .team-menu {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .team-menu a {
+      min-height: 58px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-right: 1px solid var(--idl-line);
+      border-bottom: 1px solid var(--idl-line);
+      font: 400 14px/16px CarbonPlus, monospace;
+      text-transform: uppercase;
+    }
+    .team-menu a:nth-child(2n) { border-right: 0; }
+    .team-menu a:nth-last-child(-n + 2) { border-bottom: 0; }
+    .team-menu a:hover { color: var(--idl-go-gold); background: var(--idl-panel); }
+    .team-menu svg { width: 16px; height: 16px; }
+    .bag-button {
+      height: 44px;
+      padding: 4px 24px 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      border: 1px solid #bde50b;
+      background: rgba(189, 229, 11, 0.16);
+      color: var(--idl-go-gold);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 22px;
+    }
+    .bag-button:hover { background: var(--idl-go-gold); color: var(--idl-button-ink); }
+    .bag-count {
+      min-width: auto;
+      height: auto;
+      padding: 0;
+      display: inline;
+      background: transparent;
+      color: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 18px;
+    }
+    .mobile-toggle { display: none; }
+
+    .mobile-menu {
+      position: fixed;
+      z-index: 35;
+      inset: var(--header-height) 0 0;
+      display: none;
+      background: var(--idl-bg-deep);
+      color: var(--idl-white);
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu-inner { padding: 20px 16px 40px; }
+    .mobile-menu a {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--idl-line);
+      font: 400 20px/22px CarbonPlus, monospace;
+      text-transform: uppercase;
+    }
+    .mobile-menu svg { width: 18px; height: 18px; }
+
+    .hero {
+      position: relative;
+      min-height: 800px;
+      overflow: hidden;
+      background: var(--idl-bg-deep);
+      isolation: isolate;
+    }
+    .hero-media,
+    .hero-scrim { position: absolute; inset: 0; }
+    .hero-media img { height: 100%; object-fit: cover; object-position: center center; transform: translateX(-3.5%); }
+    .hero-scrim { z-index: 1; background: rgba(6, 14, 18, 0.42); }
+    .hero-pattern {
+      position: absolute;
+      z-index: 2;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 3;
+      min-height: 800px;
+      padding-block: 76px 96px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: end;
+    }
+    .hero-copy { max-width: 610px; }
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--idl-muted);
+      font: 700 12px/14px CarbonPlus, monospace;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 28px; height: 2px; flex: 0 0 auto; background: var(--idl-go-gold); }
+    .hero-chip { display: inline-flex; align-items: center; gap: 4px; }
+    .hero-chip-label {
+      height: 26px;
+      padding: 4px 6px;
+      display: flex;
+      align-items: center;
+      background: var(--idl-white);
+      color: var(--idl-button-ink);
+      font-family: CarbonPlus, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 18px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .hero-chip-date {
+      height: 26px;
+      display: flex;
+      align-items: stretch;
+    }
+    .hero-chip-tail {
+      width: 16px;
+      height: 26px;
+      flex: 0 0 auto;
+      background: var(--idl-white);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 39 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 64 L 32 0 L 0 0 Z' fill='black'/%3E%3Cpath d='M 31.941 0 L 36 0 L 3.5 64 L 0 64 Z' fill='black'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 39 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 64 L 32 0 L 0 0 Z' fill='black'/%3E%3Cpath d='M 31.941 0 L 36 0 L 3.5 64 L 0 64 Z' fill='black'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    }
+    h1, h2, h3, p { letter-spacing: 0; }
+    .hero h1 {
+      margin: 18px 0 26px;
+      font-size: 64px;
+      font-weight: 900;
+      line-height: 64px;
+      text-transform: uppercase;
+    }
+    .hero h1 span { display: block; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .button {
+      height: 44px;
+      min-height: 44px;
+      padding: 0;
+      display: inline-flex;
+      align-items: stretch;
+      gap: 6px;
+      border: 0;
+      background: var(--idl-go-gold);
+      color: var(--idl-button-ink);
+      font: 700 16px/18px CarbonPlus, monospace;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 100ms ease, background 100ms ease, border-color 100ms ease;
+    }
+    .button-label { padding: 0 10px 0 16px; display: flex; align-items: center; justify-content: center; }
+    .button-icon {
+      width: 44px;
+      height: 44px;
+      padding: 4px;
+      display: grid;
+      place-items: center;
+    }
+    .button-icon svg { width: 36px; height: 36px; padding: 10px; background: var(--idl-panel-soft); color: var(--idl-go-gold); }
+    .button.primary,
+    .button.secondary { background: var(--idl-go-gold); color: var(--idl-button-ink); }
+    .button:hover { background: var(--idl-white); color: var(--idl-button-ink); }
+    .button:hover .button-icon svg { background: var(--idl-panel); }
+
+    .section { padding-block: 96px; background: var(--idl-bg); }
+    .section.alt { background: var(--idl-bg-deep); }
+    .section-header {
+      margin-bottom: 48px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 414px;
+      align-items: end;
+      gap: 48px;
+    }
+    .section-header h2 {
+      margin: 0;
+      font-size: 36px;
+      font-weight: 900;
+      line-height: 36px;
+      text-transform: uppercase;
+    }
+    .section-intro { margin: 0; color: #fbfbfb; font-size: 16px; font-weight: 400; line-height: 20px; letter-spacing: 0.5px; }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--idl-line);
+      border-left: 1px solid var(--idl-line);
+    }
+    .product-card {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--idl-panel-soft);
+      border-right: 1px solid var(--idl-line);
+      border-bottom: 1px solid var(--idl-line);
+    }
+    .product-media {
+      position: relative;
+      height: 460px;
+      overflow: hidden;
+      background: var(--idl-panel-soft);
+      border-bottom: 1px solid var(--idl-line);
+    }
+    .product-media img {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: opacity 220ms ease, transform 240ms ease;
+    }
+    .product-image-default { opacity: 1; }
+    .product-image-hover { opacity: 0; }
+    @media (hover: hover) {
+      .product-card:hover .product-image-default { opacity: 0; }
+      .product-card:hover .product-image-hover { opacity: 1; }
+      .product-card:hover .product-media img { transform: scale(1.018); }
+    }
+    .product-card:focus-within .product-image-default { opacity: 0; }
+    .product-card:focus-within .product-image-hover { opacity: 1; }
+    .product-details { min-height: 166px; padding: 20px; display: flex; flex-direction: column; }
+    .product-team { color: var(--idl-go-gold); font: 700 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
+    .product-details h3 { margin: 8px 0 0; font-size: 16px; font-weight: 900; line-height: 18px; text-transform: uppercase; }
+    .product-actions { margin-top: auto; padding-top: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .product-price { color: var(--idl-white); font: 700 16px/20px CarbonPlus, monospace; text-transform: uppercase; }
+    .add-button {
+      height: 44px;
+      min-height: 44px;
+      padding: 0;
+      display: inline-flex;
+      align-items: stretch;
+      gap: 6px;
+      border: 0;
+      background: var(--idl-go-gold);
+      color: var(--idl-button-ink);
+      font: 700 16px/18px CarbonPlus, monospace;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .add-button > span:first-child { padding: 0 10px 0 16px; display: grid; place-items: center; }
+    .add-button .icon-segment { width: 44px; height: 44px; padding: 4px; display: grid; place-items: center; }
+    .add-button svg { width: 36px; height: 36px; padding: 10px; background: var(--idl-panel-soft); color: var(--idl-go-gold); }
+    .add-button:hover { background: var(--idl-white); }
+    .add-button:hover svg { background: var(--idl-panel); }
+
+    .sport-band {
+      padding-block: 64px 76px;
+      background: var(--idl-bg-deep);
+      border-bottom: 1px solid var(--idl-line);
+    }
+    .sport-band-inner { min-width: 0; }
+    .sport-stage {
+      min-height: 360px;
+      display: grid;
+      grid-template-columns: 48% 52%;
+      overflow: hidden;
+      background: var(--idl-panel-soft);
+      border: 1px solid var(--idl-line);
+    }
+    .sport-visual {
+      position: relative;
+      z-index: 1;
+      width: calc(100% + 58px);
+      min-height: 360px;
+      overflow: hidden;
+      background: var(--idl-go-gold);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 58px) 100%, 0 100%);
+    }
+    .sport-logo {
+      position: absolute;
+      z-index: 3;
+      top: 28px;
+      left: 30px;
+      width: 112px;
+      height: 34px;
+      object-fit: contain;
+      filter: brightness(0);
+    }
+    .sport-pattern {
+      position: absolute;
+      z-index: 1;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: auto;
+      opacity: 0.9;
+      filter: brightness(0);
+    }
+    .sport-athlete {
+      position: absolute;
+      z-index: 2;
+      bottom: -34px;
+      left: 48%;
+      width: auto;
+      height: 390px;
+      object-fit: contain;
+      transform: translateX(-50%);
+    }
+    .sport-manifesto {
+      min-width: 0;
+      padding: 54px 60px 48px 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--idl-panel-soft);
+      color: var(--idl-white);
+    }
+    .sport-manifesto h2 {
+      margin: 0;
+      font-size: 36px;
+      font-weight: 900;
+      line-height: 36px;
+      text-transform: uppercase;
+    }
+    .sport-points { margin: 26px 0 0; padding: 0; display: grid; gap: 14px; list-style: none; }
+    .sport-points li { display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: center; gap: 12px; color: var(--idl-silver); font-size: 16px; line-height: 20px; }
+    .sport-points span {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      color: var(--idl-go-gold);
+      font: 400 13px/13px CarbonPlus, monospace;
+    }
+
+    .campaign { padding-block: 0; background: var(--idl-bg-deep); }
+    .campaign-inner {
+      min-height: 660px;
+      display: grid;
+      grid-template-columns: 414px minmax(0, 1fr);
+      border-inline: 1px solid var(--idl-line);
+    }
+    .campaign-copy {
+      padding: 68px 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--idl-panel);
+      border-right: 1px solid var(--idl-line);
+    }
+    .campaign-copy h2 { margin: 0; font-size: 36px; font-weight: 900; line-height: 36px; text-transform: uppercase; }
+    .campaign-copy p { margin: 22px 0 30px; color: var(--idl-silver); font-size: 16px; line-height: 24px; }
+    .campaign-copy .button { width: auto; align-self: flex-start; }
+    .campaign-media { position: relative; min-width: 0; overflow: hidden; }
+    .campaign-media img { height: 100%; object-fit: cover; object-position: center; }
+    .play-button {
+      position: absolute;
+      right: 30px;
+      bottom: 30px;
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--idl-white);
+      border-radius: 50%;
+      background: rgba(6, 14, 18, 0.8);
+      color: var(--idl-white);
+      cursor: pointer;
+    }
+    .play-button:hover { background: var(--idl-go-gold); color: var(--idl-button-ink); border-color: var(--idl-go-gold); }
+    .play-button svg { width: 22px; height: 22px; }
+
+    .newsletter {
+      position: relative;
+      height: 350px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      overflow: hidden;
+      background: var(--idl-bg-deep);
+      border-top: 1px solid var(--idl-line);
+      border-bottom: 1px solid var(--idl-line);
+    }
+    .newsletter-panel {
+      position: relative;
+      z-index: 2;
+      width: calc(100% + 76px);
+      padding: 0 20px 0 var(--gutter);
+      display: flex;
+      align-items: center;
+      background: var(--idl-go-gold);
+      color: var(--idl-button-ink);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 76px) 100%, 0 100%);
+    }
+    .newsletter-pitch { width: min(658px, 100%); }
+    .newsletter h2 { margin: 0; color: var(--idl-button-ink); font-size: 52px; font-weight: 900; line-height: 52px; white-space: nowrap; text-transform: uppercase; }
+    .newsletter-benefits { margin: 20px 0 0; padding: 0; display: flex; align-items: flex-start; gap: 12px; list-style: none; }
+    .newsletter-benefits li { display: flex; align-items: center; gap: 4px; font-size: 16px; font-weight: 500; line-height: 18px; white-space: nowrap; }
+    .newsletter-benefits svg { width: 20px; height: 20px; flex: 0 0 20px; }
+    .newsletter-media { position: relative; min-width: 0; display: flex; align-items: center; }
+    .newsletter-media > img { position: absolute; inset: 0; height: 100%; object-fit: cover; object-position: center 43%; }
+    .newsletter-media::after { content: ""; position: absolute; inset: 0; background: rgba(6, 14, 18, 0.58); }
+    .newsletter-form-wrap { position: relative; z-index: 1; width: 532px; margin: 0 auto; color: var(--idl-white); }
+    .signup { display: grid; grid-template-columns: minmax(0, 332px) 200px; column-gap: 0; row-gap: 18px; }
+    .signup > input[type="email"] { width: 100%; height: 44px; min-width: 0; padding: 0 14px; border: 0; outline: 0; background: var(--idl-white); color: var(--idl-button-ink); font-size: 16px; line-height: 24px; }
+    .signup > input[type="email"]::placeholder { color: var(--idl-muted); }
+    .signup button {
+      width: 100%;
+      height: 44px;
+      min-height: 44px;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      align-items: center;
+      gap: 6px;
+      border: 0;
+      background: var(--idl-go-gold);
+      color: var(--idl-button-ink);
+      font: 700 16px/18px CarbonPlus, monospace;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .signup-button-label { display: flex; align-items: center; justify-content: center; }
+    .signup button:hover { background: var(--idl-white); }
+    .signup button > svg { width: 36px; height: 36px; padding: 10px; background: var(--idl-panel-soft); color: var(--idl-go-gold); }
+    .signup button:hover svg { background: var(--idl-panel); }
+    .signup-consent { grid-column: 1 / -1; display: grid; grid-template-columns: 20px 1fr; gap: 12px; align-items: start; color: var(--idl-silver); font-size: 14px; font-weight: 400; line-height: 18px; letter-spacing: 0.5px; }
+    .signup-consent input { width: 20px; height: 20px; margin: 0; accent-color: var(--idl-go-gold); }
+    .form-note { min-height: 18px; padding-top: 8px; color: var(--idl-go-gold); font: 700 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
+    .form-note:empty { display: none; }
+
+    .footer { min-height: 237px; background: var(--idl-bg-deep); color: var(--idl-white); }
+    .footer-inner {
+      min-height: 237px;
+      padding-block: 60px;
+      display: grid;
+      grid-template-columns: minmax(110px, 1fr) auto;
+      grid-template-rows: 32px 1px 32px;
+      align-items: center;
+      align-content: space-between;
+      column-gap: 40px;
+    }
+    .footer-logo { width: 110px; height: 32px; display: block; }
+    .footer-logo img { width: 110px; height: 32px; object-fit: contain; object-position: left center; }
+    .footer-nav { display: flex; align-items: center; justify-content: flex-end; gap: 30px; }
+    .footer-nav a,
+    .footer-policy a {
+      font: 400 16px/18px CarbonPlus, monospace;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: color 100ms ease;
+    }
+    .footer-nav a:hover,
+    .footer-policy a:hover { color: var(--idl-go-gold); }
+    .footer-divider { grid-column: 1 / -1; width: 100%; height: 1px; background: var(--idl-line); }
+    .footer-copyright {
+      margin: 0;
+      color: var(--idl-muted);
+      font: 400 16px/18px CarbonPlus, monospace;
+      text-transform: uppercase;
+    }
+    .footer-meta { display: flex; align-items: center; justify-content: flex-end; gap: 30px; }
+    .footer-policy { display: flex; align-items: center; gap: 30px; }
+    .footer-social { display: flex; align-items: center; gap: 8px; }
+    .footer-social a {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      background: var(--idl-panel-soft);
+      color: var(--idl-white);
+      transition: background 100ms ease, color 100ms ease;
+    }
+    .footer-social a:hover { background: var(--idl-go-gold); color: var(--idl-button-ink); }
+    .footer-social svg { width: 17px; height: 17px; }
+
+    .bag-drawer {
+      position: fixed;
+      z-index: 80;
+      top: 0;
+      right: 0;
+      width: min(440px, 100%);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      visibility: hidden;
+      transform: translateX(100%);
+      background: var(--idl-bg-deep);
+      border-left: 1px solid var(--idl-line);
+      transition: transform 180ms ease, visibility 180ms;
+    }
+    .bag-drawer.open { visibility: visible; transform: translateX(0); }
+    .drawer-scrim { position: fixed; z-index: 70; inset: 0; visibility: hidden; opacity: 0; background: rgba(6, 14, 18, 0.72); transition: opacity 180ms ease; }
+    .drawer-scrim.open { visibility: visible; opacity: 1; }
+    .drawer-header { min-height: 82px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--idl-line); }
+    .drawer-header h2 { margin: 0; font-size: 24px; line-height: 24px; text-transform: uppercase; }
+    .icon-button { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--idl-line); background: transparent; color: var(--idl-white); cursor: pointer; }
+    .icon-button:hover { color: var(--idl-go-gold); border-color: var(--idl-go-gold); }
+    .icon-button svg { width: 20px; height: 20px; }
+    .drawer-items { flex: 1; overflow-y: auto; }
+    .drawer-empty { padding: 28px 22px; color: var(--idl-muted); }
+    .drawer-item { padding: 18px 22px; display: grid; grid-template-columns: 70px 1fr auto; gap: 16px; align-items: center; border-bottom: 1px solid var(--idl-line); }
+    .drawer-item img { width: 70px; height: 86px; object-fit: contain; background: var(--idl-panel-alt); }
+    .drawer-item h3 { margin: 0 0 6px; font-size: 16px; line-height: 18px; text-transform: uppercase; }
+    .drawer-item p { margin: 0; color: var(--idl-muted); font: 400 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
+    .remove-item { border: 0; background: transparent; color: var(--idl-muted); cursor: pointer; }
+    .remove-item:hover { color: var(--idl-go-gold); }
+    .remove-item svg { width: 18px; height: 18px; }
+    .drawer-footer { padding: 22px; border-top: 1px solid var(--idl-line); }
+    .drawer-total { margin-bottom: 18px; display: flex; justify-content: space-between; font: 700 13px/14px CarbonPlus, monospace; text-transform: uppercase; }
+    .drawer-footer .button { width: 100%; justify-content: space-between; }
+
+    .film-dialog {
+      width: min(920px, calc(100% - 32px));
+      padding: 0;
+      border: 1px solid var(--idl-line);
+      background: var(--idl-bg-deep);
+      color: var(--idl-white);
+    }
+    .film-dialog::backdrop { background: rgba(6, 14, 18, 0.84); }
+    .dialog-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+    .dialog-media img { height: 100%; object-fit: cover; }
+    .dialog-close { position: absolute; top: 14px; right: 14px; background: rgba(6, 14, 18, 0.86); }
+    .dialog-caption { padding: 22px; border-top: 1px solid var(--idl-line); }
+    .dialog-caption h2 { margin: 0; font-size: 24px; line-height: 24px; text-transform: uppercase; }
+    .dialog-caption p { margin: 8px 0 0; color: var(--idl-muted); }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      right: 20px;
+      bottom: 20px;
+      max-width: calc(100% - 40px);
+      padding: 14px 18px;
+      border-left: 3px solid var(--idl-go-gold);
+      background: var(--idl-panel);
+      color: var(--idl-white);
+      font: 700 12px/14px CarbonPlus, monospace;
+      text-transform: uppercase;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 1080px) {
+      :root { --gutter: 32px; }
+      .header-side { gap: 22px; }
+      .section-header { grid-template-columns: minmax(0, 1fr) 340px; }
+      .product-media { height: 420px; }
+      .sport-manifesto { padding: 48px 36px 44px 78px; }
+      .campaign-inner { grid-template-columns: 360px minmax(0, 1fr); }
+    }
+
+    @media (max-width: 760px) {
+      :root { --gutter: 16px; --header-height: 72px; --announcement-height: 44px; }
+      .site-shell { border: 0; }
+      .header-inner { grid-template-columns: 1fr auto 1fr; gap: 12px; }
+      .header-side.left > :not(.mobile-toggle),
+      .header-side.right > .nav-link { display: none; }
+      .mobile-toggle { display: inline-flex; align-items: center; gap: 8px; }
+      .mobile-toggle svg { width: 19px; height: 19px; }
+      .brand-mark { width: 110px; height: 32px; }
+      .brand-mark img { width: 110px; height: 32px; }
+      .nav-button { font-size: 12px; line-height: 14px; }
+      .bag-button { gap: 6px; padding: 4px 10px 2px; font-size: 16px; font-weight: 700; line-height: 22px; }
+      .bag-count { min-width: auto; height: auto; }
+
+      .hero { min-height: 670px; }
+      .hero-media img { object-position: 59% center; transform: none; }
+      .hero-scrim { background: rgba(6, 14, 18, 0.5); }
+      .hero-inner { min-height: 670px; padding-block: 42px 42px; grid-template-columns: 1fr; align-content: end; gap: 20px; }
+      .hero-copy { max-width: 100%; }
+      .hero h1 { margin-block: 14px 20px; font-size: 36px; line-height: 36px; }
+      .hero-actions { gap: 8px; }
+      .hero-actions .button { min-height: 44px; }
+      .button-label { padding: 0 8px 0 14px; }
+      .button-icon { width: 44px; }
+      .section { padding-block: 72px; }
+      .section-header { margin-bottom: 36px; display: block; }
+      .section-header h2,
+      .campaign-copy h2,
+      .newsletter h2 { font-size: 36px; line-height: 36px; }
+      .section-intro { margin-top: 20px; }
+      .product-grid { grid-template-columns: 1fr; }
+      .product-media { height: 470px; }
+      .product-details { min-height: 156px; }
+
+      .sport-band { padding-block: 48px 56px; }
+      .sport-stage { min-height: 0; grid-template-columns: 1fr; }
+      .sport-visual { width: 100%; min-height: 370px; clip-path: none; }
+      .sport-logo { top: 24px; left: 20px; width: 100px; height: 30px; }
+      .sport-athlete { bottom: -28px; height: 370px; }
+      .sport-manifesto { min-height: 310px; padding: 46px 20px; }
+      .sport-manifesto h2 { font-size: 36px; line-height: 36px; }
+      .sport-points li { font-size: 15px; line-height: 19px; }
+
+      .campaign-inner { min-height: 0; grid-template-columns: 1fr; border-inline: 0; }
+      .campaign-copy { padding: 54px 16px; border-right: 0; border-bottom: 1px solid var(--idl-line); }
+      .campaign-copy p { max-width: 460px; }
+      .campaign-media { height: 480px; }
+      .play-button { right: 18px; bottom: 18px; }
+
+      .newsletter { height: auto; display: block; }
+      .newsletter-panel { width: 100%; min-height: 270px; padding: 46px 16px 54px; clip-path: none; }
+      .newsletter-pitch { width: 100%; }
+      .newsletter h2 { font-size: 36px; line-height: 36px; white-space: normal; }
+      .newsletter-benefits { margin-top: 22px; display: grid; gap: 8px; }
+      .newsletter-benefits li { white-space: normal; }
+      .newsletter-media { min-height: 360px; padding: 44px 16px; display: flex; align-items: center; }
+      .newsletter-form-wrap { width: 100%; margin: 0; }
+      .signup { grid-template-columns: 1fr; gap: 10px; }
+      .signup-consent { grid-column: auto; margin-top: 8px; }
+      .signup > input[type="email"] { height: 48px; }
+
+      .footer { min-height: 0; }
+      .footer-inner {
+        min-height: 0;
+        padding-block: 48px 28px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+      }
+      .footer-logo { margin-bottom: 38px; }
+      .footer-nav {
+        margin-bottom: 34px;
+        display: grid;
+        grid-template-columns: 1fr;
+        justify-content: stretch;
+        gap: 0 20px;
+      }
+      .footer-nav a { min-height: 42px; display: flex; align-items: center; border-top: 1px solid var(--idl-line); }
+      .footer-nav a:last-child { border-bottom: 1px solid var(--idl-line); }
+      .footer-divider { display: none; }
+      .footer-meta { order: 3; margin-bottom: 34px; display: grid; grid-template-columns: 1fr; justify-items: start; gap: 24px; }
+      .footer-policy { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .footer-policy a { white-space: normal; }
+      .footer-copyright { order: 4; font-size: 12px; line-height: 16px; }
+    }
+
+    @media (max-width: 390px) {
+      .product-media { height: 440px; }
+      .campaign-media { height: 430px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      .announcement-track { animation: none !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-shell">
+    <aside class="announcement-bar" aria-label="Shipping promotion">
+      <span class="sr-only">Free shipping on orders above $250 USD.</span>
+      <div class="announcement-track" aria-hidden="true">
+        <div class="announcement-group">
+          <span>Free shipping on orders above $250 USD</span>
+          <span>Free shipping on orders above $250 USD</span>
+          <span>Free shipping on orders above $250 USD</span>
+          <span>Free shipping on orders above $250 USD</span>
+        </div>
+        <div class="announcement-group">
+          <span>Free shipping on orders above $250 USD</span>
+          <span>Free shipping on orders above $250 USD</span>
+          <span>Free shipping on orders above $250 USD</span>
+          <span>Free shipping on orders above $250 USD</span>
+        </div>
+      </div>
+    </aside>
+    <header class="site-header">
+      <div class="header-inner content">
+        <div class="header-side left">
+          <button class="nav-button mobile-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
+            <i data-lucide="menu" aria-hidden="true"></i><span>Menu</span>
+          </button>
+          <div class="team-nav">
+            <button class="nav-button team-trigger" type="button" aria-expanded="false">
+              Shop by team <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="team-menu" aria-label="Shop by team">
+              <a href="#grv">GRV <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+              <a href="#brotherhood">Brotherhood <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+              <a href="#royal-family">Royal Family <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+              <a href="#1million">1Million <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+              <a href="#quick-style">Quick Style <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+              <a href="#jam-republic">Jam Republic <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </div>
+          <a class="nav-link" href="#team-kits">Team kits</a>
+        </div>
+
+        <a class="brand-mark" href="#top" aria-label="IDL Merch home">
+          <img src="fieldbook-assets/logo.png" alt="IDL">
+        </a>
+
+        <div class="header-side right">
+          <a class="nav-link" href="#team-kits">Shop all</a>
+          <button class="nav-button bag-button" type="button" aria-expanded="false" aria-controls="bag-drawer">
+            Cart <span class="bag-count" data-count>0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation">
+      <div class="mobile-menu-inner">
+        <a href="#team-kits">Shop by team <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        <a href="#team-kits">Team kits <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        <a href="#campaign">Season 01 film <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-media"><img src="fieldbook-assets/hero.png" alt="Six IDL Season 01 crews wearing their official team kits"></div>
+        <div class="hero-scrim" aria-hidden="true"></div>
+        <img class="hero-pattern" src="fieldbook-assets/idl-live-hero-pattern.svg" alt="" aria-hidden="true">
+        <div class="hero-inner content">
+          <div class="hero-copy">
+            <div class="hero-chip"><span class="hero-chip-date"><span class="hero-chip-label">Official team kits</span><span class="hero-chip-tail" aria-hidden="true"></span></span></div>
+            <h1 id="hero-title"><span>The league</span><span>wears IDL.</span></h1>
+            <div class="hero-actions">
+              <a class="button primary" href="#team-kits"><span class="button-label">Shop team kits</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="team-kits" aria-labelledby="team-kits-title">
+        <div class="content">
+          <header class="section-header">
+            <div>
+              <h2 id="team-kits-title">Official team kits</h2>
+            </div>
+            <p class="section-intro">One kit, six identities. Select your crew and add the official Season 01 jersey to your lineup.</p>
+          </header>
+
+          <div class="product-grid">
+            <article class="product-card" id="grv">
+              <div class="product-media"><img class="product-image-default" src="fieldbook-assets/product-fullbody-grv.webp" alt="GRV official Season 01 match kit"><img class="product-image-hover" src="fieldbook-assets/product-medium-grv.webp" alt="" aria-hidden="true"></div>
+              <div class="product-details"><span class="product-team">GRV</span><h3>GRV Match Kit</h3><div class="product-actions"><span class="product-price">$85 USD</span><button class="add-button" data-product="GRV Match Kit" data-price="85" data-image="fieldbook-assets/product-medium-grv.webp" type="button"><span>Add to cart</span><span class="icon-segment"><i data-lucide="plus" aria-hidden="true"></i></span></button></div></div>
+            </article>
+            <article class="product-card" id="brotherhood">
+              <div class="product-media"><img class="product-image-default" src="fieldbook-assets/product-fullbody-brotherhood.webp" alt="Brotherhood official Season 01 match kit"><img class="product-image-hover" src="fieldbook-assets/product-medium-brotherhood.webp" alt="" aria-hidden="true"></div>
+              <div class="product-details"><span class="product-team">Brotherhood</span><h3>Brotherhood Match Kit</h3><div class="product-actions"><span class="product-price">$85 USD</span><button class="add-button" data-product="Brotherhood Match Kit" data-price="85" data-image="fieldbook-assets/product-medium-brotherhood.webp" type="button"><span>Add to cart</span><span class="icon-segment"><i data-lucide="plus" aria-hidden="true"></i></span></button></div></div>
+            </article>
+            <article class="product-card" id="royal-family">
+              <div class="product-media"><img class="product-image-default" src="fieldbook-assets/product-fullbody-royal-family.webp" alt="Royal Family official Season 01 match kit"><img class="product-image-hover" src="fieldbook-assets/product-medium-royal-family.webp" alt="" aria-hidden="true"></div>
+              <div class="product-details"><span class="product-team">Royal Family</span><h3>Royal Family Match Kit</h3><div class="product-actions"><span class="product-price">$85 USD</span><button class="add-button" data-product="Royal Family Match Kit" data-price="85" data-image="fieldbook-assets/product-medium-royal-family.webp" type="button"><span>Add to cart</span><span class="icon-segment"><i data-lucide="plus" aria-hidden="true"></i></span></button></div></div>
+            </article>
+            <article class="product-card" id="1million">
+              <div class="product-media"><img class="product-image-default" src="fieldbook-assets/product-fullbody-1million.webp" alt="1Million official Season 01 match kit"><img class="product-image-hover" src="fieldbook-assets/product-medium-1million.webp" alt="" aria-hidden="true"></div>
+              <div class="product-details"><span class="product-team">1Million</span><h3>1Million Match Kit</h3><div class="product-actions"><span class="product-price">$85 USD</span><button class="add-button" data-product="1Million Match Kit" data-price="85" data-image="fieldbook-assets/product-medium-1million.webp" type="button"><span>Add to cart</span><span class="icon-segment"><i data-lucide="plus" aria-hidden="true"></i></span></button></div></div>
+            </article>
+            <article class="product-card" id="quick-style">
+              <div class="product-media"><img class="product-image-default" src="fieldbook-assets/product-fullbody-quick-style.webp" alt="Quick Style official Season 01 match kit"><img class="product-image-hover" src="fieldbook-assets/product-medium-quick-style.webp" alt="" aria-hidden="true"></div>
+              <div class="product-details"><span class="product-team">Quick Style</span><h3>Quick Style Match Kit</h3><div class="product-actions"><span class="product-price">$85 USD</span><button class="add-button" data-product="Quick Style Match Kit" data-price="85" data-image="fieldbook-assets/product-medium-quick-style.webp" type="button"><span>Add to cart</span><span class="icon-segment"><i data-lucide="plus" aria-hidden="true"></i></span></button></div></div>
+            </article>
+            <article class="product-card" id="jam-republic">
+              <div class="product-media"><img class="product-image-default" src="fieldbook-assets/product-fullbody-jam-republic.webp" alt="Jam Republic official Season 01 match kit"><img class="product-image-hover" src="fieldbook-assets/product-medium-jam-republic.webp" alt="" aria-hidden="true"></div>
+              <div class="product-details"><span class="product-team">Jam Republic</span><h3>Jam Republic Match Kit</h3><div class="product-actions"><span class="product-price">$85 USD</span><button class="add-button" data-product="Jam Republic Match Kit" data-price="85" data-image="fieldbook-assets/product-medium-jam-republic.webp" type="button"><span>Add to cart</span><span class="icon-segment"><i data-lucide="plus" aria-hidden="true"></i></span></button></div></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="sport-band" id="sport" aria-labelledby="sport-title">
+        <div class="sport-band-inner content">
+          <div class="sport-stage">
+            <div class="sport-visual">
+              <img class="sport-logo" src="fieldbook-assets/logo.png" alt="" aria-hidden="true">
+              <img class="sport-pattern" src="fieldbook-assets/idl-live-hero-pattern.svg" alt="" aria-hidden="true">
+              <img class="sport-athlete" src="fieldbook-assets/kit-grv-cutout.png" alt="GRV athlete wearing the official Season 01 team kit">
+            </div>
+            <div class="sport-manifesto">
+              <h2 id="sport-title">This is our sport.</h2>
+              <ol class="sport-points">
+                <li><span>1</span>Official Season 01 match kits</li>
+                <li><span>2</span>Worn by all six IDL crews</li>
+                <li><span>3</span>Built for the floor and the street</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="newsletter" id="newsletter" aria-labelledby="newsletter-title">
+        <div class="newsletter-panel">
+          <div class="newsletter-pitch">
+            <h2 id="newsletter-title">First call on every kit.</h2>
+            <ul class="newsletter-benefits" aria-label="IDL Club benefits">
+              <li><i data-lucide="circle-check" aria-hidden="true"></i> Team-kit restock alerts</li>
+              <li><i data-lucide="circle-check" aria-hidden="true"></i> Early access to new drops</li>
+              <li><i data-lucide="circle-check" aria-hidden="true"></i> Season 01 member updates</li>
+            </ul>
+          </div>
+        </div>
+        <div class="newsletter-media">
+          <img src="fieldbook-assets/hero.png" alt="IDL teams wearing official Season 01 kits">
+          <div class="newsletter-form-wrap">
+            <form class="signup">
+              <input type="email" aria-label="Email address" placeholder="Enter Your Email" required>
+              <button type="submit"><span class="signup-button-label">Join the club</span><i data-lucide="bell" aria-hidden="true"></i></button>
+              <label class="signup-consent"><input type="checkbox" required><span>By signing up, you agree to receive IDL team-merch updates and promotions. You can unsubscribe at any time.</span></label>
+            </form>
+            <div class="form-note" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner content">
+        <a class="footer-logo" href="#top" aria-label="IDL Merch home"><img src="fieldbook-assets/logo.png" alt="IDL"></a>
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <a href="#team-kits">Shop by team</a>
+          <a href="#team-kits">Team kits</a>
+          <a href="#team-kits">Shop all</a>
+        </nav>
+        <div class="footer-divider" aria-hidden="true"></div>
+        <p class="footer-copyright">&copy; 2026 International Dance League, Inc. All rights reserved.</p>
+        <div class="footer-meta">
+          <nav class="footer-policy" aria-label="Legal links">
+            <a href="#newsletter">Terms &amp; conditions</a>
+            <a href="#newsletter">Privacy policy</a>
+          </nav>
+          <div class="footer-social" aria-label="IDL social channels">
+            <a href="#stories" aria-label="Instagram" title="Instagram"><i data-lucide="instagram" aria-hidden="true"></i></a>
+            <a href="#stories" aria-label="TikTok" title="TikTok"><i data-lucide="music-2" aria-hidden="true"></i></a>
+            <a href="#stories" aria-label="YouTube" title="YouTube"><i data-lucide="youtube" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="drawer-scrim" data-close-drawer></div>
+  <aside class="bag-drawer" id="bag-drawer" aria-hidden="true" aria-labelledby="bag-title">
+    <header class="drawer-header"><h2 id="bag-title">Your cart</h2><button class="icon-button" type="button" data-close-drawer aria-label="Close cart"><i data-lucide="x" aria-hidden="true"></i></button></header>
+    <div class="drawer-items"><p class="drawer-empty">Your cart is empty.</p></div>
+    <footer class="drawer-footer"><div class="drawer-total"><span>Total</span><span data-total>$0 USD</span></div><button class="button primary" type="button"><span class="button-label">Checkout</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button></footer>
+  </aside>
+
+  <dialog class="film-dialog">
+    <div class="dialog-media"><img src="fieldbook-assets/feature-motion.jpeg" alt="Season 01 film still"><button class="icon-button dialog-close" type="button" aria-label="Close film"><i data-lucide="x" aria-hidden="true"></i></button></div>
+    <div class="dialog-caption"><h2>Worn by the league.</h2><p>Season 01 official team kits in motion.</p></div>
+  </dialog>
+
+  <div class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const body = document.body;
+    const mobileToggle = document.querySelector('.mobile-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const teamNav = document.querySelector('.team-nav');
+    const teamTrigger = document.querySelector('.team-trigger');
+    const bagButton = document.querySelector('.bag-button');
+    const bagDrawer = document.querySelector('.bag-drawer');
+    const drawerScrim = document.querySelector('.drawer-scrim');
+    const drawerItems = document.querySelector('.drawer-items');
+    const toast = document.querySelector('.toast');
+    const filmDialog = document.querySelector('.film-dialog');
+    const cart = [];
+    let toastTimer;
+
+    function refreshIcons() {
+      if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.7 } });
+    }
+
+    function setBodyLock() {
+      body.classList.toggle('locked', mobileMenu.classList.contains('open') || bagDrawer.classList.contains('open') || filmDialog.open);
+    }
+
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('open');
+      mobileToggle.setAttribute('aria-expanded', 'false');
+      mobileToggle.querySelector('span').textContent = 'Menu';
+      mobileToggle.querySelector('svg')?.setAttribute('data-lucide', 'menu');
+      setBodyLock();
+      refreshIcons();
+    }
+
+    mobileToggle.addEventListener('click', () => {
+      const open = mobileMenu.classList.toggle('open');
+      mobileToggle.setAttribute('aria-expanded', String(open));
+      mobileToggle.querySelector('span').textContent = open ? 'Close' : 'Menu';
+      const icon = mobileToggle.querySelector('svg');
+      if (icon) icon.setAttribute('data-lucide', open ? 'x' : 'menu');
+      setBodyLock();
+      refreshIcons();
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMobileMenu));
+
+    teamTrigger.addEventListener('click', () => {
+      const open = teamNav.classList.toggle('open');
+      teamTrigger.setAttribute('aria-expanded', String(open));
+    });
+
+    document.addEventListener('click', event => {
+      if (!teamNav.contains(event.target)) {
+        teamNav.classList.remove('open');
+        teamTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    function openDrawer() {
+      bagDrawer.classList.add('open');
+      drawerScrim.classList.add('open');
+      bagDrawer.setAttribute('aria-hidden', 'false');
+      bagButton.setAttribute('aria-expanded', 'true');
+      setBodyLock();
+      bagDrawer.querySelector('[data-close-drawer]').focus();
+    }
+
+    function closeDrawer() {
+      bagDrawer.classList.remove('open');
+      drawerScrim.classList.remove('open');
+      bagDrawer.setAttribute('aria-hidden', 'true');
+      bagButton.setAttribute('aria-expanded', 'false');
+      setBodyLock();
+    }
+
+    function showToast(message) {
+      window.clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add('show');
+      toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    function renderBag() {
+      const count = cart.length;
+      document.querySelectorAll('[data-count]').forEach(node => { node.textContent = count; });
+      document.querySelector('[data-total]').textContent = `$${cart.reduce((total, item) => total + item.price, 0)} USD`;
+
+      if (!count) {
+        drawerItems.innerHTML = '<p class="drawer-empty">Your cart is empty.</p>';
+        return;
+      }
+
+      drawerItems.innerHTML = cart.map((item, index) => `
+        <article class="drawer-item">
+          <img src="${item.image}" alt="">
+          <div><h3>${item.name}</h3><p>$${item.price} USD / Season 01</p></div>
+          <button class="remove-item" type="button" data-remove="${index}" aria-label="Remove ${item.name}"><i data-lucide="trash-2" aria-hidden="true"></i></button>
+        </article>
+      `).join('');
+      refreshIcons();
+    }
+
+    bagButton.addEventListener('click', openDrawer);
+    document.querySelectorAll('[data-close-drawer]').forEach(button => button.addEventListener('click', closeDrawer));
+    document.querySelectorAll('.add-button').forEach(button => button.addEventListener('click', () => {
+      cart.push({ name: button.dataset.product, price: Number(button.dataset.price), image: button.dataset.image });
+      renderBag();
+      showToast(`${button.dataset.product} added to cart`);
+    }));
+    drawerItems.addEventListener('click', event => {
+      const button = event.target.closest('[data-remove]');
+      if (!button) return;
+      const removed = cart.splice(Number(button.dataset.remove), 1)[0];
+      renderBag();
+      showToast(`${removed.name} removed`);
+    });
+
+    document.querySelectorAll('.open-film').forEach(button => button.addEventListener('click', () => {
+      filmDialog.showModal();
+      setBodyLock();
+    }));
+    document.querySelector('.dialog-close').addEventListener('click', () => filmDialog.close());
+    filmDialog.addEventListener('close', setBodyLock);
+    filmDialog.addEventListener('click', event => {
+      if (event.target === filmDialog) filmDialog.close();
+    });
+
+    const signup = document.querySelector('.signup');
+    const formNote = document.querySelector('.form-note');
+    signup.addEventListener('submit', event => {
+      event.preventDefault();
+      formNote.textContent = 'You are on the list.';
+      signup.reset();
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        closeMobileMenu();
+        closeDrawer();
+      }
+    });
+
+    window.addEventListener('load', refreshIcons);
+    renderBag();
+  </script>
+</body>
+</html>
