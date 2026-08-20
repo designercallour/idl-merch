@@ -59,30 +59,14 @@
     '</aside>' +
     '<div class="toast" role="status" aria-live="polite"></div>';
 
-  var ARROW_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>';
   var EMPTY_HTML =
     '<div class="drawer-empty">' +
-      '<p class="drawer-empty-head">Your cart is empty</p>' +
-      '<div class="drawer-empty-cards">' +
-        '<article class="partner-card">' +
-          '<img class="partner-card-media" src="standout-assets/van-capsule-glitch-black.jpg" alt="IDL VAN Capsule half-zip caught mid-motion" loading="lazy">' +
-          '<span class="partner-card-scrim" aria-hidden="true"></span>' +
-          '<div class="partner-card-copy">' +
-            '<h3 class="partner-card-heading">Crews &amp; Teams</h3>' +
-            '<p class="partner-card-sub">Custom team kit in your colours, marks and numbers</p>' +
-            '<a class="partner-card-cta" href="idl-merch-redesign-v2.html#partner"><span class="button-label">Shop now</span><span class="button-icon"><span class="button-icon-cells">' + ARROW_SVG + ARROW_SVG + '</span></span></a>' +
-          '</div>' +
-        '</article>' +
-        '<article class="partner-card">' +
-          '<img class="partner-card-media" src="standout-assets/van-capsule-glitch-red.jpg" alt="IDL VAN Capsule long sleeve caught mid-spin" loading="lazy">' +
-          '<span class="partner-card-scrim" aria-hidden="true"></span>' +
-          '<div class="partner-card-copy">' +
-            '<h3 class="partner-card-heading">Events &amp; Retail</h3>' +
-            '<p class="partner-card-sub">Bring an IDL pop-up to your<br>jam, battle or store</p>' +
-            '<a class="partner-card-cta" href="idl-merch-redesign-v2.html#partner"><span class="button-label">Shop now</span><span class="button-icon"><span class="button-icon-cells">' + ARROW_SVG + ARROW_SVG + '</span></span></a>' +
-          '</div>' +
-        '</article>' +
-      '</div>' +
+      '<div class="drawer-empty-logo" role="img" aria-label="IDL"><span class="del-base"></span><span class="del-red"></span><span class="del-cyan"></span></div>' +
+      '<p class="drawer-empty-head">There&#39;s nothing in your cart</p>' +
+    '</div>' +
+    '<div class="drawer-empty-actions">' +
+      '<a class="button primary drawer-empty-action" href="idl-merch-redesign-v2.html#team-kits"><span class="button-label">Shop by team</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>' +
+      '<a class="button primary drawer-empty-action is-alt" href="idl-merch-redesign-v2.html#look-title"><span class="button-label">Shop city series</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>' +
     '</div>';
 
   function init() {

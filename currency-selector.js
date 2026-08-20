@@ -23,7 +23,7 @@
     return `${symbol}${new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(value)} ${currency}`;
+    }).format(value)}`;
   }
 
   function initCurrencySelector(doc = root.document) {

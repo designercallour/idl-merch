@@ -87,13 +87,44 @@
       --c-line: rgba(10, 10, 10, 0.16);
       --c-track: #676769;
       --c-accent: #d67400;
-      width: min(680px, 100%);
+      /* Floating panel: a 20px gap of the (blurred) scrim shows on the top,
+         right and bottom instead of the drawer meeting those viewport edges.
+         height:auto + top/bottom insets replace the base's height:100%. */
+      top: 20px;
+      right: 20px;
+      bottom: 20px;
+      height: auto;
+      width: min(680px, calc(100% - 40px));
+      overflow: hidden;
       background: var(--c-paper);
       color: var(--c-ink);
       border-left: 0;
       font-family: NeueHaas, "Helvetica Neue", Arial, sans-serif;
     }
+    /* Slide clear of the 24px inset when closed (100% of its own width leaves
+       the gap, so nudge the extra 24px to fully clear the edge). */
+    .bag-drawer.cart-v2:not(.open) { transform: translateX(calc(100% + 20px)); }
     .cart-v2 * { box-sizing: border-box; }
+
+    /* Mobile: the floating-panel treatment (20px gap on three sides) leaves
+       too little room for the cart's own content once the viewport is this
+       narrow, so the drawer goes edge-to-edge instead — full width, full
+       height, no inset. */
+    @media (max-width: 760px) {
+      .bag-drawer.cart-v2 {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+      }
+      .bag-drawer.cart-v2:not(.open) { transform: translateX(100%); }
+      /* Side by side, "Shop by team" / "Shop city series" only had room to
+         clip their own labels once the buttons were this narrow — stack them
+         instead so each keeps its full width and its label stays whole. */
+      .cart-v2 .drawer-empty-actions { flex-direction: column; }
+      .cart-v2 .drawer-empty-action { flex: none; width: 100%; }
+    }
 
     /* ---- header (scaled to the IDL navbar: 20px bag glyph, 13px label, the
        small black count circle from .bag-count rather than a big amber pill) ---- */
@@ -108,6 +139,11 @@
       font: 500 16px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+      /* The glyphs sit high in their own line box (no descenders in an
+         all-caps label, but the box still reserves descender space) — nudge
+         down a hair so the ink lines up with the bag icon and count circle,
+         which are already true box-centered. */
+      transform: translateY(1px);
       color: var(--c-ink);
     }
     .cart-v2 .drawer-count {
@@ -151,11 +187,18 @@
 
     /* ---- body / scroll ---- */
     .cart-v2 .drawer-body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
-    .cart-v2 .drawer-items { flex: 0 0 auto; overflow: visible; }
+    /* Padding-bottom, not the last item's own spacing: .cart-upsell right below
+       carries its own border-top, and with zero gap here that line sits flush
+       against the last item's divider — reading as one doubled-up rule. */
+    .cart-v2 .drawer-items { flex: 0 0 auto; overflow: visible; padding-bottom: 20px; }
     /* Empty state grows to fill the body and centres vertically, rather than
        sitting pinned to the top under the free-shipping bar — populated carts
        keep the default (content-height, top-anchored) sizing above. */
-    .cart-v2 .drawer-items:has(.drawer-empty) { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    /* No justify-content:center here anymore — .drawer-empty below is the
+       flexed, self-centring zone; .drawer-empty-actions is a plain sibling
+       that lands wherever it naturally falls after that, which is flush
+       against the bottom of the available space. */
+    .cart-v2 .drawer-items:has(.drawer-empty) { flex: 1; display: flex; flex-direction: column; }
 
     /* ---- free-shipping progress: full-bleed bar, IDL lime fill (same token as
        the checkout button) on a light track. Message ink rather than white so
@@ -428,37 +471,120 @@
     .cart-v2 .cart-upsell-arrow svg { width: 16px; height: 16px; }
 
     /* ---- empty state ---- */
-    .cart-v2 .drawer-empty { padding: 40px 24px; text-align: center; color: var(--c-muted); }
-    .cart-v2 .drawer-empty-head { margin: 0 0 22px; font: 500 22px/1.2 NeueHaas, "Helvetica Neue", Arial, sans-serif; color: var(--c-ink); }
-    /* Two "Crews & Teams" / "Events & Retail" cards, the same component the
-       homepage's .partner-grid uses, shrunk to fit the drawer column. Only the
-       type/box scale is re-pointed — the media, scrim and CTA behaviour ride
-       on the shared .partner-card rules. */
-    .cart-v2 .drawer-empty-cards {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      text-align: left;
+    /* flex:1 + centred content: this block claims all the space above
+       .drawer-empty-actions and centres the logo/copy within it, so the
+       actions row (a plain sibling, not nested in here) is what actually
+       ends up pinned to the very bottom of the drawer. */
+    .cart-v2 .drawer-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px 0;
+      text-align: center;
+      color: var(--c-muted);
     }
-    /* justify-content:center overrides the base .partner-card's flex-end —
-       the copy block sits centred in the card instead of pinned to its
-       bottom edge. */
-    .cart-v2 .drawer-empty-cards .partner-card { aspect-ratio: 1; padding: 16px; border-radius: 6px; justify-content: center; }
-    /* The base .partner-card-scrim is a bottom-loaded gradient built for copy
-       pinned to the card's bottom edge (dark at 100%, clear through the
-       middle). Centring the copy above moved the text into that clear band,
-       so it needs its own scrim here — darkest at the centre where the text
-       actually sits, easing out top and bottom. */
-    .cart-v2 .drawer-empty-cards .partner-card-scrim {
-      background: radial-gradient(ellipse at center, rgba(5, 5, 8, 0.66) 0%, rgba(5, 5, 8, 0.5) 45%, rgba(5, 5, 8, 0.22) 100%);
+    /* Glitch / RGB-split wordmark. The mark is three stacked copies of the same
+       masked SVG (the file is baked white — same one the preloader recolours):
+       an ink base plus red and cyan copies that sit hidden and aligned, then
+       burst apart on a ~4s loop (channel offset + horizontal slice jumps),
+       echoing the site's van-capsule-glitch imagery. */
+    .cart-v2 .drawer-empty-logo {
+      position: relative;
+      width: 100px;
+      height: 31px;
+      margin: 0 auto 20px;
     }
-    .cart-v2 .drawer-empty-cards .partner-card-copy { align-items: center; text-align: center; }
-    .cart-v2 .drawer-empty-cards .partner-card-heading { font-size: 24px; line-height: 0.96; letter-spacing: -0.02em; }
-    /* Balances the wrap so a 2+ line sub never strands its last word alone —
-       see the .pdp-title note above for the same treatment. */
-    .cart-v2 .drawer-empty-cards .partner-card-sub { margin-top: 8px; font-size: 12px; line-height: 16px; letter-spacing: 0.05em; text-wrap: balance; }
-    .cart-v2 .drawer-empty-cards .partner-card-cta { margin-top: 14px; height: 40px; min-height: 40px; }
-    .cart-v2 .drawer-empty-cards .partner-card-cta .button-icon { width: 40px; height: 40px; }
+    .cart-v2 .drawer-empty-logo span {
+      position: absolute;
+      inset: 0;
+      -webkit-mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
+      mask: url("fieldbook-assets/idl-live-logo.svg?v=3") center / contain no-repeat;
+    }
+    .cart-v2 .drawer-empty-logo .del-base { background: var(--c-ink); animation: cart-v2-logo-slice 4s steps(1) infinite; }
+    .cart-v2 .drawer-empty-logo .del-red { background: #ff0038; mix-blend-mode: multiply; opacity: 0; animation: cart-v2-logo-red 4s steps(1) infinite; }
+    .cart-v2 .drawer-empty-logo .del-cyan { background: #00e5ff; mix-blend-mode: multiply; opacity: 0; animation: cart-v2-logo-cyan 4s steps(1) infinite; }
+    @keyframes cart-v2-logo-slice {
+      0%, 86%, 100% { clip-path: none; transform: translateX(0); }
+      88% { clip-path: inset(30% 0 40% 0); transform: translateX(5px); }
+      89% { clip-path: inset(60% 0 10% 0); transform: translateX(-6px); }
+      90% { clip-path: none; transform: translateX(0); }
+      96% { clip-path: inset(10% 0 70% 0); transform: translateX(4px); }
+      97% { clip-path: none; transform: translateX(0); }
+    }
+    @keyframes cart-v2-logo-red {
+      0%, 86%, 100% { opacity: 0; transform: translateX(0); }
+      87% { opacity: .9; transform: translateX(-4px); }
+      90% { opacity: .9; transform: translateX(3px); }
+      93% { opacity: 0; transform: translateX(0); }
+      96% { opacity: .9; transform: translateX(-2px); }
+      98% { opacity: 0; }
+    }
+    @keyframes cart-v2-logo-cyan {
+      0%, 86%, 100% { opacity: 0; transform: translateX(0); }
+      87% { opacity: .9; transform: translateX(4px); }
+      90% { opacity: .9; transform: translateX(-3px); }
+      93% { opacity: 0; transform: translateX(0); }
+      96% { opacity: .9; transform: translateX(2px); }
+      98% { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cart-v2 .drawer-empty-logo span { animation: none; }
+      .cart-v2 .drawer-empty-logo .del-red,
+      .cart-v2 .drawer-empty-logo .del-cyan { opacity: 0; }
+    }
+    .cart-v2 .drawer-empty-head { margin: 0; font: 400 16px/20px NeueHaas, "Helvetica Neue", Arial, sans-serif; color: var(--c-ink); }
+    .cart-v2 .drawer-empty-actions {
+      flex: 0 0 auto;
+      padding: 24px;
+      width: 100%;
+      display: flex;
+      gap: 10px;
+    }
+    /* IDL's own .button.primary component (same one the checkout button and
+       header CTAs use), just stretched to this row and bumped from its 44px
+       base to 48px — same pattern as .cart-checkout: the icon plate is taken
+       out of flow (absolute, pinned right) so the label spans the button's
+       true full width, and text-align:center on that full-width label lands
+       the copy on the actual visual centre of the whole lime rectangle,
+       icon included — not just the sliver of it left of the icon. */
+    .cart-v2 .drawer-empty-action { position: relative; flex: 1; height: 48px; min-height: 48px; justify-content: flex-start; overflow: hidden; }
+    .cart-v2 .drawer-empty-action .button-label { flex: 1; width: 100%; padding: 0; text-align: center; }
+    .cart-v2 .drawer-empty-action .button-icon { position: absolute; top: 0; right: 0; width: 48px; height: 48px; }
+    /* Wipe-on-hover — the same effect .newsletter-submit / .partner-card-cta
+       use: the fill HOLDS, a faint dark tint wipes across from the left, and
+       the icon plate deepens from panel-soft to panel. The hold is per-variant
+       (below) so neither button falls through to .button:hover's white swap.
+       Shared bits (the wipe, z-index, plate deepen) live here. */
+    .cart-v2 .drawer-empty-action::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: rgba(0, 0, 0, 0.1);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 320ms cubic-bezier(0.22, 0.8, 0.2, 1);
+      pointer-events: none;
+    }
+    .cart-v2 .drawer-empty-action:hover::before { transform: scaleX(1); }
+    .cart-v2 .drawer-empty-action > span { position: relative; z-index: 1; }
+    .cart-v2 .drawer-empty-action:hover .button-icon svg { background: var(--idl-panel); }
+
+    /* "Shop by team" (default): IDL's lime .button.primary, held on hover so
+       the wipe reads instead of the stock white swap. */
+    .cart-v2 .drawer-empty-action.button:hover { background: var(--idl-go-gold); color: var(--idl-button-ink); }
+
+    /* "Shop city series" (.is-alt): the "Take 10% off" discount-teaser red
+       gradient, white text + arrow. Qualified with .button so it outranks the
+       inline .button.primary fill (shipped after this stylesheet). */
+    .cart-v2 .drawer-empty-action.is-alt.button,
+    .cart-v2 .drawer-empty-action.is-alt.button:hover {
+      background: linear-gradient(90deg, rgb(89, 13, 13) 0%, rgb(151, 8, 8) 100%);
+      color: var(--idl-white);
+    }
+    .cart-v2 .drawer-empty-action.is-alt .button-icon svg { color: var(--idl-white); }
 
     /* ---- footer ---- */
     .cart-v2 .drawer-footer { padding: 18px 24px 20px; border-top: 1px solid var(--c-line); background: var(--c-footer); }
@@ -498,4 +624,41 @@
       font: 400 14px/1 NeueHaas, "Helvetica Neue", Arial, sans-serif;
       letter-spacing: 0;
       color: var(--c-muted);
+    }
+
+    /* Mobile: every section's side padding was the desktop panel's own 22-24px,
+       unrelated to the page's actual mobile gutter. Now that the drawer goes
+       edge-to-edge on mobile (see the full-screen override above), its content
+       should sit at the same --gutter (12px) the rest of the mobile layout
+       uses, not a leftover floating-panel figure. Longhand so each rule's own
+       vertical padding is untouched; placed last so it wins in the cascade
+       over the same-specificity base rules earlier in this file. */
+    @media (max-width: 760px) {
+      .cart-v2 .drawer-header,
+      .cart-v2 .drawer-item,
+      .cart-v2 .drawer-empty,
+      .cart-v2 .drawer-empty-actions,
+      .cart-v2 .cart-upsell,
+      .cart-v2 .drawer-footer {
+        padding-left: var(--gutter);
+        padding-right: var(--gutter);
+      }
+      /* These two are the drawer's actual last section in each state (empty
+         cart vs. cart with items) — their bottom edge IS the screen's bottom
+         edge now that the drawer is full-screen, so it gets the same --gutter
+         the sides just got instead of the desktop panel's 20-24px. */
+      .cart-v2 .drawer-empty-actions,
+      .cart-v2 .drawer-footer {
+        padding-bottom: var(--gutter);
+      }
+      /* Two-per-view (the desktop split) leaves each card only a sliver next
+         to its 84px-wide image once the drawer is phone-width — the name
+         truncates and the price crowds the add button. One full-width card
+         per swipe keeps every card's own content legible. */
+      .cart-v2 .upsell-card { flex: 0 0 100%; }
+      /* The item row's divider is a separately-positioned ::after (not a
+         border), so it didn't move when the row's own padding dropped to
+         --gutter above — it stayed inset at the desktop 24px, sitting past
+         where every other section's content now starts. */
+      .cart-v2 .drawer-item::after { left: var(--gutter); right: var(--gutter); }
     }

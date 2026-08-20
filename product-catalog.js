@@ -38,7 +38,11 @@ window.IDL_CATALOG = {
     "idl-nyc-metro-shirt",
     "idl-recovery-sweatpants",
     "idl-nyc-distressed-beanie",
-    "idl-nyc-series-tee"
+    "idl-nyc-series-tee",
+    "idl-seoul-jersey",
+    "idl-seoul-bandana",
+    "idl-seoul-pleated-nylon-shorts",
+    "idl-seoul-series-tee"
   ],
   "groups": {
     "brotherhood": {
@@ -121,6 +125,16 @@ window.IDL_CATALOG = {
         "lookbook-assets/van-capsule-11.jpg"
       ]
     },
+    "seoul": {
+      "label": "Seoul series",
+      "crest": null,
+      "flag": null,
+      "place": "Season 01 capsule",
+      "photos": [
+        "standout-assets/shop-products/idl-seoul-bandana-lifestyle.webp",
+        "standout-assets/shop-products/idl-seoul-pleated-nylon-shorts-lifestyle.webp"
+      ]
+    },
     "league": {
       "label": "League essentials",
       "crest": null,
@@ -191,7 +205,8 @@ window.IDL_CATALOG = {
       "sizes": [
         "One size"
       ],
-      "out": []
+      "out": [],
+      "stock": 1
     },
     "idl-grv-short-sleeve-green-jersey": {
       "name": "IDL GRV Short Sleeve Green Jersey",
@@ -235,7 +250,8 @@ window.IDL_CATALOG = {
         "XXL"
       ],
       "cut": "Long sleeve",
-      "pair": "idl-grv-short-sleeve-green-jersey"
+      "pair": "idl-grv-short-sleeve-green-jersey",
+      "stock": 2
     },
     "team-grv-hat": {
       "name": "Team GRV Hat",
@@ -415,7 +431,8 @@ window.IDL_CATALOG = {
       "sizes": [
         "One size"
       ],
-      "out": []
+      "out": [],
+      "stock": 3
     },
     "idl-jam-republic-short-sleeve-orange-jersey": {
       "name": "IDL Jam Republic Short Sleeve Orange Jersey",
@@ -481,7 +498,8 @@ window.IDL_CATALOG = {
       "out": [
         "XS",
         "XXL"
-      ]
+      ],
+      "stock": 1
     },
     "idl-vancouver-utility-vest": {
       "name": "IDL Utility Vest",
@@ -501,7 +519,8 @@ window.IDL_CATALOG = {
       "out": [
         "XS",
         "XXL"
-      ]
+      ],
+      "stock": 2
     },
     "idl-vancouver-convertible-pants": {
       "name": "IDL Convertible Pants",
@@ -521,7 +540,8 @@ window.IDL_CATALOG = {
       "out": [
         "XS",
         "XXL"
-      ]
+      ],
+      "stock": 3
     },
     "idl-nyc-distressed-practice-jersey": {
       "name": "IDL NYC Distressed Practice Jersey",
@@ -614,6 +634,85 @@ window.IDL_CATALOG = {
         "XS",
         "XXL"
       ]
+    },
+    "idl-seoul-jersey": {
+      "name": "IDL Seoul Jersey",
+      "price": 2013000,
+      "shop": "https://shop.idl.pro/products/idl-seoul-jersey",
+      "group": "seoul",
+      "kind": "jersey",
+      "soldOut": true,
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "out": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ]
+    },
+    "idl-seoul-bandana": {
+      "name": "IDL Seoul Bandana",
+      "price": 915000,
+      "shop": "https://shop.idl.pro/products/idl-seoul-bandana",
+      "group": "seoul",
+      "kind": "bandana",
+      "soldOut": false,
+      "sizes": [
+        "One size"
+      ],
+      "out": [],
+      "stock": 1
+    },
+    "idl-seoul-pleated-nylon-shorts": {
+      "name": "IDL Pleated Nylon Shorts",
+      "price": 1830000,
+      "shop": "https://shop.idl.pro/products/idl-seoul-pleated-nylon-shorts",
+      "group": "seoul",
+      "kind": "shorts",
+      "soldOut": false,
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "out": [
+        "XS",
+        "XXL"
+      ],
+      "stock": 2
+    },
+    "idl-seoul-series-tee": {
+      "name": "IDL Seoul Series Tee",
+      "price": 2287000,
+      "shop": "https://shop.idl.pro/products/idl-seoul-series-tee",
+      "group": "seoul",
+      "kind": "tee",
+      "soldOut": false,
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "out": [
+        "XS",
+        "XXL"
+      ],
+      "stock": 3
     }
   },
   "copy": {
@@ -621,13 +720,13 @@ window.IDL_CATALOG = {
       "sizeNote": "Model is 182cm, wearing M. Fits true to size.",
       "headline": "Built for the floor, not the shelf",
       "description": [
-        "The jersey the crew competed in through Season 01 \u2014 sublimated graphic, mesh-backed side panels, and a drop hem cut to stay put through a full routine.",
-        "Made on the same pattern as the competition kit \u2014 no retail-only substitutions."
+        "The jersey the crew competed in through Season 01 — sublimated graphic, mesh-backed side panels, and a drop hem cut to stay put through a full routine.",
+        "Made on the same pattern as the competition kit — no retail-only substitutions."
       ],
       "fabric": [
         "92% recycled polyester, 8% elastane double-knit",
         "Four-way stretch, moisture-wicking finish",
-        "Athletic regular fit \u2014 size up for a relaxed cut",
+        "Athletic regular fit — size up for a relaxed cut",
         "Machine wash cold, hang dry, do not iron the print"
       ],
       "spec": [
@@ -650,7 +749,7 @@ window.IDL_CATALOG = {
       ]
     },
     "practice-jersey": {
-      "sizeNote": "Model is 182cm, wearing M. Cut roomy \u2014 size down for a close fit.",
+      "sizeNote": "Model is 182cm, wearing M. Cut roomy — size down for a close fit.",
       "headline": "Worn in before it ships",
       "description": [
         "The practice jersey from the NYC series, washed and abraded so it arrives already broken in.",
@@ -658,7 +757,7 @@ window.IDL_CATALOG = {
       ],
       "fabric": [
         "100% cotton jersey, garment-washed",
-        "Distressed by hand \u2014 no two pieces are identical",
+        "Distressed by hand — no two pieces are identical",
         "Oversized fit through the body and sleeve",
         "Machine wash cold, tumble dry low"
       ],
@@ -669,7 +768,7 @@ window.IDL_CATALOG = {
         },
         {
           "term": "Cut",
-          "detail": "Wider through the chest and shoulder than the competition jersey \u2014 layering room for a full session."
+          "detail": "Wider through the chest and shoulder than the competition jersey — layering room for a full session."
         },
         {
           "term": "Graphic",
@@ -685,13 +784,13 @@ window.IDL_CATALOG = {
       "sizeNote": "Model is 182cm, wearing M. Fits true to size.",
       "headline": "The one that leaves the venue with you",
       "description": [
-        "The series tee from the Season 01 capsule \u2014 heavyweight cotton, boxy through the body, printed in small runs.",
+        "The series tee from the Season 01 capsule — heavyweight cotton, boxy through the body, printed in small runs.",
         "The everyday piece of the capsule: no team lock, wearable off the floor."
       ],
       "fabric": [
         "100% combed cotton, 240gsm",
         "Boxy fit with a dropped shoulder",
-        "Pre-shrunk \u2014 take your usual size",
+        "Pre-shrunk — take your usual size",
         "Machine wash cold, tumble dry low"
       ],
       "spec": [
@@ -737,7 +836,7 @@ window.IDL_CATALOG = {
         },
         {
           "term": "Collar",
-          "detail": "Camp cut \u2014 it sits flat open, which is how it is meant to be worn."
+          "detail": "Camp cut — it sits flat open, which is how it is meant to be worn."
         },
         {
           "term": "Pocket",
@@ -749,12 +848,12 @@ window.IDL_CATALOG = {
       "sizeNote": "Model is 182cm, wearing M. Fits true to size.",
       "headline": "A carry layer, built for load-in",
       "description": [
-        "The utility vest from the Vancouver capsule \u2014 a carry layer built for load-in, not for the stage.",
+        "The utility vest from the Vancouver capsule — a carry layer built for load-in, not for the stage.",
         "Six pockets, all of them reachable while wearing it."
       ],
       "fabric": [
         "Ripstop nylon shell, water-repellent finish",
-        "Regular fit \u2014 layers over a jersey",
+        "Regular fit — layers over a jersey",
         "Six pockets, two zipped",
         "Machine wash cold, hang dry"
       ],
@@ -781,7 +880,7 @@ window.IDL_CATALOG = {
       "sizeNote": "Model is 182cm, wearing M. Fits true to size.",
       "headline": "Two garments, one zip",
       "description": [
-        "Convertible pants from the Vancouver capsule \u2014 zip the leg off at the knee and they are shorts.",
+        "Convertible pants from the Vancouver capsule — zip the leg off at the knee and they are shorts.",
         "Cut wide through the thigh so the leg can move before the cloth does."
       ],
       "fabric": [
@@ -797,7 +896,7 @@ window.IDL_CATALOG = {
         },
         {
           "term": "Thigh",
-          "detail": "Cut wide, gusseted at the crotch \u2014 the leg moves before the cloth does."
+          "detail": "Cut wide, gusseted at the crotch — the leg moves before the cloth does."
         },
         {
           "term": "Waist",
@@ -813,7 +912,7 @@ window.IDL_CATALOG = {
       "sizeNote": "Model is 182cm, wearing M. Fits true to size.",
       "headline": "For the hours after the session",
       "description": [
-        "The recovery sweatpant \u2014 brushed fleece, cut loose, made for the hours after a session rather than during one.",
+        "The recovery sweatpant — brushed fleece, cut loose, made for the hours after a session rather than during one.",
         "Heavy enough to sit in on a cold floor."
       ],
       "fabric": [
@@ -825,7 +924,7 @@ window.IDL_CATALOG = {
       "spec": [
         {
           "term": "Weight",
-          "detail": "380gsm brushed fleece \u2014 warm without needing a second layer."
+          "detail": "380gsm brushed fleece — warm without needing a second layer."
         },
         {
           "term": "Fit",
@@ -845,7 +944,7 @@ window.IDL_CATALOG = {
       "sizeNote": "One size, adjustable strap at the back.",
       "headline": "Built around the crest",
       "description": [
-        "The team hat \u2014 structured six-panel crown with the crew crest embroidered at the front.",
+        "The team hat — structured six-panel crown with the crew crest embroidered at the front.",
         "Adjustable at the back, so one size genuinely is one size."
       ],
       "fabric": [
@@ -869,7 +968,7 @@ window.IDL_CATALOG = {
         },
         {
           "term": "Strap",
-          "detail": "Metal clasp with a keeper \u2014 it holds a setting instead of creeping."
+          "detail": "Metal clasp with a keeper — it holds a setting instead of creeping."
         }
       ]
     },
@@ -877,7 +976,7 @@ window.IDL_CATALOG = {
       "sizeNote": "One size, cuffed.",
       "headline": "Finished by hand, one at a time",
       "description": [
-        "The distressed beanie from the NYC series \u2014 washed, pilled at the cuff, finished by hand.",
+        "The distressed beanie from the NYC series — washed, pilled at the cuff, finished by hand.",
         "Ribbed through the body so it holds to the head without gripping."
       ],
       "fabric": [
@@ -889,7 +988,7 @@ window.IDL_CATALOG = {
       "spec": [
         {
           "term": "Knit",
-          "detail": "2x1 rib through the body \u2014 it holds without gripping."
+          "detail": "2x1 rib through the body — it holds without gripping."
         },
         {
           "term": "Distressing",
@@ -902,6 +1001,70 @@ window.IDL_CATALOG = {
         {
           "term": "Mark",
           "detail": "Woven label at the fold rather than a print that would crack."
+        }
+      ]
+    },
+    "shorts": {
+      "sizeNote": "Model is 182cm, wearing M. Fits true to size.",
+      "headline": "Pleated for movement, not for show",
+      "description": [
+        "Nylon shorts from the Seoul series — box-pleated at the waist so the leg has room to open through a full split before the cloth catches up.",
+        "Cut with a soft drape rather than a stiff shell, so it moves the way the rest of the kit does."
+      ],
+      "fabric": [
+        "100% nylon, soft-hand finish",
+        "Box-pleated front, relaxed through the thigh",
+        "Side seam pockets, back welt pocket",
+        "Machine wash cold, hang dry"
+      ],
+      "spec": [
+        {
+          "term": "Pleat",
+          "detail": "Box-pleated at the waist, so the leg opens without pulling the seat tight."
+        },
+        {
+          "term": "Drape",
+          "detail": "Soft-hand nylon, weighted enough to fall clean instead of ballooning."
+        },
+        {
+          "term": "Waist",
+          "detail": "Button-and-zip fly with a fixed tab — no drawcord to catch mid-set."
+        },
+        {
+          "term": "Pockets",
+          "detail": "Two side seam, one welt at the back, all bar-tacked at the stress points."
+        }
+      ]
+    },
+    "bandana": {
+      "sizeNote": "One size, 55cm square.",
+      "headline": "Tied a dozen ways, styled in one",
+      "description": [
+        "The bandana from the Seoul series — full-bleed print, finished on all four edges so it holds a fold whether it is worn at the neck, the wrist, or the bag strap.",
+        "The one piece of the capsule built to move between outfits, not just kits."
+      ],
+      "fabric": [
+        "100% cotton twill, 55cm square",
+        "All-over sublimated print",
+        "Hand-rolled and stitched hem on all four edges",
+        "Hand wash cold, iron on reverse"
+      ],
+      "spec": [
+        {
+          "term": "Print",
+          "detail": "Sublimated edge to edge, so the graphic runs into the hem instead of stopping short of it."
+        },
+        {
+          "term": "Hem",
+          "detail": "Rolled and stitched on all four sides, the same finish a woven pocket square gets."
+        },
+        {
+          "term": "Weight",
+          "detail": "Mid-weight twill — holds a knot without bulking one out."
+        },
+        {
+          "term": "Wear",
+          "detail": "Ties at the neck, wrist, or bag strap without losing its shape any of the three ways."
         }
       ]
     }

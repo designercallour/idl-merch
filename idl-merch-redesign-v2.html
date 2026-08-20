@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#061015">
   <title>IDL Merch - Live Website Redesign</title>
   <link rel="stylesheet" href="standout-assets/fonts.css">
-  <link rel="stylesheet" href="cart-v2.css">
+  <link rel="stylesheet" href="cart-v2.css?v=7">
   <script src="standout-assets/lucide.min.js" defer></script>
   <style>
     :root {
@@ -1772,7 +1772,6 @@
       place-items: center;
       padding: 0;
       border: 0;
-      border-radius: 2px;
       background: rgba(255, 255, 255, 0.64);
       color: #111;
       cursor: pointer;
@@ -2337,66 +2336,6 @@
     .form-note { min-height: 18px; padding-top: 10px; color: var(--idl-go-gold); font: 700 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
     .form-note:empty { display: none; }
 
-    .assurance {
-      padding: 0 20px;
-      background: var(--idl-bg);
-      border-top: 1px solid var(--idl-line);
-      border-bottom: 1px solid var(--idl-line);
-    }
-    .assurance-inner {
-      width: 100%;
-      margin-inline: auto;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0;
-    }
-    .assurance-item {
-      display: flex;
-      /* Badge centred against the copy block, not pinned to the heading. */
-      align-items: center;
-      /* Centred in its own column — the first child no longer flushes left, so
-         both halves sit symmetrically either side of the divider. */
-      justify-content: center;
-      gap: 24px;
-      padding: 44px 40px;
-      border: 0;
-      border-right: 1px solid var(--idl-line);
-    }
-    .assurance-item:last-child { border-right: 0; }
-    /* Badge matched to the hexagon illustrations on idl.pro: pointy-top, a
-       diagonal navy gradient with a light bevel on the upper-left edge, and a
-       soft drop shadow that follows the clipped shape. */
-    /* The artwork is the whole badge — hexagon, bevel and shadow are baked into
-       the PNG, so no clip-path or gradient here. Both files are pre-cropped to
-       0.866, the regular pointy-top hexagon ratio. */
-    .assurance-icon {
-      flex: 0 0 auto;
-      height: 58px;
-      aspect-ratio: 0.866;
-      display: block;
-    }
-    .assurance-icon img {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    .assurance-item h3 {
-      /* Heading to its own line of copy — the 24px line-height already carries
-         most of the separation, so the margin only has to nudge. */
-      margin: 0 0 4px;
-      color: var(--idl-white);
-      /* 500, not a lighter 400: the family ships a real 500 cut, so this stays a
-         drawn weight rather than a browser-synthesised one. */
-      font: 500 19px/24px NeueHaas, Arial, sans-serif;
-      letter-spacing: 0;
-    }
-    .assurance-item p {
-      max-width: 340px;
-      margin: 0;
-      color: #9fb0bc;
-      font: 400 15px/23px NeueHaas, Arial, sans-serif;
-      letter-spacing: 0.2px;
-    }
 
     /* Shoppable look: hotspot photo + look panel */
     /* The headline scrolls away with the section; only the filter row parks
@@ -2973,16 +2912,18 @@
       position: absolute;
       top: 16px;
       right: 16px;
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       display: grid;
       place-items: center;
       border: 0;
-      border-radius: 50%;
-      background: var(--idl-white);
+      border-radius: 0;
+      background: rgba(255, 255, 255, 0.4);
       color: var(--idl-button-ink);
       cursor: pointer;
+      transition: background 140ms ease;
     }
+    .promo-popup-close:hover { background: var(--idl-white); }
     .promo-popup-close svg { width: 15px; height: 15px; }
 
     .discount-teaser {
@@ -3207,10 +3148,6 @@
       .campaign-inner { grid-template-columns: 360px minmax(0, 1fr); }
       .partner { padding: 28px; }
       .closer-signup { padding: 56px 28px; }
-      .assurance { padding: 0 28px; }
-      .assurance-inner { gap: 0; }
-      .assurance-item { padding: 36px 26px; gap: 22px; }
-      .assurance-item p { max-width: 300px; }
     }
 
     /* Kinetik-inspired desktop product grid */
@@ -3766,6 +3703,13 @@
          the chip line — two city chips never fill it — and take over the right
          gutter the sort used to hold down. */
       .look-intro-row > .look-slider-nav { margin-right: var(--gutter); }
+      /* The shared .team-filter-tabs rule only reserves 4px on the trailing
+         edge (built for the catalog rail, where the sort control used to sit
+         right after it on the same line). With sort now on its own line below
+         and no slider-nav rendered, that 4px was the rail's only right inset —
+         thinner than the 12px gutter the sort bar under it uses. Matches the
+         catalog rail's own mobile fix (padding-inline: var(--gutter) there). */
+      .look-intro-row .team-filter-tabs { padding-right: var(--gutter); }
       /* Nothing scrolls under it now, so the white plate, the fade and the
          stacking that kept them above the chips all come off. The gap to the
          chips is the rail's own padding-bottom — the sort sits outside it. */
@@ -4023,22 +3967,6 @@
         background: rgba(6, 16, 21, 0.34);
       }
       .signup-consent { grid-template-columns: 14px 1fr; justify-content: stretch; align-items: start; margin-top: 4px; }
-      /* The gutter moves off the section and onto each row, so the divider
-         between rows runs edge to edge while the copy stays on the 12px rail. */
-      .assurance { padding: 0; }
-      .assurance-inner { grid-template-columns: minmax(0, 1fr); gap: 0; }
-      .assurance-item {
-        /* Full-width rows on mobile — centring would leave a ragged left edge. */
-        justify-content: flex-start;
-        gap: 20px;
-        padding: 28px var(--gutter);
-        border-right: 0;
-        border-bottom: 1px solid var(--idl-line);
-      }
-      .assurance-item:last-child { border-bottom: 0; }
-      .assurance-icon { height: 50px; }
-      .assurance-item h3 { margin-bottom: 4px; font-size: 16px; line-height: 20px; }
-      .assurance-item p { max-width: none; font-size: 14px; line-height: 21px; }
 
       .footer-inner { padding: 48px var(--gutter) 24px; }
       .footer-row { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; }
@@ -4154,22 +4082,22 @@
         <div class="announcement-group">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
         <div class="announcement-group" aria-hidden="true">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
         <div class="announcement-group" aria-hidden="true">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
         <div class="announcement-group" aria-hidden="true">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
       </div>
     </aside>
@@ -4293,6 +4221,13 @@
           </span>
           <span class="team-menu-team-name">New York Series</span>
           <span class="team-menu-team-place"><img src="standout-assets/team-flags/usa.webp" alt="" width="512" height="303">New York, USA</span>        </a>
+        <a class="team-menu-team" href="#look-title" data-menu-capsule="seoul">
+          <span class="team-menu-team-media" data-cycle="idl-seoul-jersey-lifestyle.webp|idl-seoul-bandana-lifestyle.webp|idl-seoul-pleated-nylon-shorts-lifestyle.webp|idl-seoul-series-tee-lifestyle.webp">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-seoul-jersey-lifestyle.webp" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Seoul Series</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/korea.webp" alt="" width="512" height="303">Seoul, KOR</span>        </a>
       </div>
     </div>
 
@@ -4327,14 +4262,14 @@
             </video>
             <div class="hero-split-scrim" aria-hidden="true"></div>
             <div class="hero-split-content">
-              <h2 class="hero-split-title">Capsule 2026</h2>
+              <h2 class="hero-split-title">City Series Capsules</h2>
               <p class="hero-split-subtitle">One league in motion</p>
-              <a class="hero-split-cta button primary" data-hero-panel="capsules" href="#look-title"><span class="button-label">Shop capsule kits</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>
+              <a class="hero-split-cta button primary" data-hero-panel="capsules" href="#look-title"><span class="button-label">Shop city series</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>
             </div>
           </article>
         </div>
         <a class="hero-follow-cta button primary" data-hero-panel="kits" href="#team-kits" aria-hidden="true" tabindex="-1"><span class="button-label">Shop by team</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>
-        <a class="hero-follow-cta button primary" data-hero-panel="capsules" href="#look-title" aria-hidden="true" tabindex="-1"><span class="button-label">Shop capsule kits</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>
+        <a class="hero-follow-cta button primary" data-hero-panel="capsules" href="#look-title" aria-hidden="true" tabindex="-1"><span class="button-label">Shop city series</span><span class="button-icon"><i data-lucide="arrow-right" aria-hidden="true"></i></span></a>
         <img class="hero-bottom-pattern" src="fieldbook-assets/idl-hero-bottom-pattern.svg" alt="" aria-hidden="true">
       </section>
 
@@ -4342,7 +4277,7 @@
         <div class="kit-showcase-sticky">
           <div class="kit-collection-intro">
             <div class="kit-collection-headline">
-              <h2>Shop By Team</h2>
+              <h2>Official Team Kits</h2>
             </div>
             <p class="kit-collection-mobile-copy">2026 IDL team kit. Official jerseys &amp; hats for every <span class="kit-inline-media" aria-hidden="true"><img src="Asset Photo/ACTION/ACT_GRV2.webp" alt=""></span> supporter.</p>
           </div>
@@ -4560,12 +4495,13 @@
 
       <section class="look" data-header-light aria-labelledby="look-title">
         <div class="kit-collection-headline">
-          <h2 id="look-title">Capsule 2026</h2>
+          <h2 id="look-title">City Series Capsules</h2>
         </div>
         <div class="look-intro-row" data-pinned-row>
             <div class="team-filter-tabs capsule-filter-tabs" role="tablist" aria-label="Filter capsule by city">
               <button class="team-filter-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-capsule-filter="vancouver"><img class="team-filter-logo" src="standout-assets/capsule-flags/canada.webp" alt="" aria-hidden="true">Vancouver Series<span class="team-filter-count">4</span></button>
               <button class="team-filter-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-capsule-filter="nyc"><img class="team-filter-logo" src="standout-assets/capsule-flags/usa.webp" alt="" aria-hidden="true">New York Series<span class="team-filter-count">5</span></button>
+              <button class="team-filter-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-capsule-filter="seoul"><img class="team-filter-logo" src="standout-assets/capsule-flags/korea.webp" alt="" aria-hidden="true">Seoul Series<span class="team-filter-count">4</span></button>
             </div>
             <div class="kit-collection-meta">
               <div class="kit-sort-control" data-sort-control>
@@ -4602,6 +4538,10 @@
             <img class="look-media" data-look-capsule="nyc" src="standout-assets/shop-products/idl-nyc-metro-shirt-lifestyle.jpg?v=1" alt="IDL NYC Metro Shirt worn front-on" loading="lazy">
             <img class="look-media" data-look-capsule="nyc" src="standout-assets/shop-products/idl-recovery-sweatpants-lifestyle.jpg?v=1" alt="IDL Recovery Sweatpants worn front-on" loading="lazy">
             <img class="look-media" data-look-capsule="nyc" src="standout-assets/shop-products/idl-nyc-series-tee-lifestyle.jpg?v=1" alt="IDL NYC Series Tee worn front-on" loading="lazy">
+            <img class="look-media" data-look-capsule="seoul" src="standout-assets/shop-products/idl-seoul-jersey-lifestyle.webp" alt="IDL Seoul Jersey worn front-on" loading="lazy">
+            <img class="look-media" data-look-capsule="seoul" src="standout-assets/shop-products/idl-seoul-bandana-lifestyle.webp" alt="IDL Seoul Bandana worn front-on" loading="lazy">
+            <img class="look-media" data-look-capsule="seoul" src="standout-assets/shop-products/idl-seoul-pleated-nylon-shorts-lifestyle.webp" alt="IDL Pleated Nylon Shorts worn front-on" loading="lazy">
+            <img class="look-media" data-look-capsule="seoul" src="standout-assets/shop-products/idl-seoul-series-tee-lifestyle.webp" alt="IDL Seoul Series Tee worn front-on" loading="lazy">
             <div class="look-dots" aria-hidden="true"></div>
           </figure>
           <div class="look-panel">
@@ -4697,33 +4637,51 @@
                   </div>
                 </div>
               </article>
+              <article class="kit-showcase-card official-product-card" data-capsule="seoul" data-showcase-card>
+                <div class="kit-showcase-grid">
+                  <a class="kit-showcase-visual has-hover-media" href="idl-product.html?product=idl-seoul-jersey" aria-label="View IDL Seoul Jersey">
+                    <img src="standout-assets/shop-products/idl-seoul-jersey-studio.webp" alt="IDL Seoul Jersey" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-seoul-jersey-lifestyle.webp" alt="" aria-hidden="true" loading="lazy"><span class="kit-showcase-badges"><span class="kit-showcase-badge">Sold out</span></span>
+                  </a>
+                  <div class="kit-showcase-details">
+                    <div class="kit-showcase-info"><h3>IDL Seoul Jersey</h3><div class="kit-showcase-price"><span>Rp 2.013.000</span></div><div class="kit-showcase-actions"><button class="add-button button primary" data-notify data-product="IDL Seoul Jersey" data-price="2013000" data-image="standout-assets/shop-products/idl-seoul-jersey-studio.webp" type="button"><span class="button-label">Notify me</span><span class="button-icon"><i data-lucide="bell" aria-hidden="true"></i></span></button><a class="kit-showcase-secondary button primary" href="idl-product.html?product=idl-seoul-jersey"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                  </div>
+                </div>
+              </article>
+              <article class="kit-showcase-card official-product-card" data-capsule="seoul" data-stock="1" data-showcase-card>
+                <div class="kit-showcase-grid">
+                  <a class="kit-showcase-visual has-hover-media" href="idl-product.html?product=idl-seoul-bandana" aria-label="View IDL Seoul Bandana">
+                    <img src="standout-assets/shop-products/idl-seoul-bandana-studio.webp" alt="IDL Seoul Bandana" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-seoul-bandana-lifestyle.webp" alt="" aria-hidden="true" loading="lazy">
+                  </a>
+                  <div class="kit-showcase-details">
+                    <div class="kit-showcase-info"><h3>IDL Seoul Bandana</h3><div class="kit-showcase-price"><span>Rp 915.000</span></div><div class="kit-showcase-actions"><button class="add-button button primary" data-product="IDL Seoul Bandana" data-price="915000" data-image="standout-assets/shop-products/idl-seoul-bandana-studio.webp" type="button"><span class="button-label">Add to cart</span><span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span></button><a class="kit-showcase-secondary button primary" href="idl-product.html?product=idl-seoul-bandana"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                  </div>
+                </div>
+              </article>
+              <article class="kit-showcase-card official-product-card" data-capsule="seoul" data-stock="2" data-showcase-card>
+                <div class="kit-showcase-grid">
+                  <a class="kit-showcase-visual has-hover-media" href="idl-product.html?product=idl-seoul-pleated-nylon-shorts" aria-label="View IDL Pleated Nylon Shorts">
+                    <img src="standout-assets/shop-products/idl-seoul-pleated-nylon-shorts-studio.webp" alt="IDL Pleated Nylon Shorts" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-seoul-pleated-nylon-shorts-lifestyle.webp" alt="" aria-hidden="true" loading="lazy">
+                  </a>
+                  <div class="kit-showcase-details">
+                    <div class="kit-showcase-info"><h3>IDL Pleated Nylon Shorts</h3><div class="kit-showcase-price"><span>Rp 1.830.000</span></div><div class="kit-showcase-actions"><button class="add-button button primary" data-product="IDL Pleated Nylon Shorts" data-price="1830000" data-image="standout-assets/shop-products/idl-seoul-pleated-nylon-shorts-studio.webp" type="button"><span class="button-label">Add to cart</span><span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span></button><a class="kit-showcase-secondary button primary" href="idl-product.html?product=idl-seoul-pleated-nylon-shorts"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                  </div>
+                </div>
+              </article>
+              <article class="kit-showcase-card official-product-card" data-capsule="seoul" data-stock="3" data-showcase-card>
+                <div class="kit-showcase-grid">
+                  <a class="kit-showcase-visual has-hover-media" href="idl-product.html?product=idl-seoul-series-tee" aria-label="View IDL Seoul Series Tee">
+                    <img src="standout-assets/shop-products/idl-seoul-series-tee-studio.webp" alt="IDL Seoul Series Tee" loading="lazy"><img class="kit-showcase-hover-media" src="standout-assets/shop-products/idl-seoul-series-tee-lifestyle.webp" alt="" aria-hidden="true" loading="lazy">
+                  </a>
+                  <div class="kit-showcase-details">
+                    <div class="kit-showcase-info"><h3>IDL Seoul Series Tee</h3><div class="kit-showcase-price"><span>Rp 2.287.000</span></div><div class="kit-showcase-actions"><button class="add-button button primary" data-product="IDL Seoul Series Tee" data-price="2287000" data-image="standout-assets/shop-products/idl-seoul-series-tee-studio.webp" type="button"><span class="button-label">Add to cart</span><span class="button-icon"><i data-lucide="plus" aria-hidden="true"></i></span></button><a class="kit-showcase-secondary button primary" href="idl-product.html?product=idl-seoul-series-tee"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a></div></div>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="partner" aria-label="Partner with the league" data-header-light>
-        <div class="partner-grid">
-          <article class="partner-card">
-            <img class="partner-card-media" src="standout-assets/van-capsule-glitch-black.jpg" alt="IDL VAN Capsule half-zip caught mid-motion" loading="lazy">
-            <span class="partner-card-scrim" aria-hidden="true"></span>
-            <div class="partner-card-copy">
-              <h3 class="partner-card-heading">Crews &amp; Teams</h3>
-              <p class="partner-card-sub">Custom team kit in your colours, marks and numbers</p>
-              <a class="partner-card-cta" href="#team-kits"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a>
-            </div>
-          </article>
-          <article class="partner-card">
-            <img class="partner-card-media" src="standout-assets/van-capsule-glitch-red.jpg" alt="IDL VAN Capsule long sleeve caught mid-spin" loading="lazy">
-            <span class="partner-card-scrim" aria-hidden="true"></span>
-            <div class="partner-card-copy">
-              <h3 class="partner-card-heading">Events &amp; Retail</h3>
-              <p class="partner-card-sub">Bring an IDL pop-up to your jam, battle or store</p>
-              <a class="partner-card-cta" href="#look-title"><span class="button-label">Learn more</span><span class="button-icon"><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></a>
-            </div>
-          </article>
-        </div>
-      </section>
       <section class="closer" id="newsletter" aria-labelledby="newsletter-title">
         <div class="closer-tile closer-signup">
           <video class="newsletter-background-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1">
@@ -4750,46 +4708,27 @@
             </div>
           </div>
         </div>
-      </section>
-      <section class="assurance" aria-label="Why shop IDL Merch">
-        <div class="assurance-inner">
-          <div class="assurance-item">
-            <span class="assurance-icon" aria-hidden="true"><img src="standout-assets/assurance-worldwide-shipping.png" alt="" width="201" height="232" loading="lazy" decoding="async"></span>
-            <div class="assurance-copy">
-              <h3>Worldwide Shipping</h3>
-              <p>Season 01 orders ship from Seoul to more than 60 countries, tracked end to end.</p>
-            </div>
-          </div>
-          <div class="assurance-item">
-            <span class="assurance-icon" aria-hidden="true"><img src="standout-assets/assurance-30-day-returns.png" alt="" width="201" height="232" loading="lazy" decoding="async"></span>
-            <div class="assurance-copy">
-              <h3>30-Day Returns</h3>
-              <p>Unworn kit goes back within 30 days. Every order ships with a prepaid return label.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      <aside class="announcement-bar is-footer" aria-label="Store highlights">
+      </section>      <aside class="announcement-bar is-footer" aria-label="Store highlights">
         <div class="announcement-track">
           <div class="announcement-group">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
           <div class="announcement-group" aria-hidden="true">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
           <div class="announcement-group" aria-hidden="true">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
           <div class="announcement-group" aria-hidden="true">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
         </div>
       </aside>
@@ -4841,7 +4780,6 @@
               <ul>
                 <li><a href="#">Contact Us</a></li>
                 <li><a href="#">Shipping</a></li>
-                <li><a href="#">Returns</a></li>
                 <li><a href="#">Size &amp; Fit Support</a></li>
                 <li><a href="#">Team Orders</a></li>
               </ul>
@@ -4929,7 +4867,7 @@
   <script src="product-catalog-sort.js"></script>
   <script src="product-image-zoom.js"></script>
   <script src="team-mega-menu-state.js"></script>
-  <script src="currency-selector.js"></script>
+  <script src="currency-selector.js?v=2"></script>
   <script src="hero-follow-cta.js"></script>
   <script src="hero-logo-scroll.js"></script>
   <script src="header-tone.js"></script>

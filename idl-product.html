@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#061015">
   <title>IDL Brotherhood Short Sleeve Red Jersey — IDL Merch</title>
   <link rel="stylesheet" href="standout-assets/fonts.css">
-  <link rel="stylesheet" href="cart-v2.css">
+  <link rel="stylesheet" href="cart-v2.css?v=7">
   <script src="standout-assets/lucide.min.js" defer></script>
   <style>
     :root {
@@ -294,38 +294,49 @@
       z-index: 60;
       top: calc(100% + 7px);
       right: 0;
-      width: 96px;
-      padding: 5px;
-      border: 1px solid rgb(35, 52, 59);
-      background: rgba(6, 14, 18, 0.98);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
+      width: 104px;
+      padding: 6px;
+      border: 1px solid rgb(35, 42, 53);
+      background: rgb(13, 20, 25);
+      box-shadow: none;
     }
     .currency-menu[hidden] { display: none; }
     .currency-option {
       width: 100%;
-      height: 34px;
-      padding: 0 10px;
+      height: 40px;
+      padding: 12px;
+      gap: 12px;
       border: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: transparent;
       color: var(--idl-white);
-      font: 400 13px/1 CarbonPlus, sans-serif;
+      font: 400 14px/16px CarbonPlus, sans-serif;
       text-transform: uppercase;
       cursor: pointer;
+      transition: background-color 150ms ease;
     }
-    .currency-option:hover,
+    /* Hover on an unchosen row lifts to the panel's own hairline colour rather
+       than the lime -- on idl.pro the lime is reserved for what is selected, so
+       hovering never previews a state you are not in. Declared before .is-active
+       at equal specificity, so the chosen row keeps its plate when hovered. */
+    .currency-option:hover { background: #232a35; }
     .currency-option.is-active {
       background: var(--idl-go-gold);
       color: var(--idl-button-ink);
     }
+    /* The tick idl.pro ships as an inline SVG, painted here through a mask so it
+       takes currentColor and flips with the row's ink instead of being pinned to
+       one fill -- same technique the brand mark uses on the light header. */
     .currency-option.is-active::after {
       content: "";
-      width: 5px;
-      height: 5px;
+      width: 16px;
+      height: 16px;
+      flex: none;
       background: currentColor;
-      border-radius: 50%;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8.5L6.5 12L13 4.5' stroke='%23000' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8.5L6.5 12L13 4.5' stroke='%23000' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E") center / contain no-repeat;
     }
     .nav-link,
     .nav-button {
@@ -480,6 +491,24 @@
     .site-header.is-light .nav-button,
     .site-header.is-light .icon-button { color: var(--idl-button-ink); }
     .site-header.is-light .icon-button { border-color: rgba(12, 15, 19, 0.18); }
+    /* The dropdown hangs off the white bar, so it inverts with it: white panel,
+       ink labels, and the hairline dropped to the same 0.18 the icon buttons use.
+       Only the header's menu -- the footer copy stays on the dark palette. */
+    .site-header.is-light .currency-menu {
+      border-color: rgba(12, 15, 19, 0.18);
+      background: var(--idl-white);
+    }
+    .site-header.is-light .currency-option { color: var(--idl-button-ink); }
+    /* Hover sits lighter than the hairline here. On the dark panel the two share
+       a value, but a fill at 0.18 on white reads heavier than the same figure
+       does as a 1px line. */
+    .site-header.is-light .currency-option:hover { background: rgba(12, 15, 19, 0.08); }
+    /* The selected row keeps the lime plate: it carries its own ink, so it reads
+       the same either way and stays the one thing the eye lands on. */
+    .site-header.is-light .currency-option.is-active {
+      background: var(--idl-go-gold);
+      color: var(--idl-button-ink);
+    }
     /* The wordmark ships as a white-filled SVG, so it can't just be recoloured.
        Mask the shape onto the brand link and paint that instead -- same
        technique the announcement bar's mark already uses. */
@@ -1602,6 +1631,45 @@
     .official-product-card .kit-showcase-visual.has-hover-media.is-zooming img {
       transform: none;
     }
+    /* Card mini-gallery — arrows appear on hover and step through the product
+       shots. Once JS marks a visual with data-gallery (2+ images), the active
+       image is driven by .is-active instead of the hover swap above, so the
+       arrows fully own which shot shows. Ported verbatim from the storefront's
+       own kit-showcase grid (idl-merch-redesign-v2.html). */
+    .official-product-card .kit-showcase-visual[data-gallery] img {
+      opacity: 0;
+      transition: opacity 240ms ease;
+    }
+    .kit-showcase-card.official-product-card .kit-showcase-visual[data-gallery] img.is-active {
+      opacity: 1;
+    }
+    .kit-showcase-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 5;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      background: rgba(255, 255, 255, 0.64);
+      color: #111;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-50%);
+      transition: opacity 160ms ease, background 140ms ease;
+      pointer-events: none;
+    }
+    .kit-showcase-nav svg { width: 16px; height: 16px; }
+    .kit-showcase-nav--prev { left: 12px; }
+    .kit-showcase-nav--next { right: 12px; }
+    .kit-showcase-nav:hover { background: #fff; }
+    .official-product-card:hover .kit-showcase-nav,
+    .official-product-card:focus-within .kit-showcase-nav {
+      opacity: 1;
+      pointer-events: auto;
+    }
     .kit-showcase-details {
       min-width: 0;
       flex: 1;
@@ -2149,66 +2217,6 @@
     .form-note { min-height: 18px; padding-top: 10px; color: var(--idl-go-gold); font: 700 12px/14px CarbonPlus, monospace; text-transform: uppercase; }
     .form-note:empty { display: none; }
 
-    .assurance {
-      padding: 0 20px;
-      background: var(--idl-bg);
-      border-top: 1px solid var(--idl-line);
-      border-bottom: 1px solid var(--idl-line);
-    }
-    .assurance-inner {
-      width: 100%;
-      margin-inline: auto;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0;
-    }
-    .assurance-item {
-      display: flex;
-      /* Badge centred against the copy block, not pinned to the heading. */
-      align-items: center;
-      /* Centred in its own column — the first child no longer flushes left, so
-         both halves sit symmetrically either side of the divider. */
-      justify-content: center;
-      gap: 24px;
-      padding: 44px 40px;
-      border: 0;
-      border-right: 1px solid var(--idl-line);
-    }
-    .assurance-item:last-child { border-right: 0; }
-    /* Badge matched to the hexagon illustrations on idl.pro: pointy-top, a
-       diagonal navy gradient with a light bevel on the upper-left edge, and a
-       soft drop shadow that follows the clipped shape. */
-    /* The artwork is the whole badge — hexagon, bevel and shadow are baked into
-       the PNG, so no clip-path or gradient here. Both files are pre-cropped to
-       0.866, the regular pointy-top hexagon ratio. */
-    .assurance-icon {
-      flex: 0 0 auto;
-      height: 58px;
-      aspect-ratio: 0.866;
-      display: block;
-    }
-    .assurance-icon img {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    .assurance-item h3 {
-      /* Heading to its own line of copy — the 24px line-height already carries
-         most of the separation, so the margin only has to nudge. */
-      margin: 0 0 4px;
-      color: var(--idl-white);
-      /* 500, not a lighter 400: the family ships a real 500 cut, so this stays a
-         drawn weight rather than a browser-synthesised one. */
-      font: 500 19px/24px NeueHaas, Arial, sans-serif;
-      letter-spacing: 0;
-    }
-    .assurance-item p {
-      max-width: 340px;
-      margin: 0;
-      color: #9fb0bc;
-      font: 400 15px/23px NeueHaas, Arial, sans-serif;
-      letter-spacing: 0.2px;
-    }
 
     /* Shoppable look: hotspot photo + look panel */
     /* The headline scrolls away with the section; only the filter row parks
@@ -2820,16 +2828,18 @@
       position: absolute;
       top: 16px;
       right: 16px;
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       display: grid;
       place-items: center;
       border: 0;
-      border-radius: 50%;
-      background: var(--idl-white);
+      border-radius: 0;
+      background: rgba(255, 255, 255, 0.4);
       color: var(--idl-button-ink);
       cursor: pointer;
+      transition: background 140ms ease;
     }
+    .promo-popup-close:hover { background: var(--idl-white); }
     .promo-popup-close svg { width: 15px; height: 15px; }
 
     .discount-teaser {
@@ -3054,10 +3064,6 @@
       .campaign-inner { grid-template-columns: 360px minmax(0, 1fr); }
       .partner { padding: 28px; }
       .closer-signup { padding: 56px 28px; }
-      .assurance { padding: 0 28px; }
-      .assurance-inner { gap: 0; }
-      .assurance-item { padding: 36px 26px; gap: 22px; }
-      .assurance-item p { max-width: 300px; }
     }
 
     /* Kinetik-inspired desktop product grid */
@@ -3862,22 +3868,6 @@
         background: rgba(6, 16, 21, 0.34);
       }
       .signup-consent { grid-template-columns: 14px 1fr; justify-content: stretch; align-items: start; margin-top: 4px; }
-      /* The gutter moves off the section and onto each row, so the divider
-         between rows runs edge to edge while the copy stays on the 12px rail. */
-      .assurance { padding: 0; }
-      .assurance-inner { grid-template-columns: minmax(0, 1fr); gap: 0; }
-      .assurance-item {
-        /* Full-width rows on mobile — centring would leave a ragged left edge. */
-        justify-content: flex-start;
-        gap: 20px;
-        padding: 28px var(--gutter);
-        border-right: 0;
-        border-bottom: 1px solid var(--idl-line);
-      }
-      .assurance-item:last-child { border-bottom: 0; }
-      .assurance-icon { height: 50px; }
-      .assurance-item h3 { margin-bottom: 4px; font-size: 16px; line-height: 20px; }
-      .assurance-item p { max-width: none; font-size: 14px; line-height: 21px; }
 
       .footer-inner { padding: 48px var(--gutter) 24px; }
       .footer-row { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; }
@@ -4869,13 +4859,17 @@
       cursor: pointer;
       transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
     }
-    .pdp-size:hover:not(.is-out) { border-color: var(--pdp-ink); }
+    .pdp-size:hover { border-color: var(--pdp-ink); }
     .pdp-size[aria-checked="true"] { border-color: var(--pdp-ink); }
     /* Sold out reads as struck through rather than merely dimmed: at this size
        a grey label is easy to mistake for a style choice. */
     .pdp-size.is-out {
       color: rgba(12, 15, 19, 0.3);
-      cursor: not-allowed;
+      cursor: pointer;
+      /* Soft grey fill (like a sold-out size on banditrunning.com) under the
+         diagonal strike — background-color, so it sits beneath the strike's
+         background-image rather than replacing it. */
+      background-color: rgba(12, 15, 19, 0.03);
       background-image: linear-gradient(to top right, transparent calc(50% - 1px), var(--pdp-line) 50%, transparent calc(50% + 1px));
     }
     .pdp-size-note { margin: 14px 0 0; color: var(--pdp-muted); font-size: 13px; line-height: 18px; }
@@ -4950,10 +4944,10 @@
     /* ---- spec list --------------------------------------------------
        Was its own full-width section below the gallery (photo + a big
        headline); now folded into the accordion stack as a fourth detail, the
-       same shape as Description/Fabric & fit/Shipping & returns. Only the
-       list itself survives that move — the photo was a duplicate of a shot
-       already in the gallery, and the section-level headline is now the
-       accordion's own summary label instead of needing its own type scale. */
+       same shape as Description/Fabric & fit/Shipping & returns. The photo
+       was a duplicate of a shot already in the gallery and the editorial
+       headline (copy.headline) both got dropped — the accordion's own label
+       is the plain, literal "Specs" instead. */
     .pdp-spec-list { margin: 0; padding-left: 18px; list-style: none; display: grid; gap: 10px; }
     .pdp-spec-item { position: relative; }
     .pdp-spec-item::before {
@@ -5141,9 +5135,22 @@
     .size-guide-head h2 { margin: 0; font-size: 22px; line-height: 22px; text-transform: uppercase; }
     .size-guide-body { padding: 22px; }
     .size-guide-body > p { margin: 0 0 18px; color: var(--idl-muted); font-size: 14px; line-height: 20px; }
-    /* Stack to one column on a phone — chart first, model shot below. */
+    /* Stack to one column on a phone — chart first, model shot below. Also
+       go full-screen: the floating card (760px cap, centred) leaves barely
+       any room for the chart once it's this narrow, so the dialog fills the
+       viewport instead. overflow-y replaces the desktop overflow:hidden (set
+       above) since a full-height dialog with a photo AND the size table can
+       run taller than the screen. */
     @media (max-width: 620px) {
-      .size-guide { grid-template-columns: minmax(0, 1fr); }
+      .size-guide {
+        grid-template-columns: minmax(0, 1fr);
+        inset: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        overflow-y: auto;
+      }
       .size-guide-media { order: 2; aspect-ratio: 4 / 3; }
     }
     .size-guide-scroll { overflow-x: auto; }
@@ -5207,22 +5214,22 @@
         <div class="announcement-group">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
         <div class="announcement-group" aria-hidden="true">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
         <div class="announcement-group" aria-hidden="true">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
         <div class="announcement-group" aria-hidden="true">
           <span class="announcement-copy">Free shipping on US orders over $160</span>
           <span class="announcement-copy">New: Capsule 2026</span>
-          <span class="announcement-copy">Easy returns</span>
+          <span class="announcement-copy">Worldwide Shipping</span>
         </div>
       </div>
     </aside>
@@ -5346,6 +5353,13 @@
           </span>
           <span class="team-menu-team-name">New York Series</span>
           <span class="team-menu-team-place"><img src="standout-assets/team-flags/usa.webp" alt="" width="512" height="303">New York, USA</span>        </a>
+        <a class="team-menu-team" href="idl-merch-redesign-v2.html?capsule=seoul#look-title" data-menu-capsule="seoul">
+          <span class="team-menu-team-media" data-cycle="idl-seoul-jersey-lifestyle.webp|idl-seoul-bandana-lifestyle.webp|idl-seoul-pleated-nylon-shorts-lifestyle.webp|idl-seoul-series-tee-lifestyle.webp">
+            <span class="team-menu-team-cursor" aria-hidden="true"><span class="button primary"><span class="button-label">Shop</span><span class="button-icon"><i data-lucide="arrow-right"></i></span></span></span>
+            <img src="standout-assets/shop-products/idl-seoul-jersey-lifestyle.webp" alt="" loading="lazy">
+          </span>
+          <span class="team-menu-team-name">Seoul Series</span>
+          <span class="team-menu-team-place"><img src="standout-assets/team-flags/korea.webp" alt="" width="512" height="303">Seoul, KOR</span>        </a>
       </div>
     </div>
 
@@ -5476,28 +5490,27 @@
 
                 <ul class="pdp-perks">
                   <li><i data-lucide="truck" aria-hidden="true"></i><span>Ships from Seoul in 2&ndash;4 business days</span></li>
-                  <li><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>30-day returns with a prepaid label</span></li>
                   <li><i data-lucide="shield-check" aria-hidden="true"></i><span>Official league kit &mdash; same spec the crews compete in</span></li>
                 </ul>
 
                 <div class="pdp-details">
-                  <details class="pdp-detail" open>
+                  <details class="pdp-detail" name="pdp-detail" open>
                     <summary>Description<i data-lucide="plus" aria-hidden="true"></i></summary>
                     <div class="pdp-detail-body" data-pdp-description></div>
                   </details>
-                  <details class="pdp-detail">
+                  <details class="pdp-detail" name="pdp-detail">
                     <summary>Fabric &amp; fit<i data-lucide="plus" aria-hidden="true"></i></summary>
                     <div class="pdp-detail-body"><ul data-pdp-fabric></ul></div>
                   </details>
-                  <details class="pdp-detail">
+                  <details class="pdp-detail" name="pdp-detail">
                     <summary>Shipping &amp; returns<i data-lucide="plus" aria-hidden="true"></i></summary>
                     <div class="pdp-detail-body">
                       <p>Free shipping on US orders over $160. Everything else ships tracked to 60+ countries at checkout rates.</p>
                       <p>Unworn kit goes back within 30 days. Team-name customisations are final sale.</p>
                     </div>
                   </details>
-                  <details class="pdp-detail">
-                    <summary><span data-pdp-spec-headline>Built for the floor, not the shelf</span><i data-lucide="plus" aria-hidden="true"></i></summary>
+                  <details class="pdp-detail" name="pdp-detail">
+                    <summary>Specs<i data-lucide="plus" aria-hidden="true"></i></summary>
                     <div class="pdp-detail-body">
                       <dl class="pdp-spec-list" data-pdp-spec></dl>
                     </div>
@@ -5553,46 +5566,27 @@
             </div>
           </div>
         </div>
-      </section>
-      <section class="assurance" aria-label="Why shop IDL Merch">
-        <div class="assurance-inner">
-          <div class="assurance-item">
-            <span class="assurance-icon" aria-hidden="true"><img src="standout-assets/assurance-worldwide-shipping.png" alt="" width="201" height="232" loading="lazy" decoding="async"></span>
-            <div class="assurance-copy">
-              <h3>Worldwide Shipping</h3>
-              <p>Season 01 orders ship from Seoul to more than 60 countries, tracked end to end.</p>
-            </div>
-          </div>
-          <div class="assurance-item">
-            <span class="assurance-icon" aria-hidden="true"><img src="standout-assets/assurance-30-day-returns.png" alt="" width="201" height="232" loading="lazy" decoding="async"></span>
-            <div class="assurance-copy">
-              <h3>30-Day Returns</h3>
-              <p>Unworn kit goes back within 30 days. Every order ships with a prepaid return label.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      <aside class="announcement-bar is-footer" aria-label="Store highlights">
+      </section>      <aside class="announcement-bar is-footer" aria-label="Store highlights">
         <div class="announcement-track">
           <div class="announcement-group">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
           <div class="announcement-group" aria-hidden="true">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
           <div class="announcement-group" aria-hidden="true">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
           <div class="announcement-group" aria-hidden="true">
             <span class="announcement-copy">Free shipping on US orders over $160</span>
             <span class="announcement-copy">New: Capsule 2026</span>
-            <span class="announcement-copy">Easy returns</span>
+            <span class="announcement-copy">Worldwide Shipping</span>
           </div>
         </div>
       </aside>
@@ -5644,7 +5638,6 @@
               <ul>
                 <li><a href="#">Contact Us</a></li>
                 <li><a href="#">Shipping</a></li>
-                <li><a href="#">Returns</a></li>
                 <li><a href="#">Size &amp; Fit Support</a></li>
                 <li><a href="#">Team Orders</a></li>
               </ul>
@@ -5787,7 +5780,7 @@
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>
   <script src="team-mega-menu-state.js"></script>
-  <script src="currency-selector.js"></script>
+  <script src="currency-selector.js?v=2"></script>
   <script src="header-tone.js"></script>
   <!-- The PDP tells the shared cart which product is on screen, so the upsell
        can lead with its sibling cut / team. Updated on cut switch below. -->
@@ -6362,7 +6355,13 @@
       let selectedSize = null;
       let defaultSizeNote = sizeNote ? sizeNote.textContent : '';
 
-      const shotSrc = (key, variant) => `${SHOP}${key}${variant ? '-' + variant : ''}.jpg`;
+      // Seoul series ships as webp (smaller, sharpened on export); every other
+      // product's photography is still jpg — this is the one place that has to
+      // know the difference, since every shotSrc() caller just passes a key.
+      const WEBP_PRODUCTS = new Set([
+        'idl-seoul-jersey', 'idl-seoul-bandana', 'idl-seoul-pleated-nylon-shorts', 'idl-seoul-series-tee'
+      ]);
+      const shotSrc = (key, variant) => `${SHOP}${key}${variant ? '-' + variant : ''}.${WEBP_PRODUCTS.has(key) ? 'webp' : 'jpg'}`;
 
       function render(key) {
         if (!catalog) return;
@@ -6395,8 +6394,16 @@
           img.alt = `${group.label} in the Season 01 kit`;
         });
 
+        // Mirrors the storefront card's low-stock badge: only while 1-3 remain
+        // (0 is sold out, its own badge; 4+ or unset shows nothing).
         const badges = el('[data-pdp-badges]');
-        badges.innerHTML = product.soldOut ? '<span class="pdp-badge pdp-badge--out">Sold out</span>' : '';
+        if (product.soldOut) {
+          badges.innerHTML = '<span class="pdp-badge pdp-badge--out">Sold out</span>';
+        } else if (Number.isInteger(product.stock) && product.stock > 0 && product.stock < 4) {
+          badges.innerHTML = `<span class="pdp-badge pdp-badge--stock">${product.stock} left</span>`;
+        } else {
+          badges.innerHTML = '';
+        }
 
         // Cut control, only for the products that come in both sleeve lengths.
         const pair = product.pair ? catalog.products[product.pair] : null;
@@ -6433,7 +6440,8 @@
           button.className = 'pdp-size' + (gone ? ' is-out' : '');
           button.setAttribute('role', 'radio');
           button.setAttribute('aria-checked', 'false');
-          if (gone) button.setAttribute('aria-disabled', 'true');
+          // Not aria-disabled: sold-out sizes are selectable now (they flip the
+          // CTA to Notify me), so disabling them for AT would be a lie.
           button.dataset.size = size;
           button.textContent = size;
           sizesBox.append(button);
@@ -6471,7 +6479,6 @@
 
         el('[data-pdp-description]').innerHTML = copy.description.map(line => `<p>${line}</p>`).join('');
         el('[data-pdp-fabric]').innerHTML = copy.fabric.map(line => `<li>${line}</li>`).join('');
-        el('[data-pdp-spec-headline]').textContent = copy.headline;
         el('[data-pdp-spec]').innerHTML = copy.spec.map(item =>
           `<div class="pdp-spec-item"><dt>${item.term}</dt><dd>${item.detail}</dd></div>`).join('');
 
@@ -6522,6 +6529,47 @@
         if (window.IDLProductImageZoom) {
           window.IDLProductImageZoom.bindProductImageZoom(relatedGrid.querySelectorAll('.kit-showcase-visual'));
         }
+        // Card mini-gallery: same behaviour as the storefront's own kit-showcase
+        // grid (idl-merch-redesign-v2.html) — prev/next arrows shown on hover
+        // step through the studio/lifestyle shots instead of just crossfading.
+        relatedGrid.querySelectorAll('.kit-showcase-visual').forEach(visual => {
+          const images = Array.from(visual.querySelectorAll('img'));
+          if (images.length < 2) return;
+
+          visual.dataset.gallery = '';
+          let index = 0;
+          const show = next => {
+            index = (next + images.length) % images.length;
+            images.forEach((img, i) => img.classList.toggle('is-active', i === index));
+          };
+          show(0);
+
+          const makeArrow = (dir, label, path) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `kit-showcase-nav kit-showcase-nav--${dir}`;
+            btn.setAttribute('aria-label', label);
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+            btn.addEventListener('click', event => {
+              event.preventDefault();
+              event.stopPropagation();
+              show(index + (dir === 'next' ? 1 : -1));
+            });
+            return btn;
+          };
+
+          visual.appendChild(makeArrow('prev', 'Previous photo', '<path d="m15 18-6-6 6-6"></path>'));
+          visual.appendChild(makeArrow('next', 'Next photo', '<path d="m9 18 6-6-6-6"></path>'));
+
+          const cardEl = visual.closest('.official-product-card') || visual;
+          cardEl.addEventListener('pointerenter', () => {
+            if (window.matchMedia('(hover: hover)').matches) show(1);
+          });
+          cardEl.addEventListener('pointerleave', () => show(0));
+          cardEl.addEventListener('focusout', event => {
+            if (!cardEl.contains(event.relatedTarget)) show(0);
+          });
+        });
         // New set, so the rail starts back at its own first card rather than
         // wherever the previous product's set happened to leave it scrolled.
         relatedGrid.scrollLeft = 0;
@@ -6531,26 +6579,34 @@
         refreshIcons();
       }
 
+      // Flip the CTA between "Add to cart" (plus) and "Notify me" (bell). The
+      // click handler below keys off dataset.soldOut, so this is the single
+      // switch for both the whole-product sold-out state and a sold-out size.
+      function setNotifyMode(on) {
+        addButton.dataset.soldOut = String(on);
+        addLabel.textContent = on ? 'Notify me' : 'Add to cart';
+        addButton.querySelector('.button-icon').innerHTML =
+          `<i data-lucide="${on ? 'bell' : 'plus'}" aria-hidden="true"></i>`;
+        if (window.lucide) window.lucide.createIcons();
+      }
+
       // Both controls are rebuilt on every render, so the listeners live on the
       // containers rather than on buttons that will not survive the next one.
       sizesBox.addEventListener('click', (event) => {
         const button = event.target.closest('.pdp-size');
         if (!button) return;
-        // Sold-out sizes stay clickable so the reason is announced rather than
-        // the click just doing nothing.
-        if (button.classList.contains('is-out')) {
-          if (sizeNote) {
-            sizeNote.textContent = `${button.dataset.size} is sold out — join the restock list below.`;
-            sizeNote.classList.add('is-warning');
-          }
-          return;
-        }
+        // Sold-out sizes are now selectable: picking one highlights it and
+        // flips the CTA to Notify me, rather than being a dead click.
         selectedSize = button.dataset.size;
         [...sizesBox.children].forEach(node => node.setAttribute('aria-checked', String(node === button)));
+        const gone = button.classList.contains('is-out');
         if (sizeNote) {
-          sizeNote.textContent = defaultSizeNote;
-          sizeNote.classList.remove('is-warning');
+          sizeNote.textContent = gone
+            ? `${button.dataset.size} is sold out — get notified when it's back.`
+            : defaultSizeNote;
+          sizeNote.classList.toggle('is-warning', gone);
         }
+        setNotifyMode(gone);
         addNote.textContent = '';
       });
 
@@ -6985,7 +7041,7 @@
       document.querySelectorAll('#collections-mega-menu .team-menu-team').forEach(function (card) {
         var img = card.querySelector('img');
         var src = img ? img.getAttribute('src') : '';
-        var slug = CAPSULES.find(function (c) { return src.indexOf(c) !== -1; });
+        var slug = card.getAttribute('data-menu-capsule') || CAPSULES.find(function (c) { return src.indexOf(c) !== -1; });
         if (slug) card.setAttribute('href', 'idl-merch-redesign-v2.html?capsule=' + slug + '#look-title');
       });
     })();
