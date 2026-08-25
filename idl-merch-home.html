@@ -120,7 +120,7 @@ section{padding:90px 40px;}
 .sec-head .eyebrow{margin-bottom:14px;}
 .sec-head .button{flex:0 0 auto;align-self:flex-end;}
 /* collection stories (full-bleed, stacked) */
-.cstory{position:relative;display:block;min-height:88vh;overflow:hidden;background:var(--ink);}
+.cstory{position:relative;display:block;min-height:88vh;overflow:hidden;background:var(--ink);scroll-margin-top:64px;}
 .cstory + .cstory{border-top:2px solid #000;}
 .cstory .bg{position:absolute;inset:0;background-size:cover;background-position:center 28%;transition:transform .8s ease;}
 .cstory .bgv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
@@ -216,7 +216,7 @@ function view(state){
     </section>` : '';
   const tick=cols.map(c=>`<span>${esc(c.name)}</span><span class="dot">/</span>`).join('');
   const stories=cols.map(c=>`
-    <a class="cstory" href="${esc(c.link)}">
+    <a class="cstory" id="col-${(c.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}" href="${esc(c.link)}">
       ${media(c)}
       <div class="cs-inner"><h2 class="display">${esc(c.name)}</h2><p>${esc(c.blurb)}</p><span class="button"><span class="button-label">${esc(c.cta)}</span><span class="button-icon"><span class="button-icon-cells"><i data-lucide="arrow-right" aria-hidden="true"></i><i data-lucide="arrow-right" aria-hidden="true"></i></span></span></span></div>
     </a>${c.name==='OFFICIAL TEAM KITS' ? teamSection : ''}${pstrip(c)}`).join('');
@@ -266,7 +266,7 @@ function view(state){
         <div class="hero-split-content">
           <h2 class="hero-split-title">City Series Capsules</h2>
           <p class="hero-split-subtitle">One league in motion</p>
-          <a href="#collections" class="hero-split-cta button primary"><span class="button-label">Shop capsules</span><span class="button-icon"><span class="button-icon-cells"><i data-lucide="arrow-right" aria-hidden="true"></i><i data-lucide="arrow-right" aria-hidden="true"></i></span></span></a>
+          <a href="#col-new-york-series" class="hero-split-cta button primary"><span class="button-label">Shop capsules</span><span class="button-icon"><span class="button-icon-cells"><i data-lucide="arrow-right" aria-hidden="true"></i><i data-lucide="arrow-right" aria-hidden="true"></i></span></span></a>
         </div>
       </article>
     </div>
