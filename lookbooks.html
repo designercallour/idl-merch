@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDL LOOKBOOKS — SEASON 2026</title>
+<link rel="stylesheet" href="standout-assets/fonts.css">
+<script src="standout-assets/lucide.min.js" defer></script>
+<style>
+:root{--accent:#C0E700;--carbon:#061015;--chalk:#FFFFFF;--steel:#90999F;--slate:#121D22;--ink:#0D222D;--btn-ink:#0C0F13;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--carbon);color:var(--chalk);font-family:'NeueHaas',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+.display{font-family:'NeueHaas';font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:0;}
+.eyebrow{font-family:'CarbonPlus';text-transform:uppercase;font-size:12px;letter-spacing:.14em;color:var(--steel);}
+
+/* promobar */
+.promobar{position:relative;z-index:90;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 44px;background:var(--carbon);border-bottom:1px solid #1c1c1a;color:var(--accent);}
+.promobar .pb-i{white-space:nowrap;font-family:'NeueHaas';font-weight:700;text-transform:uppercase;font-size:15px;line-height:1.14;letter-spacing:0;}
+.promobar .pb-i b{display:block;font-weight:700;}
+.promobar .pb-c{text-align:left;}
+.promobar .pb-mono{height:22px;}
+
+/* nav */
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 40px;background:var(--carbon);border-bottom:1px solid #17171a;}
+nav .brand{display:flex;align-items:center;gap:12px;}nav .brand img{height:20px;}nav .brand .tm{font-family:'CarbonPlus';font-size:10px;color:var(--steel);align-self:flex-start;margin-top:2px;}
+nav .links{display:flex;gap:32px;}
+nav .links a{font-family:'CarbonPlus';font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--chalk);transition:color .15s;}
+nav .links a:hover{color:var(--accent);}
+nav .links a.active{color:var(--accent);}
+nav .cart{display:flex;align-items:center;gap:9px;border:1px solid var(--steel);padding:8px 16px;font-family:'CarbonPlus';font-size:13px;letter-spacing:.08em;cursor:pointer;transition:.15s;}
+nav .cart:hover{border-color:var(--accent);color:var(--accent);}
+nav .cart .count{color:var(--carbon);background:var(--accent);padding:1px 7px;font-size:12px;}
+nav .nav-actions{display:flex;align-items:center;gap:14px;}
+.navToggle{display:none;background:none;border:0;color:var(--chalk);cursor:pointer;padding:2px;align-items:center;}
+.navToggle svg{width:26px;height:26px;}
+.mobnav{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:95;background:var(--carbon);flex-direction:column;padding:84px 22px 40px;}
+.mobnav.open{display:flex;}
+.mobnav a{padding:18px 0;font-family:'CarbonPlus';font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk);border-bottom:1px solid #17171a;}
+.mobnav a.active{color:var(--accent);}
+
+/* button */
+.button{height:44px;min-height:44px;padding:0;display:inline-flex;align-items:stretch;gap:6px;border:0;background:var(--accent);color:var(--btn-ink);font-family:'CarbonPlus';font-weight:700;font-size:16px;line-height:18px;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:color 100ms ease,background 100ms ease,border-color 100ms ease;position:relative;overflow:hidden;}
+.button-label{padding:0 10px 0 20px;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+.button-icon{width:44px;height:44px;padding:4px;display:grid;place-items:center;position:relative;z-index:1;}
+.button-icon svg{width:36px;height:36px;padding:10px;background:var(--slate);color:var(--accent);}
+.button-icon-cells{display:grid;overflow:hidden;background:var(--slate);}
+.button-icon-cells>svg{grid-area:1/1;transition:transform 340ms cubic-bezier(.22,.8,.2,1);}
+.button-icon-cells>svg:nth-child(2){transform:translateY(-100%);}
+.button::before{content:"";position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.1);transform:scaleX(0);transform-origin:left center;transition:transform 320ms cubic-bezier(.22,.8,.2,1);pointer-events:none;}
+.button:hover::before{transform:scaleX(1);}
+.button:hover .button-icon-cells>svg:nth-child(1){transform:translateY(100%);}
+.button:hover .button-icon-cells>svg:nth-child(2){transform:translateY(0);}
+.button:hover .button-icon svg{background:var(--ink);}
+
+/* lookbook hero */
+.lb-hero{position:relative;min-height:62vh;display:flex;align-items:flex-end;overflow:hidden;background:#050505;}
+.lb-hero .lb-hero-bg{position:absolute;inset:0;background-size:cover;background-position:50% 32%;filter:saturate(.92) contrast(1.03);}
+.lb-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,21,.5) 0%,rgba(6,16,21,.05) 30%,rgba(6,16,21,.35) 60%,rgba(6,16,21,.96) 100%);}
+.lb-hero-inner{position:relative;z-index:2;padding:0 40px 60px;max-width:1100px;}
+.lb-hero-inner .eyebrow{color:var(--chalk);margin-bottom:18px;}
+.lb-hero-inner h1{font-size:clamp(46px,8vw,104px);color:var(--chalk);}
+.lb-hero-inner p{font-family:'CarbonPlus';text-transform:uppercase;letter-spacing:.06em;font-size:14px;color:var(--chalk);margin-top:20px;max-width:52ch;line-height:1.5;}
+
+/* index grid */
+.lb-wrap{padding:64px 40px 100px;}
+.lb-wrap .head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:36px;}
+.lb-wrap .head h2{font-family:'NeueHaas';font-weight:900;text-transform:uppercase;font-size:clamp(30px,4.4vw,52px);line-height:.9;color:var(--chalk);}
+.lb-count{font-family:'CarbonPlus';font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);}
+.lb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.lb-card{position:relative;display:block;overflow:hidden;background:var(--ink);aspect-ratio:4/5;isolation:isolate;}
+.lb-card.wide{grid-column:span 2;aspect-ratio:8/5;}
+.lb-card .lb-bg{position:absolute;inset:0;background-size:cover;background-position:50% 30%;transition:transform .6s cubic-bezier(.22,.8,.2,1);}
+.lb-card:hover .lb-bg{transform:scale(1.05);}
+.lb-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,21,.05) 40%,rgba(6,16,21,.55) 74%,rgba(6,16,21,.95) 100%);}
+.lb-card .lb-cat{position:absolute;top:16px;left:16px;z-index:2;font-family:'CarbonPlus';font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--carbon);background:var(--accent);padding:4px 9px;}
+.lb-card .lb-meta{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:24px;}
+.lb-card .lb-date{font-family:'CarbonPlus';font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);margin-bottom:8px;}
+.lb-card .lb-title{font-family:'NeueHaas';font-weight:900;text-transform:uppercase;font-size:clamp(20px,2.2vw,30px);line-height:.95;color:var(--chalk);}
+.lb-card .lb-cta{margin-top:14px;display:inline-flex;align-items:center;gap:8px;font-family:'CarbonPlus';font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
+.lb-card .lb-cta svg{width:15px;height:15px;transition:transform .25s;}
+.lb-card:hover .lb-cta svg{transform:translateX(4px);}
+
+/* footer */
+footer{background:var(--carbon);padding:72px 40px 40px;border-top:1px solid #17171a;}
+footer .top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:40px;margin-bottom:48px;}
+footer .mono{height:26px;margin-bottom:18px;}
+footer .col h5{font-family:'CarbonPlus';font-size:12px;letter-spacing:.12em;color:var(--steel);margin-bottom:16px;text-transform:uppercase;}
+footer .col a{display:block;font-family:'CarbonPlus';font-size:13px;letter-spacing:.05em;color:var(--chalk);margin-bottom:11px;transition:color .15s;}
+footer .col a:hover{color:var(--accent);}
+footer .base{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:26px;font-family:'CarbonPlus';font-size:11px;letter-spacing:.08em;color:var(--steel);}
+footer .base .url{color:var(--accent);}
+
+@media(max-width:900px){
+  nav .links{display:none;}
+  .navToggle{display:inline-flex;}
+  .lb-grid{grid-template-columns:repeat(2,1fr);}
+  .lb-card.wide{grid-column:span 2;aspect-ratio:16/9;}
+}
+@media(max-width:560px){
+  nav{padding:14px 22px;}
+  .promobar{padding:12px 18px;gap:10px;}
+  .promobar .pb-mono{display:none;}
+  .promobar .pb-i{font-size:13px;}
+  .lb-hero-inner{padding:0 22px 44px;}
+  .lb-wrap{padding:44px 22px 70px;}
+  .lb-grid{grid-template-columns:1fr;gap:14px;}
+  .lb-card,.lb-card.wide{grid-column:auto;aspect-ratio:4/5;}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+
+<a class="promobar" href="index.html">
+  <span class="pb-i"><b>2026 SEASON</b><b>DROP</b></span>
+  <span class="pb-i pb-c"><b>FREE SHIPPING</b><b>OVER $150</b></span>
+  <img class="pb-mono" src="fieldbook-assets/idl-live-logo.svg" alt="IDL">
+  <span class="pb-i"><b>CODE:</b><b>DAYONE</b></span>
+</a>
+
+<nav>
+  <a class="brand" href="idl-merch-home.html"><img src="fieldbook-assets/idl-live-logo.svg" alt="IDL"><span class="tm">™</span></a>
+  <div class="links"><a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a><a href="lookbooks.html" class="active">LOOKBOOKS</a></div>
+  <div class="nav-actions">
+    <div class="cart" data-bag>BAG <span class="count">0</span></div>
+    <button class="navToggle" data-navtoggle type="button" aria-label="Menu" aria-expanded="false"><i data-lucide="menu" aria-hidden="true"></i></button>
+  </div>
+</nav>
+<div class="mobnav" data-mobnav>
+  <a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a><a href="lookbooks.html" class="active">LOOKBOOKS</a>
+</div>
+
+<header class="lb-hero">
+  <div class="lb-hero-bg" style="background-image:url('lookbook-assets/van-capsule-11.jpg')"></div>
+  <div class="lb-hero-inner">
+    <div class="eyebrow">THE IDL SHOP / SEASON 2026</div>
+    <h1 class="display">LOOKBOOKS</h1>
+    <p>Every capsule and crew, shot on location. The kit as it actually moves — from the practice floor to the city that hosts the series.</p>
+  </div>
+</header>
+
+<div class="lb-wrap">
+  <div class="head">
+    <h2>Season 01 Lookbooks</h2>
+    <span class="lb-count">9 stories</span>
+  </div>
+  <div class="lb-grid">
+
+    <a class="lb-card wide" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('lookbook-assets/van-capsule-03.jpg')"></div>
+      <span class="lb-cat">City Capsule</span>
+      <div class="lb-meta">
+        <div class="lb-date">May 23, 2026 · Vancouver</div>
+        <div class="lb-title">The Vancouver Capsule, shot on the clock</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/shop-products/idl-nyc-metro-shirt-lifestyle.jpg')"></div>
+      <span class="lb-cat">City Capsule</span>
+      <div class="lb-meta">
+        <div class="lb-date">May 2, 2026 · New York</div>
+        <div class="lb-title">NYC Series</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/shop-products/idl-seoul-jersey-lifestyle.webp')"></div>
+      <span class="lb-cat">City Capsule</span>
+      <div class="lb-meta">
+        <div class="lb-date">Jun 27, 2026 · Seoul</div>
+        <div class="lb-title">Seoul Series</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/eco_grv_1.jpg')"></div>
+      <span class="lb-cat">Team</span>
+      <div class="lb-meta">
+        <div class="lb-date">Los Angeles, USA</div>
+        <div class="lb-title">GRV — Team Lookbook</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/eco_rf_1.jpg')"></div>
+      <span class="lb-cat">Team</span>
+      <div class="lb-meta">
+        <div class="lb-date">Auckland, NZL</div>
+        <div class="lb-title">Royal Family — Team Lookbook</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/eco_1m_1.jpg')"></div>
+      <span class="lb-cat">Team</span>
+      <div class="lb-meta">
+        <div class="lb-date">Seoul, KOR</div>
+        <div class="lb-title">1MILLION — Team Lookbook</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/eco_bro_1.jpg')"></div>
+      <span class="lb-cat">Team</span>
+      <div class="lb-meta">
+        <div class="lb-date">Vancouver, CAN</div>
+        <div class="lb-title">Brotherhood — Team Lookbook</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/eco_qs_1.jpg')"></div>
+      <span class="lb-cat">Team</span>
+      <div class="lb-meta">
+        <div class="lb-date">Oslo, NOR</div>
+        <div class="lb-title">Quick Style — Team Lookbook</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+    <a class="lb-card" href="lookbook.html">
+      <div class="lb-bg" style="background-image:url('standout-assets/eco_jr_1.jpg')"></div>
+      <span class="lb-cat">Team</span>
+      <div class="lb-meta">
+        <div class="lb-date">South East Asia, SEA</div>
+        <div class="lb-title">Jam Republic — Team Lookbook</div>
+        <span class="lb-cta">View lookbook <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<footer>
+  <div class="top">
+    <div><img class="mono" src="fieldbook-assets/idl-live-logo.svg" alt="IDL"><div class="eyebrow">INTL / DANCE / LEAGUE<br>2026 SEASON</div></div>
+    <div class="col"><h5>SHOP</h5><a href="index.html">TEAM KITS</a><a href="series_editor.html">NEW YORK SERIES</a><a href="vancouver_editor.html">VANCOUVER SERIES</a><a href="seoul_editor.html">SEOUL SERIES</a></div>
+    <div class="col"><h5>DISCOVER</h5><a href="lookbooks.html">LOOKBOOKS</a><a href="idl-merch-home.html">NEW ARRIVALS</a><a href="#">CAMPAIGN FILM</a><a href="#">SIZE GUIDE</a></div>
+    <div class="col"><h5>HELP</h5><a href="#">SHIPPING</a><a href="#">RETURNS</a><a href="#">CONTACT</a></div>
+  </div>
+  <div class="base"><span>© 2026 INTERNATIONAL DANCE LEAGUE. IDL™ ALL RIGHTS RESERVED.</span><span class="url">IDL.PRO</span></div>
+</footer>
+
+<script>
+(function(){
+  if(window.lucide) window.lucide.createIcons();
+  window.addEventListener('DOMContentLoaded',()=>{ if(window.lucide) window.lucide.createIcons(); });
+  var toggle=document.querySelector('[data-navtoggle]'), mob=document.querySelector('[data-mobnav]');
+  if(toggle&&mob){
+    toggle.addEventListener('click',function(){
+      var open=mob.classList.toggle('open');
+      toggle.setAttribute('aria-expanded',String(open));
+      var old=toggle.querySelector('i,svg'); if(old) old.remove();
+      var ic=document.createElement('i'); ic.setAttribute('data-lucide',open?'x':'menu'); ic.setAttribute('aria-hidden','true'); toggle.appendChild(ic);
+      if(window.lucide) window.lucide.createIcons();
+    });
+    mob.querySelectorAll('a').forEach(function(a){ a.addEventListener('click',function(){ mob.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }); });
+  }
+})();
+</script>
+</body>
+</html>

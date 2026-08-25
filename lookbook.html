@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE VANCOUVER CAPSULE — IDL LOOKBOOK</title>
+<link rel="stylesheet" href="standout-assets/fonts.css">
+<script src="standout-assets/lucide.min.js" defer></script>
+<style>
+:root{--accent:#C0E700;--carbon:#061015;--chalk:#FFFFFF;--steel:#90999F;--slate:#121D22;--ink:#0D222D;--btn-ink:#0C0F13;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--carbon);color:var(--chalk);font-family:'NeueHaas',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+.display{font-family:'NeueHaas';font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:0;}
+.eyebrow{font-family:'CarbonPlus';text-transform:uppercase;font-size:12px;letter-spacing:.14em;color:var(--steel);}
+
+/* promobar */
+.promobar{position:relative;z-index:90;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 44px;background:var(--carbon);border-bottom:1px solid #1c1c1a;color:var(--accent);}
+.promobar .pb-i{white-space:nowrap;font-family:'NeueHaas';font-weight:700;text-transform:uppercase;font-size:15px;line-height:1.14;letter-spacing:0;}
+.promobar .pb-i b{display:block;font-weight:700;}
+.promobar .pb-c{text-align:left;}
+.promobar .pb-mono{height:22px;}
+
+/* nav */
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 40px;background:var(--carbon);border-bottom:1px solid #17171a;}
+nav .brand{display:flex;align-items:center;gap:12px;}nav .brand img{height:20px;}nav .brand .tm{font-family:'CarbonPlus';font-size:10px;color:var(--steel);align-self:flex-start;margin-top:2px;}
+nav .links{display:flex;gap:32px;}
+nav .links a{font-family:'CarbonPlus';font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--chalk);transition:color .15s;}
+nav .links a:hover{color:var(--accent);}
+nav .links a.active{color:var(--accent);}
+nav .cart{display:flex;align-items:center;gap:9px;border:1px solid var(--steel);padding:8px 16px;font-family:'CarbonPlus';font-size:13px;letter-spacing:.08em;cursor:pointer;transition:.15s;}
+nav .cart:hover{border-color:var(--accent);color:var(--accent);}
+nav .cart .count{color:var(--carbon);background:var(--accent);padding:1px 7px;font-size:12px;}
+nav .nav-actions{display:flex;align-items:center;gap:14px;}
+.navToggle{display:none;background:none;border:0;color:var(--chalk);cursor:pointer;padding:2px;align-items:center;}
+.navToggle svg{width:26px;height:26px;}
+.mobnav{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:95;background:var(--carbon);flex-direction:column;padding:84px 22px 40px;}
+.mobnav.open{display:flex;}
+.mobnav a{padding:18px 0;font-family:'CarbonPlus';font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk);border-bottom:1px solid #17171a;}
+.mobnav a.active{color:var(--accent);}
+
+/* button */
+.button{height:44px;min-height:44px;padding:0;display:inline-flex;align-items:stretch;gap:6px;border:0;background:var(--accent);color:var(--btn-ink);font-family:'CarbonPlus';font-weight:700;font-size:16px;line-height:18px;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;transition:color 100ms ease,background 100ms ease,border-color 100ms ease;position:relative;overflow:hidden;}
+.button-label{padding:0 10px 0 20px;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+.button-icon{width:44px;height:44px;padding:4px;display:grid;place-items:center;position:relative;z-index:1;}
+.button-icon svg{width:36px;height:36px;padding:10px;background:var(--slate);color:var(--accent);}
+.button-icon-cells{display:grid;overflow:hidden;background:var(--slate);}
+.button-icon-cells>svg{grid-area:1/1;transition:transform 340ms cubic-bezier(.22,.8,.2,1);}
+.button-icon-cells>svg:nth-child(2){transform:translateY(-100%);}
+.button::before{content:"";position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.1);transform:scaleX(0);transform-origin:left center;transition:transform 320ms cubic-bezier(.22,.8,.2,1);pointer-events:none;}
+.button:hover::before{transform:scaleX(1);}
+.button:hover .button-icon-cells>svg:nth-child(1){transform:translateY(100%);}
+.button:hover .button-icon-cells>svg:nth-child(2){transform:translateY(0);}
+.button:hover .button-icon svg{background:var(--ink);}
+
+/* detail hero */
+.dt-hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;overflow:hidden;background:#050505;}
+.dt-hero .dt-hero-bg{position:absolute;inset:0;background-size:cover;background-position:50% 28%;filter:saturate(.94) contrast(1.04);}
+.dt-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,21,.42) 0%,rgba(6,16,21,0) 34%,rgba(6,16,21,.4) 62%,rgba(6,16,21,.97) 100%);}
+.dt-hero-inner{position:relative;z-index:2;padding:0 40px 62px;width:100%;}
+.dt-back{display:inline-flex;align-items:center;gap:8px;font-family:'CarbonPlus';font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk);margin-bottom:26px;opacity:.85;transition:.15s;}
+.dt-back:hover{color:var(--accent);opacity:1;}
+.dt-back svg{width:15px;height:15px;}
+.dt-hero-inner .eyebrow{color:var(--chalk);margin-bottom:16px;}
+.dt-hero-inner h1{font-size:clamp(48px,9vw,128px);color:var(--chalk);max-width:16ch;}
+.dt-hero-meta{display:flex;flex-wrap:wrap;gap:28px;margin-top:26px;}
+.dt-hero-meta div{font-family:'CarbonPlus';font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
+.dt-hero-meta span{display:block;color:var(--steel);margin-bottom:5px;}
+.dt-hero-meta b{color:var(--chalk);font-weight:400;font-size:14px;}
+
+/* intro */
+.dt-intro{max-width:1400px;margin:0 auto;padding:80px 40px 44px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:60px;align-items:start;}
+.dt-intro h2{font-family:'NeueHaas';font-weight:900;text-transform:uppercase;font-size:clamp(26px,3.4vw,42px);line-height:.96;color:var(--chalk);}
+.dt-intro .body p{font-family:'NeueHaas';font-weight:400;font-size:17px;line-height:1.62;color:#C9CFD3;margin-bottom:18px;}
+.dt-intro .body .button{margin-top:12px;}
+
+/* gallery */
+.dt-gallery{max-width:1400px;margin:0 auto;padding:36px 40px 40px;display:grid;grid-template-columns:repeat(12,1fr);gap:18px;}
+.dt-gallery figure{position:relative;overflow:hidden;background:var(--ink);}
+.dt-gallery figure img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.22,.8,.2,1);}
+.dt-gallery figure:hover img{transform:scale(1.04);}
+.g-full{grid-column:span 12;aspect-ratio:16/7;}
+.g-half{grid-column:span 6;aspect-ratio:4/5;}
+.g-third{grid-column:span 4;aspect-ratio:3/4;}
+.g-two-third{grid-column:span 8;aspect-ratio:16/10;}
+.dt-cap{max-width:1400px;margin:0 auto;padding:2px 40px 90px;}
+.dt-cap .eyebrow{color:var(--steel);}
+
+/* closing cta */
+.dt-cta{position:relative;padding:96px 40px;text-align:center;border-top:1px solid #17171a;}
+.dt-cta h3{font-family:'NeueHaas';font-weight:900;text-transform:uppercase;font-size:clamp(30px,5vw,64px);line-height:.92;color:var(--chalk);margin-bottom:12px;}
+.dt-cta p{font-family:'CarbonPlus';font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);margin-bottom:28px;}
+.dt-cta .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+/* footer */
+footer{background:var(--carbon);padding:72px 40px 40px;border-top:1px solid #17171a;}
+footer .top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:40px;margin-bottom:48px;}
+footer .mono{height:26px;margin-bottom:18px;}
+footer .col h5{font-family:'CarbonPlus';font-size:12px;letter-spacing:.12em;color:var(--steel);margin-bottom:16px;text-transform:uppercase;}
+footer .col a{display:block;font-family:'CarbonPlus';font-size:13px;letter-spacing:.05em;color:var(--chalk);margin-bottom:11px;transition:color .15s;}
+footer .col a:hover{color:var(--accent);}
+footer .base{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:26px;font-family:'CarbonPlus';font-size:11px;letter-spacing:.08em;color:var(--steel);}
+footer .base .url{color:var(--accent);}
+
+@media(max-width:900px){
+  nav .links{display:none;}
+  .navToggle{display:inline-flex;}
+  .dt-intro{grid-template-columns:1fr;gap:26px;padding:56px 30px 34px;}
+  .dt-gallery{padding:24px 30px;gap:12px;}
+  .g-two-third,.g-third{grid-column:span 6;aspect-ratio:3/4;}
+}
+@media(max-width:560px){
+  nav{padding:14px 22px;}
+  .promobar{padding:12px 18px;gap:10px;}
+  .promobar .pb-mono{display:none;}
+  .promobar .pb-i{font-size:13px;}
+  .dt-hero-inner{padding:0 22px 44px;}
+  .dt-intro{padding:44px 22px 26px;}
+  .dt-gallery{padding:18px 22px;gap:10px;grid-template-columns:1fr;}
+  .g-full,.g-half,.g-third,.g-two-third{grid-column:auto;aspect-ratio:4/5;}
+  .g-full{aspect-ratio:3/4;}
+  .dt-cap{padding:0 22px 60px;}
+  .dt-cta{padding:66px 22px;}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+
+<a class="promobar" href="index.html">
+  <span class="pb-i"><b>2026 SEASON</b><b>DROP</b></span>
+  <span class="pb-i pb-c"><b>FREE SHIPPING</b><b>OVER $150</b></span>
+  <img class="pb-mono" src="fieldbook-assets/idl-live-logo.svg" alt="IDL">
+  <span class="pb-i"><b>CODE:</b><b>DAYONE</b></span>
+</a>
+
+<nav>
+  <a class="brand" href="idl-merch-home.html"><img src="fieldbook-assets/idl-live-logo.svg" alt="IDL"><span class="tm">™</span></a>
+  <div class="links"><a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a><a href="lookbooks.html" class="active">LOOKBOOKS</a></div>
+  <div class="nav-actions">
+    <div class="cart" data-bag>BAG <span class="count">0</span></div>
+    <button class="navToggle" data-navtoggle type="button" aria-label="Menu" aria-expanded="false"><i data-lucide="menu" aria-hidden="true"></i></button>
+  </div>
+</nav>
+<div class="mobnav" data-mobnav>
+  <a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a><a href="lookbooks.html" class="active">LOOKBOOKS</a>
+</div>
+
+<header class="dt-hero">
+  <div class="dt-hero-bg" style="background-image:url('lookbook-assets/van-capsule-11.jpg')"></div>
+  <div class="dt-hero-inner">
+    <a class="dt-back" href="lookbooks.html"><i data-lucide="arrow-left" aria-hidden="true"></i> All lookbooks</a>
+    <div class="eyebrow">City Capsule / Vancouver</div>
+    <h1 class="display">The Vancouver Capsule</h1>
+    <div class="dt-hero-meta">
+      <div><span>Series</span><b>Vancouver 2026</b></div>
+      <div><span>Location</span><b>Vancouver, CAN</b></div>
+      <div><span>Pieces</span><b>12 Looks</b></div>
+      <div><span>Published</span><b>May 23, 2026</b></div>
+    </div>
+  </div>
+</header>
+
+<section class="dt-intro">
+  <h2>One crew, one session, shot on the clock.</h2>
+  <div class="body">
+    <p>The Vancouver capsule was photographed in a single afternoon between rounds — no studio, no reset. The kit as it actually moves: layered for the cold, cut for the floor, worn on the way to the stage.</p>
+    <p>Every look here maps to a piece in the Vancouver series. Scroll the story, then shop the capsule the crew is wearing.</p>
+    <a class="button" href="vancouver_editor.html">
+      <span class="button-label">Shop the capsule</span>
+      <span class="button-icon"><span class="button-icon-cells"><i data-lucide="arrow-right" aria-hidden="true"></i><i data-lucide="arrow-right" aria-hidden="true"></i></span></span>
+    </a>
+  </div>
+</section>
+
+<div class="dt-gallery">
+  <figure class="g-full"><img src="lookbook-assets/van-capsule-01.jpg" alt="Vancouver capsule look 01" loading="lazy"></figure>
+  <figure class="g-half"><img src="lookbook-assets/van-capsule-02.jpg" alt="Vancouver capsule look 02" loading="lazy"></figure>
+  <figure class="g-half"><img src="lookbook-assets/van-capsule-03.jpg" alt="Vancouver capsule look 03" loading="lazy"></figure>
+  <figure class="g-third"><img src="lookbook-assets/van-capsule-04.jpg" alt="Vancouver capsule look 04" loading="lazy"></figure>
+  <figure class="g-third"><img src="lookbook-assets/van-capsule-05.jpg" alt="Vancouver capsule look 05" loading="lazy"></figure>
+  <figure class="g-third"><img src="lookbook-assets/van-capsule-06.jpg" alt="Vancouver capsule look 06" loading="lazy"></figure>
+  <figure class="g-two-third"><img src="lookbook-assets/van-capsule-07.jpg" alt="Vancouver capsule look 07" loading="lazy"></figure>
+  <figure class="g-third"><img src="lookbook-assets/van-capsule-08.jpg" alt="Vancouver capsule look 08" loading="lazy"></figure>
+  <figure class="g-full"><img src="lookbook-assets/van-capsule-09.jpg" alt="Vancouver capsule look 09" loading="lazy"></figure>
+  <figure class="g-half"><img src="lookbook-assets/van-capsule-10.jpg" alt="Vancouver capsule look 10" loading="lazy"></figure>
+  <figure class="g-half"><img src="lookbook-assets/van-capsule-12.jpg" alt="Vancouver capsule look 12" loading="lazy"></figure>
+</div>
+<div class="dt-cap"><div class="eyebrow">Vancouver Capsule 2026 · Shot on location · 12 looks</div></div>
+
+<section class="dt-cta">
+  <h3>Wear the capsule</h3>
+  <p>The full Vancouver series — jerseys, layers, and accessories.</p>
+  <div class="actions">
+    <a class="button" href="vancouver_editor.html">
+      <span class="button-label">Shop Vancouver</span>
+      <span class="button-icon"><span class="button-icon-cells"><i data-lucide="arrow-right" aria-hidden="true"></i><i data-lucide="arrow-right" aria-hidden="true"></i></span></span>
+    </a>
+    <a class="button" href="lookbooks.html">
+      <span class="button-label">All lookbooks</span>
+      <span class="button-icon"><span class="button-icon-cells"><i data-lucide="layout-grid" aria-hidden="true"></i><i data-lucide="layout-grid" aria-hidden="true"></i></span></span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="top">
+    <div><img class="mono" src="fieldbook-assets/idl-live-logo.svg" alt="IDL"><div class="eyebrow">INTL / DANCE / LEAGUE<br>2026 SEASON</div></div>
+    <div class="col"><h5>SHOP</h5><a href="index.html">TEAM KITS</a><a href="series_editor.html">NEW YORK SERIES</a><a href="vancouver_editor.html">VANCOUVER SERIES</a><a href="seoul_editor.html">SEOUL SERIES</a></div>
+    <div class="col"><h5>DISCOVER</h5><a href="lookbooks.html">LOOKBOOKS</a><a href="idl-merch-home.html">NEW ARRIVALS</a><a href="#">CAMPAIGN FILM</a><a href="#">SIZE GUIDE</a></div>
+    <div class="col"><h5>HELP</h5><a href="#">SHIPPING</a><a href="#">RETURNS</a><a href="#">CONTACT</a></div>
+  </div>
+  <div class="base"><span>© 2026 INTERNATIONAL DANCE LEAGUE. IDL™ ALL RIGHTS RESERVED.</span><span class="url">IDL.PRO</span></div>
+</footer>
+
+<script>
+(function(){
+  if(window.lucide) window.lucide.createIcons();
+  window.addEventListener('DOMContentLoaded',()=>{ if(window.lucide) window.lucide.createIcons(); });
+  var toggle=document.querySelector('[data-navtoggle]'), mob=document.querySelector('[data-mobnav]');
+  if(toggle&&mob){
+    toggle.addEventListener('click',function(){
+      var open=mob.classList.toggle('open');
+      toggle.setAttribute('aria-expanded',String(open));
+      var old=toggle.querySelector('i,svg'); if(old) old.remove();
+      var ic=document.createElement('i'); ic.setAttribute('data-lucide',open?'x':'menu'); ic.setAttribute('aria-hidden','true'); toggle.appendChild(ic);
+      if(window.lucide) window.lucide.createIcons();
+    });
+    mob.querySelectorAll('a').forEach(function(a){ a.addEventListener('click',function(){ mob.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }); });
+  }
+})();
+</script>
+</body>
+</html>

@@ -221,7 +221,7 @@ function view(state){
   return `
   <nav>
     <a class="brand" href="#/"><img src="${ASSETS.logo_white}" alt="IDL"><span class="tm">™</span></a>
-    <div class="links"><a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html" class="active">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a></div>
+    <div class="links"><a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html" class="active">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a><a href="lookbooks.html">LOOKBOOKS</a></div>
     <div class="cart" data-bag>BAG <span class="count" id="cartCount">0</span></div>
   </nav>
 
@@ -298,7 +298,7 @@ function productView(state, p){
   return `
   <nav>
     <a class="brand" href="#/"><img src="${ASSETS.logo_white}" alt="IDL"><span class="tm">™</span></a>
-    <div class="links"><a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html" class="active">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a></div>
+    <div class="links"><a href="idl-merch-home.html">MERCH</a><a href="index.html">TEAM KITS</a><a href="series_editor.html" class="active">NYC</a><a href="vancouver_editor.html">VANCOUVER</a><a href="seoul_editor.html">SEOUL</a><a href="lookbooks.html">LOOKBOOKS</a></div>
     <div class="cart" data-bag>BAG <span class="count" id="cartCount">0</span></div>
   </nav>
 
@@ -563,5 +563,63 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   if(confirm('Reset all edits to the default NYC Series?')){ state=defaultState(); boot(); save(); buildPanel(); }
 });
 </script>
+<!-- IDL mobile menu (injected) -->
+<style>
+.nav-actions{display:flex;align-items:center;gap:14px;}
+.navToggle{display:none;background:none;border:0;color:var(--chalk,#fff);cursor:pointer;padding:2px;align-items:center;}
+.navToggle svg{width:26px;height:26px;display:block;}
+.mobnav{display:none;position:fixed;inset:0;z-index:300;background:var(--carbon,#061015);flex-direction:column;padding:84px 22px 40px;}
+.mobnav.open{display:flex;}
+.mobnav a{padding:18px 0;font-family:'CarbonPlus',monospace;font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk,#fff);border-bottom:1px solid #17171a;text-decoration:none;}
+.mobnav a:hover,.mobnav a.active{color:var(--accent,#C0E700);}
+.mobnav .mobClose{position:absolute;top:20px;right:20px;background:none;border:0;color:var(--chalk,#fff);cursor:pointer;padding:4px;}
+.mobnav .mobClose svg{width:28px;height:28px;display:block;}
+@media(max-width:900px){.navToggle{display:inline-flex;}}
+</style>
+<div class="mobnav" id="idlMobnav" aria-hidden="true"></div>
+<script>
+(function(){
+  var HAMB='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+  var CLOSE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  var mob=document.getElementById('idlMobnav');
+  function closeMob(){ mob.classList.remove('open'); mob.setAttribute('aria-hidden','true'); }
+  function openMob(){
+    var links=[].slice.call(document.querySelectorAll('#app nav .links a'));
+    var html=links.map(function(a){
+      var cls=a.className?(' class="'+a.className+'"'):'';
+      return '<a href="'+a.getAttribute('href')+'"'+cls+'>'+a.textContent+'</a>';
+    }).join('');
+    mob.innerHTML='<button class="mobClose" type="button" aria-label="Close">'+CLOSE+'</button>'+html;
+    mob.classList.add('open'); mob.setAttribute('aria-hidden','false');
+  }
+  function ensureToggle(){
+    var nav=document.querySelector('#app nav'); if(!nav) return;
+    if(nav.querySelector('.navToggle')) return;
+    var btn=document.createElement('button');
+    btn.className='navToggle'; btn.type='button'; btn.setAttribute('aria-label','Menu');
+    btn.innerHTML=HAMB;
+    var actions=nav.querySelector('.nav-actions');
+    if(!actions){
+      actions=document.createElement('div'); actions.className='nav-actions';
+      var cart=nav.querySelector('.cart');
+      if(cart){ nav.insertBefore(actions,cart); actions.appendChild(cart); }
+      else nav.appendChild(actions);
+    }
+    actions.appendChild(btn);
+  }
+  document.addEventListener('click',function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest('.navToggle')){ e.preventDefault(); openMob(); return; }
+    if(e.target.closest('#idlMobnav .mobClose')){ e.preventDefault(); closeMob(); return; }
+    if(e.target.closest('#idlMobnav a')){ closeMob(); return; }
+  });
+  var app=document.getElementById('app');
+  function tick(){ ensureToggle(); }
+  tick();
+  if(app){ new MutationObserver(function(){ ensureToggle(); }).observe(app,{childList:true,subtree:true}); }
+  window.addEventListener('hashchange',closeMob);
+})();
+</script>
+
 </body>
 </html>
