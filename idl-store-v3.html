@@ -4120,6 +4120,22 @@
   .look-cards { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
 }
 </style>
+<style id="v3-capsule-stack-css">
+/* ===== VERSI 3 — City Series: show all capsules stacked (Vancouver / New York / Seoul) ===== */
+.v3-capsule-stack { display:flex; flex-direction:column; gap:60px; padding:10px 20px 0; }
+.v3-cap-block { display:flex; flex-direction:column; row-gap:20px; scroll-margin-top:150px; }
+.v3-cap-label { font-family:'NeueHaas', Arial, sans-serif; font-weight:500; font-size:32px; line-height:38px; letter-spacing:-.96px; color:#fff; margin:0; }
+.v3-cap-banner { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; border-radius:2px; background:#0d1419; }
+.v3-cap-banner img { width:100%; height:100%; object-fit:cover; object-position:50% 22%; display:block; }
+.v3-cap-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); column-gap:6px; row-gap:24px; }
+@media (min-width:761px) and (max-width:1080px){ .v3-cap-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (max-width:760px){
+  .v3-capsule-stack { padding:4px 16px 0; gap:44px; }
+  .v3-cap-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .v3-cap-label { font-size:24px; line-height:28px; letter-spacing:-.5px; }
+  .v3-cap-block { scroll-margin-top:120px; }
+}
+</style>
 </head>
 <body>
   <div class="idl-preloader" role="status" aria-live="polite" aria-label="Loading IDL Merch">
@@ -6769,5 +6785,84 @@
       });
     })();
   </script>
+<script id="v3-capsule-stack-js">
+(function(){
+  function init(){
+    var look=document.querySelector('section.look'); if(!look) return;
+    if(look.querySelector('.v3-capsule-stack')) return;
+    var origBody=look.querySelector('.look-body');
+    var stage=look.querySelector('.look-stage');
+    var origCards=look.querySelector('.look-cards');
+    if(!origBody||!stage||!origCards) return;
+    var capsules=['vancouver','nyc','seoul'];
+    var labels={vancouver:'Vancouver Series',nyc:'New York Series',seoul:'Seoul Series'};
+    function heroSrc(cap){
+      var imgs=[].slice.call(stage.querySelectorAll('.look-media[data-look-capsule="'+cap+'"]'));
+      var hero=imgs.filter(function(i){return /capsule-stage/.test(i.getAttribute('src')||'');})[0]||imgs[0];
+      return hero?hero.getAttribute('src'):'';
+    }
+    var stackEl=document.createElement('div'); stackEl.className='v3-capsule-stack';
+    capsules.forEach(function(cap){
+      var block=document.createElement('div'); block.className='v3-cap-block'; block.id='cap-'+cap;
+      var lab=document.createElement('div'); lab.className='v3-cap-label'; lab.textContent=labels[cap]; block.appendChild(lab);
+      var fig=document.createElement('figure'); fig.className='v3-cap-banner';
+      var img=document.createElement('img'); img.src=heroSrc(cap); img.alt=labels[cap]+' capsule'; img.loading='lazy'; fig.appendChild(img); block.appendChild(fig);
+      var grid=document.createElement('div'); grid.className='v3-cap-cards';
+      var cards=[].slice.call(origCards.querySelectorAll('.kit-showcase-card[data-capsule="'+cap+'"]'));
+      cards.forEach(function(c){ c.removeAttribute('hidden'); c.style.display=''; grid.appendChild(c); });
+      block.appendChild(grid);
+      stackEl.appendChild(block);
+    });
+    origBody.style.display='none';
+    origBody.parentNode.insertBefore(stackEl, origBody.nextSibling);
+    // Filters stay: clicking one auto-scrolls to that series
+    var tabs=[].slice.call(look.querySelectorAll('[data-capsule-filter]'));
+    // intercept tab clicks at window-capture (earliest phase, before the old filter handler) -> scroll to that series
+    window.addEventListener('click', function(e){
+      var tab = e.target.closest && e.target.closest('[data-capsule-filter]');
+      if(!tab || !look.contains(tab)) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      var cap=tab.getAttribute('data-capsule-filter');
+      var target=document.getElementById('cap-'+cap);
+      if(!target) return;
+      // instant scroll + re-correct against lazy-image layout shift (smooth over long distance is unreliable)
+      var root=document.documentElement, prev=root.style.scrollBehavior; root.style.scrollBehavior='auto';
+      var go=function(){ target.scrollIntoView({block:'start'}); };
+      go(); requestAnimationFrame(go);
+      setTimeout(function(){ go(); root.style.scrollBehavior=prev; if(typeof updateSpy==='function') updateSpy(); }, 220);
+    }, true);
+    function setActive(cap){
+      tabs.forEach(function(t){
+        var on=t.getAttribute('data-capsule-filter')===cap;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on?'true':'false');
+        t.setAttribute('tabindex', on?'0':'-1');
+      });
+    }
+    // scroll-spy: active tab follows the series currently in view
+    var spyRAF=null;
+    function updateSpy(){
+      spyRAF=null;
+      var doc=document.documentElement;
+      var atBottom=(window.innerHeight+window.scrollY)>=(doc.scrollHeight-4);
+      var current;
+      if(atBottom){ current=capsules[capsules.length-1]; }
+      else {
+        current=capsules[0];
+        var line=Math.min(window.innerHeight*0.4, 300);
+        capsules.forEach(function(cap){
+          var b=document.getElementById('cap-'+cap);
+          if(b && b.getBoundingClientRect().top <= line) current=cap;
+        });
+      }
+      setActive(current);
+    }
+    window.addEventListener('scroll', function(){ if(!spyRAF) spyRAF=requestAnimationFrame(updateSpy); }, {passive:true});
+    updateSpy();
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', function(){ setTimeout(init,80); }); }
+  else { setTimeout(init,80); }
+})();
+</script>
 </body>
 </html>
