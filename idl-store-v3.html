@@ -4126,7 +4126,7 @@
 .v3-cap-block { display:flex; flex-direction:column; row-gap:20px; scroll-margin-top:150px; }
 .v3-cap-label { font-family:'NeueHaas', Arial, sans-serif; font-weight:500; font-size:32px; line-height:38px; letter-spacing:-.96px; color:#fff; margin:0; }
 .v3-cap-banner { position:relative; width:100%; margin:0; aspect-ratio:16/9; overflow:hidden; border-radius:2px; background:#0d1419; }
-.v3-cap-banner img { width:100%; height:100%; object-fit:cover; object-position:50% 22%; display:block; }
+.v3-cap-banner img, .v3-cap-banner video { width:100%; height:100%; object-fit:cover; object-position:50% 22%; display:block; }
 .v3-cap-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); column-gap:6px; row-gap:24px; }
 @media (min-width:761px) and (max-width:1080px){ .v3-cap-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:760px){
@@ -6796,6 +6796,7 @@
     if(!origBody||!stage||!origCards) return;
     var capsules=['vancouver','nyc','seoul'];
     var labels={vancouver:'Vancouver Series',nyc:'New York Series',seoul:'Seoul Series'};
+    var videos={vancouver:'standout-assets/capsule-video/vancouver.mp4',nyc:'standout-assets/capsule-video/nyc.mp4',seoul:'standout-assets/capsule-video/seoul.mp4'};
     function heroSrc(cap){
       var imgs=[].slice.call(stage.querySelectorAll('.look-media[data-look-capsule="'+cap+'"]'));
       var hero=imgs.filter(function(i){return /capsule-stage/.test(i.getAttribute('src')||'');})[0]||imgs[0];
@@ -6806,7 +6807,18 @@
       var block=document.createElement('div'); block.className='v3-cap-block'; block.id='cap-'+cap;
       var lab=document.createElement('div'); lab.className='v3-cap-label'; lab.textContent=labels[cap]; block.appendChild(lab);
       var fig=document.createElement('figure'); fig.className='v3-cap-banner';
-      var img=document.createElement('img'); img.src=heroSrc(cap); img.alt=labels[cap]+' capsule'; img.loading='lazy'; fig.appendChild(img); block.appendChild(fig);
+      if(videos[cap]){
+        var vid=document.createElement('video');
+        vid.src=videos[cap]; vid.poster=heroSrc(cap);
+        vid.muted=true; vid.defaultMuted=true; vid.loop=true; vid.autoplay=true; vid.playsInline=true;
+        vid.setAttribute('muted',''); vid.setAttribute('loop',''); vid.setAttribute('autoplay',''); vid.setAttribute('playsinline',''); vid.setAttribute('preload','metadata');
+        vid.setAttribute('aria-label', labels[cap]+' capsule');
+        fig.appendChild(vid);
+        var p=vid.play&&vid.play(); if(p&&p.catch) p.catch(function(){});
+      } else {
+        var img=document.createElement('img'); img.src=heroSrc(cap); img.alt=labels[cap]+' capsule'; img.loading='lazy'; fig.appendChild(img);
+      }
+      block.appendChild(fig);
       var grid=document.createElement('div'); grid.className='v3-cap-cards';
       var cards=[].slice.call(origCards.querySelectorAll('.kit-showcase-card[data-capsule="'+cap+'"]'));
       cards.forEach(function(c){ c.removeAttribute('hidden'); c.style.display=''; grid.appendChild(c); });
@@ -6815,6 +6827,17 @@
     });
     origBody.style.display='none';
     origBody.parentNode.insertBefore(stackEl, origBody.nextSibling);
+    // play banner videos only while visible (reliable muted autoplay + saves resources)
+    if('IntersectionObserver' in window){
+      var vio=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          var v=e.target;
+          if(e.isIntersecting){ var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
+          else { v.pause(); }
+        });
+      },{threshold:0.2});
+      [].slice.call(stackEl.querySelectorAll('.v3-cap-banner video')).forEach(function(v){ vio.observe(v); });
+    }
     // Filters stay: clicking one auto-scrolls to that series
     var tabs=[].slice.call(look.querySelectorAll('[data-capsule-filter]'));
     // intercept tab clicks at window-capture (earliest phase, before the old filter handler) -> scroll to that series
