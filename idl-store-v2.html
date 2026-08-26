@@ -4095,6 +4095,17 @@
 .kit-showcase-price small { color:#8A9BA6 !important; }
 /* look editorial text */
 .look-body, .look-panel { color:#EAF0F2 !important; }
+
+/* keep header DARK even when tone-script marks it light (V2 sections are all dark) */
+.site-header.is-light, .site-header.scrolled.is-light { background:#050505 !important; color:var(--idl-white) !important; }
+.site-header.is-light .nav-link, .site-header.is-light .nav-button, .site-header.is-light .icon-button { color:var(--idl-white) !important; }
+.site-header.is-light .icon-button { border-color:var(--idl-line) !important; }
+.site-header.is-light .currency-menu { background:#0d1419 !important; border-color:var(--idl-line) !important; }
+.site-header.is-light .currency-option { color:var(--idl-white) !important; }
+.site-header.is-light .currency-option.is-active { background:var(--idl-go-gold) !important; color:var(--idl-button-ink) !important; }
+.site-header.is-light .brand-mark { background:transparent !important; -webkit-mask:none !important; mask:none !important; }
+.site-header.is-light .brand-mark img { visibility:visible !important; }
+.site-header.is-light .bag-count { border-color:#6e7276 !important; background:#6e7276 !important; color:var(--idl-white) !important; }
 </style>
 </head>
 <body>
