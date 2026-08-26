@@ -4107,6 +4107,15 @@
 .site-header.is-light .brand-mark img { visibility:visible !important; }
 .site-header.is-light .bag-count { border-color:#6e7276 !important; background:#6e7276 !important; color:var(--idl-white) !important; }
 </style>
+<style id="v3-layout">
+/* ===== VERSI 3 — LAYOUT: City Series look section stacked (photo top, products below) ===== */
+@media (min-width: 761px){
+  .look-body { grid-template-columns: minmax(0,1fr) !important; padding-left: 20px !important; padding-right: 20px !important; row-gap: 34px !important; }
+  .look-stage { position: relative !important; top: auto !important; width: 100% !important; height: auto !important; aspect-ratio: 16 / 9 !important; border-radius: 2px; }
+  .look-panel { padding-left: 0 !important; }
+  .look-cards { grid-template-columns: repeat(4, minmax(0,1fr)) !important; column-gap: 18px !important; }
+}
+</style>
 </head>
 <body>
   <div class="idl-preloader" role="status" aria-live="polite" aria-label="Loading IDL Merch">
