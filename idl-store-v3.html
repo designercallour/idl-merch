@@ -4097,7 +4097,7 @@
 .look-body, .look-panel { color:#EAF0F2 !important; }
 
 /* keep header DARK even when tone-script marks it light (V2 sections are all dark) */
-.site-header.is-light, .site-header.scrolled.is-light { background:#050505 !important; color:var(--idl-white) !important; }
+.site-header.scrolled, .site-header.is-light, .site-header.scrolled.is-light { background:#061015 !important; color:var(--idl-white) !important; }
 .site-header.is-light .nav-link, .site-header.is-light .nav-button, .site-header.is-light .icon-button { color:var(--idl-white) !important; }
 .site-header.is-light .icon-button { border-color:var(--idl-line) !important; }
 .site-header.is-light .currency-menu { background:#0d1419 !important; border-color:var(--idl-line) !important; }
@@ -4127,6 +4127,9 @@
 .v3-cap-label { font-family:'NeueHaas', Arial, sans-serif; font-weight:500; font-size:32px; line-height:38px; letter-spacing:-.96px; color:#fff; margin:0; }
 .v3-cap-banner { position:relative; width:100%; margin:0; aspect-ratio:16/9; overflow:hidden; border-radius:2px; background:#0d1419; }
 .v3-cap-banner img, .v3-cap-banner video { width:100%; height:100%; object-fit:cover; object-position:50% 22%; display:block; }
+.v3-cap-mute { position:absolute; right:16px; bottom:16px; z-index:3; width:42px; height:42px; display:grid; place-items:center; border:0; border-radius:999px; background:rgba(6,16,21,.55); color:#fff; cursor:pointer; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); transition:background .15s, transform .15s; }
+.v3-cap-mute:hover { background:rgba(6,16,21,.82); transform:scale(1.06); }
+.v3-cap-mute svg { width:20px; height:20px; display:block; pointer-events:none; }
 .v3-cap-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); column-gap:6px; row-gap:24px; }
 @media (min-width:761px) and (max-width:1080px){ .v3-cap-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:760px){
@@ -6797,6 +6800,8 @@
     var capsules=['vancouver','nyc','seoul'];
     var labels={vancouver:'Vancouver Series',nyc:'New York Series',seoul:'Seoul Series'};
     var videos={vancouver:'standout-assets/capsule-video/vancouver.mp4',nyc:'standout-assets/capsule-video/nyc.mp4',seoul:'standout-assets/capsule-video/seoul.mp4'};
+    var SVG_MUTED='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>';
+    var SVG_UNMUTED='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.4 5.6a9 9 0 0 1 0 12.8"/></svg>';
     function heroSrc(cap){
       var imgs=[].slice.call(stage.querySelectorAll('.look-media[data-look-capsule="'+cap+'"]'));
       var hero=imgs.filter(function(i){return /capsule-stage/.test(i.getAttribute('src')||'');})[0]||imgs[0];
@@ -6814,6 +6819,7 @@
         vid.setAttribute('muted',''); vid.setAttribute('loop',''); vid.setAttribute('autoplay',''); vid.setAttribute('playsinline',''); vid.setAttribute('preload','metadata');
         vid.setAttribute('aria-label', labels[cap]+' capsule');
         fig.appendChild(vid);
+        var mb=document.createElement('button'); mb.className='v3-cap-mute'; mb.type='button'; mb.setAttribute('aria-label','Unmute'); mb.innerHTML=SVG_MUTED; fig.appendChild(mb);
         var p=vid.play&&vid.play(); if(p&&p.catch) p.catch(function(){});
       } else {
         var img=document.createElement('img'); img.src=heroSrc(cap); img.alt=labels[cap]+' capsule'; img.loading='lazy'; fig.appendChild(img);
@@ -6838,6 +6844,23 @@
       },{threshold:0.2});
       [].slice.call(stackEl.querySelectorAll('.v3-cap-banner video')).forEach(function(v){ vio.observe(v); });
     }
+    // unmute toggle (one banner plays audio at a time; still starts muted+autoplay)
+    function syncMuteIcons(){
+      [].slice.call(stackEl.querySelectorAll('.v3-cap-banner')).forEach(function(f){
+        var v=f.querySelector('video'), b=f.querySelector('.v3-cap-mute');
+        if(v&&b){ b.innerHTML=v.muted?SVG_MUTED:SVG_UNMUTED; b.setAttribute('aria-label', v.muted?'Unmute':'Mute'); }
+      });
+    }
+    stackEl.addEventListener('click', function(e){
+      var b=e.target.closest && e.target.closest('.v3-cap-mute'); if(!b) return;
+      e.preventDefault(); e.stopPropagation();
+      var fig=b.closest('.v3-cap-banner'), v=fig&&fig.querySelector('video'); if(!v) return;
+      if(v.muted){
+        [].slice.call(stackEl.querySelectorAll('.v3-cap-banner video')).forEach(function(o){ if(o!==v) o.muted=true; });
+        v.muted=false; var pp=v.play(); if(pp&&pp.catch) pp.catch(function(){});
+      } else { v.muted=true; }
+      syncMuteIcons();
+    });
     // Filters stay: clicking one auto-scrolls to that series
     var tabs=[].slice.call(look.querySelectorAll('[data-capsule-filter]'));
     // intercept tab clicks at window-capture (earliest phase, before the old filter handler) -> scroll to that series
