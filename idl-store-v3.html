@@ -4112,8 +4112,12 @@
 @media (min-width: 761px){
   .look-body { grid-template-columns: minmax(0,1fr) !important; padding-left: 20px !important; padding-right: 20px !important; row-gap: 20px !important; }
   .look-stage { position: relative !important; top: auto !important; width: 100% !important; height: auto !important; aspect-ratio: 16 / 9 !important; border-radius: 2px; }
-  .look-panel { padding-left: 0 !important; }
-  .look-cards { grid-template-columns: repeat(4, minmax(0,1fr)) !important; column-gap: 18px !important; }
+  .look-panel { padding: 0 !important; width: 100% !important; }
+  /* product cards match the Official Team Kits catalog exactly (same columns, 6px column gap, full content width) */
+  .look-cards { grid-template-columns: repeat(4, minmax(0,1fr)) !important; column-gap: 6px !important; row-gap: 24px !important; width: 100% !important; max-width: none !important; margin: 0 !important; }
+}
+@media (min-width: 761px) and (max-width: 1080px){
+  .look-cards { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
 }
 </style>
 </head>
