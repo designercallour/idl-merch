@@ -6910,5 +6910,19 @@
   else { setTimeout(init,80); }
 })();
 </script>
+<script id="store-dark-nav">
+(function(){
+  var home=(location.pathname.split('/').pop()||'').replace(/[?#].*$/,'');
+  if(home!=='idl-store-v2.html'&&home!=='idl-store-v3.html') home='idl-store-v3.html';
+  document.addEventListener('click', function(e){
+    var a=e.target.closest && e.target.closest('a[href]'); if(!a) return;
+    var href=a.getAttribute('href')||''; var nh=null;
+    if(href.indexOf('idl-product.html')===0){ nh=href.replace('idl-product.html','idl-product-dark.html'); nh+=(nh.indexOf('?')>=0?'&':'?')+'home='+home; }
+    else if(href.indexOf('idl-lookbooks-index.html')===0){ nh='idl-lookbooks-index-dark.html?home='+home; }
+    else if(href.indexOf('idl-lookbooks.html')===0){ nh=href.replace('idl-lookbooks.html','idl-lookbooks-dark.html'); nh+=(nh.indexOf('?')>=0?'&':'?')+'home='+home; }
+    if(nh){ e.preventDefault(); e.stopImmediatePropagation(); location.href=nh; }
+  }, true);
+})();
+</script>
 </body>
 </html>
