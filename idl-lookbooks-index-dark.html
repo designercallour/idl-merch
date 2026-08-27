@@ -4438,10 +4438,12 @@ html,body,main,.lbx-hero,.lbx-grid,.lbx-section,.lbx-list,.lbx-intro{background:
 .drawer-close, .bag-drawer.cart-v2 .drawer-close{ color:#EAF0F2 !important; }
 /* header + close icons visible on dark */
 .bag-drawer.cart-v2 .drawer-header svg, .bag-drawer.cart-v2 .drawer-close-icon svg{ stroke:#EAF0F2 !important; color:#EAF0F2 !important; }
-/* primary (lime) buttons keep dark ink label */
+/* filled lime primary -> dark ink label; alt/ghost primary (transparent) -> light label */
 .bag-drawer.cart-v2 .button.primary .button-label{ color:#0c0f13 !important; }
-/* empty-state chromatic IDL logo: main layer -> white */
+.bag-drawer.cart-v2 .button.primary.is-alt .button-label{ color:#FFFFFF !important; }
+/* empty-state chromatic IDL logo: main layer -> white; glitch layers use screen (multiply hid them on dark) */
 .bag-drawer.cart-v2 .drawer-empty-logo .del-base{ background:#FFFFFF !important; }
+.bag-drawer.cart-v2 .drawer-empty-logo .del-cyan, .bag-drawer.cart-v2 .drawer-empty-logo .del-red{ mix-blend-mode:screen !important; }
 </style>
 </head>
 <body class="lookbooks-page">
