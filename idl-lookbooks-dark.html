@@ -5142,6 +5142,14 @@
 .kit-collection-meta{ background:#061015 !important; }
 .kit-collection-meta::before{ background:linear-gradient(90deg, rgba(6,16,21,0), #061015) !important; }
 </style>
+<style id="mega-menu-dark">
+/* Mega-menu (Shop by team / Collections) stays dark even when the legacy scroll
+   logic toggles body.header-is-light; without this the panel flips to white. */
+body.header-is-light.team-menu-open .team-menu{ background:#061015 !important; border-bottom-color:rgba(35,52,59,.95) !important; }
+body.header-is-light.team-menu-open .team-menu-team{ color:#FFFFFF !important; }
+body.header-is-light.team-menu-open .team-menu-team-place{ color:#D5D7D9 !important; }
+body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !important; }
+</style>
 </head>
 <body class="lookbooks-page">
   <div class="site-shell">
