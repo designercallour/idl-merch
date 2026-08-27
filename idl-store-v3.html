@@ -4166,6 +4166,13 @@
 .bag-drawer.cart-v2 .drawer-item-price, .bag-drawer.cart-v2 .qty-value, .bag-drawer.cart-v2 .cart-upsell-head, .bag-drawer.cart-v2 .upsell-name, .bag-drawer.cart-v2 .upsell-price, .bag-drawer.cart-v2 .drawer-empty-head{ color:#FFFFFF !important; }
 /* upsell size select chevron (::after border-arrow) -> white */
 .bag-drawer.cart-v2 .upsell-size::after{ border-color:#FFFFFF !important; }
+/* CHECKOUT hover = ADD TO CART: hold lime + dark wipe (was legacy white-flip .button:hover) */
+.bag-drawer.cart-v2 .cart-checkout.button{ position:relative; overflow:hidden; }
+.bag-drawer.cart-v2 .cart-checkout.button:hover{ background:var(--idl-go-gold) !important; color:var(--idl-button-ink) !important; }
+.bag-drawer.cart-v2 .cart-checkout.button::before{ content:""; position:absolute; inset:0; z-index:0; background:rgba(0,0,0,.1); transform:scaleX(0); transform-origin:left center; transition:transform 320ms cubic-bezier(.22,.8,.2,1); pointer-events:none; }
+.bag-drawer.cart-v2 .cart-checkout.button:hover::before{ transform:scaleX(1); }
+.bag-drawer.cart-v2 .cart-checkout.button > span{ position:relative; z-index:1; }
+.bag-drawer.cart-v2 .cart-checkout.button:hover .button-icon svg{ background:var(--idl-panel) !important; }
 /* filled lime primary -> dark ink label; alt/ghost primary (transparent) -> light label */
 .bag-drawer.cart-v2 .button.primary .button-label{ color:#0c0f13 !important; }
 .bag-drawer.cart-v2 .button.primary.is-alt .button-label{ color:#FFFFFF !important; }
