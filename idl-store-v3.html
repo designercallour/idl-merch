@@ -4110,6 +4110,11 @@
 </style>
 <style id="v3-layout">
 /* ===== VERSI 3 — LAYOUT: City Series look section stacked (photo top, products below) ===== */
+/* Team Kits title + filter row align to the 20px gutter like City Series (V3).
+   The base adds padding-inline:32px on .kit-showcase-sticky at 761-1080px,
+   which pushes Team Kits chips to 52px while the custom City Series filter
+   stays at 20px. Neutralise it so both filter rows share the same L/R padding. */
+.kit-showcase-sticky{ padding-inline: 0 !important; }
 @media (min-width: 761px){
   .look-body { grid-template-columns: minmax(0,1fr) !important; padding-left: 20px !important; padding-right: 20px !important; row-gap: 20px !important; }
   .look-stage { position: relative !important; top: auto !important; width: 100% !important; height: auto !important; aspect-ratio: 16 / 9 !important; border-radius: 2px; }
