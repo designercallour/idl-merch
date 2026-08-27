@@ -5226,6 +5226,14 @@ html,body,main,.pdp,.pdp-related,.pdp-related-inner{background:#061015 !importan
 /* Selected size uses aria-checked (not .is-active); base border was --pdp-ink (dark)
    and got overridden by the dim .pdp-size border above — active state showed nothing. */
 .pdp-size[aria-checked="true"]{background:rgba(255,255,255,.08) !important;color:#FFFFFF !important;border-color:#FFFFFF !important;}
+/* Sold-out size selected: only the outline turns white — keep the grey fill,
+   diagonal strike and dimmed label. */
+.pdp-size.is-out[aria-checked="true"]{
+  border-color:#FFFFFF !important;
+  color:rgba(234,240,242,.32) !important;
+  background-color:rgba(255,255,255,.07) !important;
+  background-image:linear-gradient(to top right, transparent calc(50% - 1px), rgba(255,255,255,.32) 50%, transparent calc(50% + 1px)) !important;
+}
 /* fit/cut selector -> dark (was still white paper; now matches size selector) */
 .pdp-cut{background:transparent !important;border-color:#2a3a42 !important;color:#EAF0F2 !important;}
 .pdp-cut:hover{border-color:#EAF0F2 !important;}
