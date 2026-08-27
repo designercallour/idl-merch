@@ -5224,6 +5224,14 @@ html,body,main,.pdp,.pdp-related,.pdp-related-inner{background:#061015 !importan
 /* sold-out / stock badges -> transparent chip, readable on dark */
 .pdp-badge{background:transparent !important;border-color:#e32833 !important;color:#ff6b6b !important;}
 .pdp-badge--stock{border-color:#EAF0F2 !important;color:#EAF0F2 !important;}
+/* accordion (details/summary) + spec list — were near-black on dark (invisible) */
+.pdp-details,.pdp-detail{border-color:#17252c !important;}
+.pdp-detail summary{color:#EAF0F2 !important;}
+.pdp-detail summary svg{stroke:#EAF0F2 !important;color:#EAF0F2 !important;}
+.pdp-detail-body{color:#C9D2D8 !important;}
+.pdp-detail-body ul li::before,.pdp-spec-item::before{background:#8b97a0 !important;}
+.pdp-spec-item dt{color:#FFFFFF !important;}
+.pdp-spec-item dd{color:#C9D2D8 !important;}
 .pdp-modelsize-toggle,.pdp-modelsize-popup{background:#0b1a22 !important;color:#EAF0F2 !important;border-color:#26343b !important;}
 .pdp-divider,.pdp hr{border-color:#17252c !important;}
 /* header dark (reuse homepage approach) */
