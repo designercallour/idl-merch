@@ -4070,6 +4070,15 @@
     .kit-showcase-badge { background: #fff; }
     .kit-showcase-badge--stock { border-color: #111; color: #111; }
   </style>
+<style id="checkout-hover-parity">
+/* CHECKOUT hover = ADD TO CART: hold lime + dark wipe (was the cart's ink-flip hover) */
+.bag-drawer.cart-v2 .cart-checkout.button{ position:relative; overflow:hidden; }
+.bag-drawer.cart-v2 .cart-checkout.button:hover{ background:var(--idl-go-gold) !important; color:var(--idl-button-ink) !important; }
+.bag-drawer.cart-v2 .cart-checkout.button::before{ content:""; position:absolute; inset:0; z-index:0; background:rgba(0,0,0,.1); transform:scaleX(0); transform-origin:left center; transition:transform 320ms cubic-bezier(.22,.8,.2,1); pointer-events:none; }
+.bag-drawer.cart-v2 .cart-checkout.button:hover::before{ transform:scaleX(1); }
+.bag-drawer.cart-v2 .cart-checkout.button > span{ position:relative; z-index:1; }
+.bag-drawer.cart-v2 .cart-checkout.button:hover .button-icon svg{ background:var(--idl-panel) !important; }
+</style>
 </head>
 <body>
   <div class="idl-preloader" role="status" aria-live="polite" aria-label="Loading IDL Merch">
