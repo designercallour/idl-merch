@@ -2730,7 +2730,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       background: var(--idl-footer-bg);
       color: var(--idl-white);
-      overflow: hidden;
+      overflow: visible;
     }
     /* display: grid above outranks the UA sheet's dialog:not([open]) rule, so a
        closed popup would otherwise sit in normal flow just above the footer. */
@@ -2824,23 +2824,25 @@
       transition: opacity 700ms ease;
     }
     .promo-popup-media img.is-active { opacity: 1; }
+    /* Matches idl.pro flash-sale close: 36px dark square, white X, floating
+       10px above the popup's top-right corner (right edge aligned to popup). */
     .promo-popup-close {
       position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 28px;
-      height: 28px;
+      top: -46px;
+      right: 0;
+      width: 36px;
+      height: 36px;
       display: grid;
       place-items: center;
       border: 0;
       border-radius: 0;
-      background: rgba(255, 255, 255, 0.4);
-      color: var(--idl-button-ink);
+      background: #12232a;
+      color: #ffffff;
       cursor: pointer;
       transition: background 140ms ease;
     }
-    .promo-popup-close:hover { background: var(--idl-white); }
-    .promo-popup-close svg { width: 15px; height: 15px; }
+    .promo-popup-close:hover { background: #1b2f39; }
+    .promo-popup-close svg { width: 13px; height: 13px; }
 
     .discount-teaser {
       position: fixed;
@@ -3315,6 +3317,9 @@
         /* Even split — the shot and the panel each take half the screen. */
         grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
       }
+      /* Fullscreen mobile popup: the desktop float-above close would sit
+         off-screen, so pin it inside the top-right corner. */
+      .promo-popup-close { top: 12px; right: 12px; }
       /* Same 28px side rail as .closer-signup — both are centred copy over a
          full-bleed shot, so they read as the same kind of panel. The block
          padding stays smaller: this one only gets half the screen, and the
