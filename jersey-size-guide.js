@@ -60,6 +60,7 @@
   function units() {
     return '<div class="jg-units" role="group" aria-label="Units">'
       + '<button type="button" data-jg-unit="in"' + (unit === 'in' ? ' class="is-on" aria-pressed="true"' : ' aria-pressed="false"') + '>Inches</button>'
+      + '<span class="jg-units-sep" aria-hidden="true">|</span>'
       + '<button type="button" data-jg-unit="cm"' + (unit === 'cm' ? ' class="is-on" aria-pressed="true"' : ' aria-pressed="false"') + '>CM</button>'
       + '</div>';
   }
@@ -103,16 +104,19 @@
       + findTable(g)
       + '<p class="jg-note">' + esc(META.findNote) + '</p>'
       + (g.extraNote ? '<p class="jg-note jg-note--flag">' + esc(g.extraNote) + '</p>' : '')
-      + '<details class="jg-more">'
-      + '<summary>Garment measurements &amp; how to measure</summary>'
-      + '<div class="jg-more-inner">'
-      + '<h4 class="jg-h4">' + esc(META.flatHeading) + '</h4>'
-      + flatTable(g)
-      + '<p class="jg-note">' + esc(META.flatNote) + '</p>'
-      + '<h4 class="jg-h4">' + esc(META.measureHeading) + '</h4>'
-      + '<p class="jg-note jg-note--flag">' + esc(META.measureBody) + '</p>'
+      // How to measure, visible like the reference — the supplied diagram plays
+      // the part its model photo does.
+      + '<h3 class="jg-h3">' + esc(META.measureHeading) + '</h3>'
+      + '<p class="jg-measure-body">' + esc(META.measureBody) + '</p>'
       + '<img class="jg-diagram" src="' + esc(META.diagram) + '" alt="Flat drawings of the short sleeve and long sleeve jerseys, one true scale, with the five measurement points A to E." loading="lazy">'
       + measureKey()
+      // The flat garment spec is the extra-detail table the reference does not
+      // carry, so it stays behind a disclosure.
+      + '<details class="jg-more">'
+      + '<summary>' + esc(META.flatHeading) + '</summary>'
+      + '<div class="jg-more-inner">'
+      + flatTable(g)
+      + '<p class="jg-note">' + esc(META.flatNote) + '</p>'
       + '</div></details>'
       + '<p class="jg-footer">' + META.footer + '</p>';
   }
@@ -131,9 +135,7 @@
     dialog.innerHTML =
       '<div class="jg-head">'
       + '<h2 id="jersey-guide-title">' + esc(META.title) + '</h2>'
-      + '<button class="jg-close" type="button" data-jg-close aria-label="Close size guide">'
-      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>'
-      + '</button></div>'
+      + '<button class="jg-close" type="button" data-jg-close>Close</button></div>'
       + '<div class="jg-body-scroll" data-jg-body></div>';
     document.body.appendChild(dialog);
 
