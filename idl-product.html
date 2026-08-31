@@ -5246,14 +5246,15 @@
 }
 .jg-close {
   flex: 0 0 auto;
-  padding: 0 2px 2px;
-  border: 0; background: transparent;
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 0; border-radius: 0; background: transparent;
   color: #ffffff; cursor: pointer;
-  font: 700 12px/14px CarbonPlus, monospace; letter-spacing: 1.4px; text-transform: uppercase;
-  text-decoration: underline; text-underline-offset: 3px;
   transition: color 140ms ease;
 }
 .jg-close:hover { color: var(--idl-go-gold, #c0e700); }
+.jg-close svg { width: 18px; height: 18px; }
 
 .jg-body-scroll { overflow-y: auto; padding: 18px 20px 22px; }
 .jg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
