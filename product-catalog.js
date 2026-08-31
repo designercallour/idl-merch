@@ -181,7 +181,6 @@ window.IDL_CATALOG = {
       "kind": "jersey",
       "soldOut": false,
       "sizes": [
-        "XS",
         "S",
         "M",
         "L",
@@ -189,7 +188,6 @@ window.IDL_CATALOG = {
         "XXL"
       ],
       "out": [
-        "XS",
         "XXL"
       ],
       "cut": "Long sleeve",
@@ -238,7 +236,6 @@ window.IDL_CATALOG = {
       "kind": "jersey",
       "soldOut": false,
       "sizes": [
-        "XS",
         "S",
         "M",
         "L",
@@ -246,7 +243,6 @@ window.IDL_CATALOG = {
         "XXL"
       ],
       "out": [
-        "XS",
         "XXL"
       ],
       "cut": "Long sleeve",
@@ -295,7 +291,6 @@ window.IDL_CATALOG = {
       "kind": "jersey",
       "soldOut": false,
       "sizes": [
-        "XS",
         "S",
         "M",
         "L",
@@ -303,7 +298,6 @@ window.IDL_CATALOG = {
         "XXL"
       ],
       "out": [
-        "XS",
         "XXL"
       ],
       "cut": "Long sleeve",
@@ -351,7 +345,6 @@ window.IDL_CATALOG = {
       "kind": "jersey",
       "soldOut": false,
       "sizes": [
-        "XS",
         "S",
         "M",
         "L",
@@ -359,7 +352,6 @@ window.IDL_CATALOG = {
         "XXL"
       ],
       "out": [
-        "XS",
         "XXL"
       ],
       "cut": "Long sleeve",
@@ -407,7 +399,6 @@ window.IDL_CATALOG = {
       "kind": "jersey",
       "soldOut": false,
       "sizes": [
-        "XS",
         "S",
         "M",
         "L",
@@ -415,7 +406,6 @@ window.IDL_CATALOG = {
         "XXL"
       ],
       "out": [
-        "XS",
         "XXL"
       ],
       "cut": "Long sleeve",
@@ -463,7 +453,6 @@ window.IDL_CATALOG = {
       "kind": "jersey",
       "soldOut": true,
       "sizes": [
-        "XS",
         "S",
         "M",
         "L",
@@ -471,7 +460,6 @@ window.IDL_CATALOG = {
         "XXL"
       ],
       "out": [
-        "XS",
         "S",
         "M",
         "L",
