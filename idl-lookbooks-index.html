@@ -3234,11 +3234,9 @@
         margin: auto;
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto auto;
-        /* Dark strip at the top holds the close button. */
-        padding-top: 46px;
       }
-      /* Close sits flush in the card's top-right corner strip. */
-      .promo-popup-close { top: 0; right: 0; }
+      /* No top strip: close floats above the card's top-right over the backdrop. */
+      .promo-popup-close { top: -46px; right: 0; }
       /* Copy panel below the shot. */
       .promo-popup-panel { order: 2; padding: 26px 22px 30px; gap: 16px; }
       /* A landscape band out of a portrait frame lands on the chest, so the
