@@ -3829,33 +3829,28 @@
       .announcement-bar.is-footer { margin-block: 28px 0; }
       .announcement-group { font-size: 11px; }
       .announcement-copy { padding-inline: 26px; }
-      /* Side by side the copy panel would be ~150px wide, so the shot moves on
-         top and the close button stays over it — and the dialog takes the whole
-         screen rather than floating as a card. The UA sheet centres a modal
-         with inset: 0 plus margin: auto and caps it at calc(100% - 6px - 2em);
-         zeroing the margin and lifting both caps lets it fill. */
+      /* Centred portrait card like idl.pro's mobile flash-sale, not a fullscreen
+         sheet: image on top, panel below, close in a dark top strip.
+         fit-content height + inset:0 + margin:auto lets the UA modal centre it. */
       .promo-popup {
-        inset: 0;
-        width: auto;
-        height: auto;
+        width: min(320px, calc(100% - 40px));
+        height: fit-content;
         max-width: none;
         max-height: none;
-        margin: 0;
+        inset: 0;
+        margin: auto;
         grid-template-columns: minmax(0, 1fr);
-        /* Even split — the shot and the panel each take half the screen. */
-        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        /* Dark strip at the top holds the close button. */
+        padding-top: 46px;
       }
-      /* Fullscreen mobile popup: the desktop float-above close would sit
-         off-screen, so pin it inside the top-right corner. */
-      .promo-popup-close { top: 12px; right: 12px; }
-      /* Same 28px side rail as .closer-signup — both are centred copy over a
-         full-bleed shot, so they read as the same kind of panel. The block
-         padding stays smaller: this one only gets half the screen, and the
-         closer's 64px would push its content past 406px. */
-      .promo-popup-panel { order: 2; padding: 32px 28px 40px; gap: 20px; }
+      /* Close sits flush in the card's top-right corner strip. */
+      .promo-popup-close { top: 0; right: 0; }
+      /* Copy panel below the shot. */
+      .promo-popup-panel { order: 2; padding: 26px 22px 30px; gap: 16px; }
       /* A landscape band out of a portrait frame lands on the chest, so the
          crop is pulled up to keep the face in it. */
-      .promo-popup-media { order: 1; height: auto; min-height: 0; aspect-ratio: auto; }
+      .promo-popup-media { order: 1; height: auto; min-height: 0; aspect-ratio: 320 / 260; }
       .promo-popup-media img { object-position: 50% 18%; }
       .promo-popup-kicker,
       .promo-popup-copy h2 { font-size: 20px; line-height: 25px; }
