@@ -3250,7 +3250,8 @@
       width: min(880px, calc(100% - 32px));
       max-width: none;
       padding: 0;
-      border: 0;
+      /* Faint white hairline around the whole popup edge. */
+      border: 1px solid rgba(255, 255, 255, 0.16);
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       background: var(--idl-footer-bg);
