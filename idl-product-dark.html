@@ -2735,6 +2735,9 @@
     /* display: grid above outranks the UA sheet's dialog:not([open]) rule, so a
        closed popup would otherwise sit in normal flow just above the footer. */
     .promo-popup:not([open]) { display: none; }
+    /* Media on the left, form panel on the right (mobile keeps its own order). */
+    .promo-popup-media { order: 1; }
+    .promo-popup-panel { order: 2; }
     /* The full overlay from the storefront original: black at 0.7 PLUS a 5px
        blur of the page behind — the blur was dropped when this popup was
        copied here, which made it read as a flat dark scrim. */
@@ -5881,8 +5884,8 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
       <img src="Asset Photo/MEDIUM/MEDIUM_QS.webp" alt="" width="1080" height="1440" loading="lazy">
       <img src="Asset Photo/MEDIUM/MEDIUM_JR.webp" alt="" width="1080" height="1440" loading="lazy">
       <div class="look-dots" aria-hidden="true"></div>
-      <button class="promo-popup-close" type="button" aria-label="Close offer"><i data-lucide="x" aria-hidden="true"></i></button>
     </div>
+    <button class="promo-popup-close" type="button" aria-label="Close offer"><i data-lucide="x" aria-hidden="true"></i></button>
   </dialog>
 
   <!-- Standing 10%-off corner teaser. Its animated grid is filled by
