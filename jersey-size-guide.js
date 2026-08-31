@@ -104,20 +104,17 @@
       + findTable(g)
       + '<p class="jg-note">' + esc(META.findNote) + '</p>'
       + (g.extraNote ? '<p class="jg-note jg-note--flag">' + esc(g.extraNote) + '</p>' : '')
+      // Both tables sit out in the open — the garment spec directly under the
+      // find-your-size chart, no disclosure.
+      + '<h3 class="jg-h3">' + esc(META.flatHeading) + '</h3>'
+      + flatTable(g)
+      + '<p class="jg-note">' + esc(META.flatNote) + '</p>'
       // How to measure, visible like the reference — the supplied diagram plays
       // the part its model photo does.
       + '<h3 class="jg-h3">' + esc(META.measureHeading) + '</h3>'
       + '<p class="jg-measure-body">' + esc(META.measureBody) + '</p>'
       + '<img class="jg-diagram" src="' + esc(META.diagram) + '" alt="Flat drawings of the short sleeve and long sleeve jerseys, one true scale, with the five measurement points A to E." loading="lazy">'
       + measureKey()
-      // The flat garment spec is the extra-detail table the reference does not
-      // carry, so it stays behind a disclosure.
-      + '<details class="jg-more">'
-      + '<summary>' + esc(META.flatHeading) + '</summary>'
-      + '<div class="jg-more-inner">'
-      + flatTable(g)
-      + '<p class="jg-note">' + esc(META.flatNote) + '</p>'
-      + '</div></details>'
       + '<p class="jg-footer">' + META.footer + '</p>';
   }
 
