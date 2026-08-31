@@ -4833,6 +4833,7 @@
     }
     .pdp-size-guide:hover { color: var(--pdp-ink); }
     .pdp-size-guide__icon { width: 18px; height: 18px; flex: 0 0 auto; }
+    .pdp-size-links { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
 
     .pdp-cuts { display: flex; gap: 10px; }
     .pdp-cut {
@@ -5753,7 +5754,10 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
                 <div class="pdp-block">
                   <div class="pdp-block-head">
                     <h2>Size:</h2>
-                    <button class="pdp-size-guide" type="button" data-size-guide><svg class="pdp-size-guide__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="20" height="8" rx="1"></rect><line x1="6.5" y1="8" x2="6.5" y2="12"></line><line x1="11" y1="8" x2="11" y2="12"></line><line x1="15.5" y1="8" x2="15.5" y2="12"></line><line x1="20" y1="8" x2="20" y2="12"></line></svg><span class="pdp-size-guide__text">Size guide</span></button>
+                    <div class="pdp-size-links">
+                      <button class="pdp-size-guide" type="button" data-recommend-size><svg class="pdp-size-guide__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3.4"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg><span class="pdp-size-guide__text">Recommend my size</span></button>
+                      <button class="pdp-size-guide" type="button" data-size-guide><svg class="pdp-size-guide__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="20" height="8" rx="1"></rect><line x1="6.5" y1="8" x2="6.5" y2="12"></line><line x1="11" y1="8" x2="11" y2="12"></line><line x1="15.5" y1="8" x2="15.5" y2="12"></line><line x1="20" y1="8" x2="20" y2="12"></line></svg><span class="pdp-size-guide__text">Size guide</span></button>
+                    </div>
                   </div>
                   <!-- Sold-out sizes stay in the list rather than disappearing:
                        a gap in the run is the clearest way to say what is gone. -->
