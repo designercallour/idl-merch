@@ -95,11 +95,7 @@
   function body() {
     var g = BY_ID[active];
     // No garment toggle: the guide only ever shows the cut selected on the PDP.
-    return '<div class="jg-garment-name"><h3>' + esc(g.heading) + '</h3><span>' + esc(g.subhead) + '</span></div>'
-      // One quiet line, the single most useful sentence for this garment.
-      + '<p class="jg-lead"><b>' + (active === 'ss-jersey' ? 'Take your usual size.' : 'Size up one from your usual.') + '</b></p>'
-      // The cross-cut reminder, always present, kept to one line.
-      + '<p class="jg-cross">' + META.banner.replace('<b>', '<b>').replace('Same team, different cut.', 'Same team, different cut.') + '</p>'
+    return '<div class="jg-garment-name"><h3>' + esc(g.heading) + '</h3></div>'
       + units()
       + (g.extraNote ? '<p class="jg-note jg-note--flag">' + esc(g.extraNote) + '</p>' : '')
       // Garment measurements, laid flat — shown in the open, no disclosure.
