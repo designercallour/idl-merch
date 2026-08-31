@@ -6935,13 +6935,29 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
       go(); requestAnimationFrame(go);
       setTimeout(function(){ go(); root.style.scrollBehavior=prev; if(typeof updateSpy==='function') updateSpy(); }, 220);
     }, true);
+    var lastActiveCap=null;
     function setActive(cap){
+      var activeTab=null;
       tabs.forEach(function(t){
         var on=t.getAttribute('data-capsule-filter')===cap;
         t.classList.toggle('is-active', on);
         t.setAttribute('aria-selected', on?'true':'false');
         t.setAttribute('tabindex', on?'0':'-1');
+        if(on) activeTab=t;
       });
+      // Only when the active tab CHANGES (not every scroll frame): slide the
+      // filter rail so the active chip stays in view instead of clipping off
+      // to the right — e.g. Seoul when the page scrolls to its section.
+      if(cap!==lastActiveCap){
+        lastActiveCap=cap;
+        if(activeTab){
+          var rail=activeTab.parentElement;
+          if(rail && rail.scrollWidth>rail.clientWidth){
+            var target=activeTab.offsetLeft-(rail.clientWidth-activeTab.offsetWidth)/2;
+            rail.scrollTo({ left:Math.max(0, Math.min(target, rail.scrollWidth-rail.clientWidth)), behavior:'smooth' });
+          }
+        }
+      }
     }
     // scroll-spy: active tab follows the series currently in view
     var spyRAF=null;
