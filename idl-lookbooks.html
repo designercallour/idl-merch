@@ -3247,10 +3247,11 @@
        and a portrait shot whose studio backdrop is dark enough to read as one
        surface with it. */
     .promo-popup {
-      width: min(760px, calc(100% - 32px));
+      width: min(880px, calc(100% - 32px));
       max-width: none;
       padding: 0;
-      border: 0;
+      /* Faint white hairline around the whole popup edge. */
+      border: 1px solid rgba(255, 255, 255, 0.08);
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       background: var(--idl-footer-bg);
@@ -3260,6 +3261,9 @@
     /* display: grid above outranks the UA sheet's dialog:not([open]) rule, so a
        closed popup would otherwise sit in normal flow just above the footer. */
     .promo-popup:not([open]) { display: none; }
+    /* Media on the left, form panel on the right (mobile keeps its own order). */
+    .promo-popup-media { order: 1; }
+    .promo-popup-panel { order: 2; }
     /* Full overlay from the storefront original: black 0.7 PLUS a 5px blur of
        the page behind — the blur was dropped when this popup was copied here. */
     .promo-popup::backdrop {
@@ -3332,7 +3336,7 @@
        surface — it shows through while the slideshow images cross-fade. */
     .promo-popup-media {
       position: relative;
-      height: 480px;
+      height: 440px;
       --look-hold: 3200ms;
       background: radial-gradient(50% 50%, rgb(10, 29, 38) 0%, rgb(9, 20, 26) 100%);
     }
@@ -3348,23 +3352,25 @@
       transition: opacity 700ms ease;
     }
     .promo-popup-media img.is-active { opacity: 1; }
+    /* Matches idl.pro flash-sale close: 36px dark square, white X, floating
+       10px above the popup's top-right corner (right edge aligned to popup). */
     .promo-popup-close {
       position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 28px;
-      height: 28px;
+      top: -46px;
+      right: 0;
+      width: 36px;
+      height: 36px;
       display: grid;
       place-items: center;
-      border: 0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 0;
-      background: rgba(255, 255, 255, 0.4);
-      color: var(--idl-button-ink);
+      background: radial-gradient(50% 50%, rgb(10, 29, 38) 0%, rgb(9, 20, 26) 100%);
+      color: #ffffff;
       cursor: pointer;
       transition: background 140ms ease;
     }
-    .promo-popup-close:hover { background: var(--idl-white); }
-    .promo-popup-close svg { width: 15px; height: 15px; }
+    .promo-popup-close:hover { background: radial-gradient(50% 50%, rgb(17, 42, 53) 0%, rgb(15, 31, 40) 100%); }
+    .promo-popup-close svg { width: 16px; height: 16px; }
 
     .discount-teaser {
       position: fixed;
@@ -3839,6 +3845,9 @@
         /* Even split — the shot and the panel each take half the screen. */
         grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
       }
+      /* Fullscreen mobile popup: the desktop float-above close would sit
+         off-screen, so pin it inside the top-right corner. */
+      .promo-popup-close { top: 12px; right: 12px; }
       /* Same 28px side rail as .closer-signup — both are centred copy over a
          full-bleed shot, so they read as the same kind of panel. The block
          padding stays smaller: this one only gets half the screen, and the
@@ -5624,8 +5633,8 @@
       <img src="Asset Photo/MEDIUM/MEDIUM_QS.webp" alt="" width="1080" height="1440" loading="lazy">
       <img src="Asset Photo/MEDIUM/MEDIUM_JR.webp" alt="" width="1080" height="1440" loading="lazy">
       <div class="look-dots" aria-hidden="true"></div>
-      <button class="promo-popup-close" type="button" aria-label="Close offer"><i data-lucide="x" aria-hidden="true"></i></button>
     </div>
+    <button class="promo-popup-close" type="button" aria-label="Close offer"><i data-lucide="x" aria-hidden="true"></i></button>
   </dialog>
 
   <!-- Standing 10%-off corner teaser. Its animated grid is filled by
