@@ -101,12 +101,9 @@
       // The cross-cut reminder, always present, kept to one line.
       + '<p class="jg-cross">' + META.banner.replace('<b>', '<b>').replace('Same team, different cut.', 'Same team, different cut.') + '</p>'
       + units()
-      + findTable(g)
-      + '<p class="jg-note">' + esc(META.findNote) + '</p>'
       + (g.extraNote ? '<p class="jg-note jg-note--flag">' + esc(g.extraNote) + '</p>' : '')
-      // Both tables sit out in the open — the garment spec directly under the
-      // find-your-size chart, no disclosure.
-      + '<h3 class="jg-h3">' + esc(META.flatHeading) + '</h3>'
+      // Garment measurements, laid flat — shown in the open, no disclosure.
+      + '<h3 class="jg-h3 jg-h3--first">' + esc(META.flatHeading) + '</h3>'
       + flatTable(g)
       + '<p class="jg-note">' + esc(META.flatNote) + '</p>'
       // How to measure, visible like the reference — the supplied diagram plays
