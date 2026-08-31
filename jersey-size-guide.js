@@ -197,49 +197,8 @@
     }
   }
 
-  // ---- PDP fit block -----------------------------------------------------
-  // Always visible, never behind a click: most shoppers never open a size
-  // chart, so this block does most of the work.
-  function renderFitBlock() {
-    var sizes = document.querySelector('[data-pdp-sizes]');
-    if (!sizes) return;
-    var host = sizes.closest('.pdp-block');
-    if (!host) return;
-
-    var gid = garmentFor(currentKey());
-    var existing = document.querySelector('.pdp-fit');
-
-    if (!gid) { if (existing) existing.remove(); return; }
-
-    var g = BY_ID[gid];
-    var html =
-      '<p class="pdp-fit-label">' + esc(META.fitLabel) + '</p>'
-      + '<p class="pdp-fit-value">' + esc(g.fitValue) + '</p>'
-      + fitScale(g.fitScale, g.fitScaleMax)
-      + '<p class="pdp-fit-advice">' + DATA.pdpAdvice[gid] + '</p>'
-      + '<p class="pdp-fit-warning">' + g.warning + '</p>';
-
-    var block = existing;
-    if (!block) {
-      block = document.createElement('div');
-      block.className = 'pdp-fit';
-      host.insertAdjacentElement('afterend', block);
-    }
-    if (block.innerHTML !== html) block.innerHTML = html;
-  }
-
   // ---- wiring ------------------------------------------------------------
   function init() {
-    renderFitBlock();
-
-    // The size list is rebuilt on every product render, so watching it covers
-    // cut switching, deep links and the first paint without touching the
-    // page's own render code.
-    var sizes = document.querySelector('[data-pdp-sizes]');
-    if (sizes) {
-      new MutationObserver(renderFitBlock).observe(sizes, { childList: true });
-    }
-
     // Take the size-guide trigger before the page's own handler, but only for
     // the jerseys — everything else keeps the generic guide it has today.
     document.addEventListener('click', function (event) {
