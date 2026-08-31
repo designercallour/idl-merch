@@ -118,6 +118,63 @@
     scroller.scrollTop = keep;
   }
 
+  // ---- size recommender (the drawer's bottom CTA) -----------------------
+  // Replaces the removed find-your-size table with something interactive: the
+  // shopper enters their chest and we map it onto the garment's body-chest
+  // bands (the same derived ranges) to name a size.
+  function renderFoot() {
+    var foot = dialog.querySelector('[data-jg-foot]');
+    if (!foot) return;
+    foot.innerHTML = '<button class="jg-reco-btn" type="button" data-jg-reco-open>Recommend My Size</button>';
+  }
+
+  function openReco() {
+    var foot = dialog.querySelector('[data-jg-foot]');
+    foot.innerHTML =
+      '<div class="jg-reco">'
+      + '<label class="jg-reco-label" for="jg-reco-input">Your chest, around (' + (unit === 'in' ? 'inches' : 'cm') + ')</label>'
+      + '<div class="jg-reco-row">'
+      + '<input class="jg-reco-input" id="jg-reco-input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="' + (unit === 'in' ? 'e.g. 39' : 'e.g. 99') + '" data-jg-reco-input>'
+      + '<button class="jg-reco-close" type="button" data-jg-reco-cancel aria-label="Cancel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>'
+      + '</div>'
+      + '<p class="jg-reco-out" data-jg-reco-out aria-live="polite">Measure around the fullest part of your chest, tape level.</p>'
+      + '</div>';
+    var input = foot.querySelector('[data-jg-reco-input]');
+    if (input) input.focus();
+  }
+
+  function recommend(value) {
+    var g = BY_ID[active];
+    var ranges = g.bodyChest[unit];
+    for (var i = 0; i < ranges.length; i += 1) {
+      var r = String(ranges[i]).toLowerCase();
+      var hi;
+      if (r.indexOf('up to') !== -1) {
+        hi = parseFloat(r.replace(/[^0-9.]/g, ''));
+      } else {
+        var parts = r.split(/[–—-]/).map(function (x) { return parseFloat(x); }).filter(function (x) { return !isNaN(x); });
+        hi = parts.length ? parts[parts.length - 1] : NaN;
+      }
+      if (!isNaN(hi) && value <= hi) return g.sizes[i];
+    }
+    return g.sizes[g.sizes.length - 1]; // above every band -> the largest made
+  }
+
+  function runReco() {
+    var out = dialog.querySelector('[data-jg-reco-out]');
+    var input = dialog.querySelector('[data-jg-reco-input]');
+    if (!out || !input) return;
+    var v = parseFloat(input.value);
+    if (isNaN(v) || v <= 0) {
+      out.className = 'jg-reco-out';
+      out.innerHTML = 'Measure around the fullest part of your chest, tape level.';
+      return;
+    }
+    var size = sizeLabel(recommend(v));
+    out.className = 'jg-reco-out jg-reco-out--hit';
+    out.innerHTML = 'We recommend size <b>' + esc(size) + '</b>.';
+  }
+
   function build() {
     dialog = document.createElement('dialog');
     dialog.className = 'jersey-guide';
@@ -128,13 +185,19 @@
       + '<button class="jg-close" type="button" data-jg-close aria-label="Close size guide">'
       + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>'
       + '</button></div>'
-      + '<div class="jg-body-scroll" data-jg-body></div>';
+      + '<div class="jg-body-scroll" data-jg-body></div>'
+      + '<div class="jg-foot" data-jg-foot></div>';
     document.body.appendChild(dialog);
+    renderFoot();
 
     dialog.addEventListener('click', function (e) {
       if (e.target.closest('[data-jg-close]')) { dialog.close(); return; }
+      if (e.target.closest('[data-jg-reco-open]')) { openReco(); return; }
+      if (e.target.closest('[data-jg-reco-cancel]')) { renderFoot(); return; }
       var unitBtn = e.target.closest('[data-jg-unit]');
-      if (unitBtn) { if (unitBtn.dataset.jgUnit !== unit) { unit = unitBtn.dataset.jgUnit; render(); } return; }
+      // Switching units would reinterpret a typed number, so the recommender
+      // resets when the unit changes.
+      if (unitBtn) { if (unitBtn.dataset.jgUnit !== unit) { unit = unitBtn.dataset.jgUnit; render(); renderFoot(); } return; }
       var tab = e.target.closest('[data-jg-garment-tab]');
       if (tab) {
         if (tab.dataset.jgGarmentTab !== active) {
@@ -146,6 +209,9 @@
       }
       if (e.target === dialog) dialog.close(); // backdrop
     });
+    dialog.addEventListener('input', function (e) {
+      if (e.target.closest('[data-jg-reco-input]')) runReco();
+    });
     dialog.addEventListener('close', function () { document.body.classList.remove('locked'); });
   }
 
@@ -154,6 +220,7 @@
     active = garmentId || DATA.garments[0].id;
     dialog.querySelector('[data-jg-body]').scrollTop = 0;
     render();
+    renderFoot();
     if (!dialog.open) dialog.showModal();
     document.body.classList.add('locked');
   }

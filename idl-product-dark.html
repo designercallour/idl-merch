@@ -5344,7 +5344,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   color: #ffffff;
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 .jersey-guide:not([open]) { display: none; }
 .jersey-guide::backdrop { background: rgba(0, 0, 0, 0.72); }
@@ -5474,6 +5474,21 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   .jg-head { padding: 16px 16px; }
   .jg-body-scroll { padding: 16px 16px 22px; }
 }
+
+/* Bottom CTA + size recommender (drawer footer). */
+.jg-foot { border-top: 1px solid rgba(255, 255, 255, 0.12); padding: 14px 20px 16px; background: #061015; }
+.jg-reco-btn { width: 100%; height: 50px; display: grid; place-items: center; border: 0; border-radius: 0; background: var(--idl-go-gold, #c0e700); color: #0c0f13; font: 700 13px/14px CarbonPlus, monospace; letter-spacing: 1.6px; text-transform: uppercase; cursor: pointer; transition: filter 140ms ease; }
+.jg-reco-btn:hover { filter: brightness(1.06); }
+.jg-reco-label { display: block; margin: 0 0 8px; color: #c9d2d8; font: 700 11px/14px CarbonPlus, monospace; letter-spacing: 1.2px; text-transform: uppercase; }
+.jg-reco-row { display: flex; gap: 8px; }
+.jg-reco-input { flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 14px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.04); color: #ffffff; font: 400 16px/20px NeueHaas, Arial, sans-serif; }
+.jg-reco-input:focus-visible { outline: 0; border-color: var(--idl-go-gold, #c0e700); }
+.jg-reco-close { flex: 0 0 auto; width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0; background: transparent; color: #c9d2d8; cursor: pointer; transition: color 140ms ease, border-color 140ms ease; }
+.jg-reco-close:hover { color: #ffffff; border-color: rgba(255, 255, 255, 0.4); }
+.jg-reco-close svg { width: 16px; height: 16px; }
+.jg-reco-out { margin: 10px 0 0; color: #8f9aa2; font-size: 12px; line-height: 18px; }
+.jg-reco-out--hit { color: #ffffff; font-size: 15px; line-height: 21px; }
+.jg-reco-out--hit b { color: var(--idl-go-gold, #c0e700); font-weight: 700; }
 </style>
 </head>
 <body class="product-page">
