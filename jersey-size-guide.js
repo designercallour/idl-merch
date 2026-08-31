@@ -94,9 +94,9 @@
   // ---- body --------------------------------------------------------------
   function body() {
     var g = BY_ID[active];
-    // No garment toggle: the guide only ever shows the cut selected on the PDP.
-    return '<div class="jg-garment-name"><h3>' + esc(g.heading) + '</h3></div>'
-      + units()
+    // No garment toggle and no garment heading here: the header title carries
+    // the garment name ("Size Guide — Long Sleeve Jersey").
+    return units()
       + (g.extraNote ? '<p class="jg-note jg-note--flag">' + esc(g.extraNote) + '</p>' : '')
       // Garment measurements, laid flat — shown in the open, no disclosure.
       + '<h3 class="jg-h3 jg-h3--first">' + esc(META.flatHeading) + '</h3>'
@@ -107,8 +107,7 @@
       + '<h3 class="jg-h3">' + esc(META.measureHeading) + '</h3>'
       + '<p class="jg-measure-body">' + esc(META.measureBody) + '</p>'
       + '<img class="jg-diagram" src="' + esc(META.diagram) + '" alt="Flat drawings of the short sleeve and long sleeve jerseys, one true scale, with the five measurement points A to E." loading="lazy">'
-      + measureKey()
-      + '<p class="jg-footer">' + META.footer + '</p>';
+      + measureKey();
   }
 
   function render() {
@@ -125,7 +124,12 @@
   function renderFoot() {
     var foot = dialog.querySelector('[data-jg-foot]');
     if (!foot) return;
-    foot.innerHTML = '<button class="jg-reco-btn" type="button" data-jg-reco-open>Recommend My Size</button>';
+    // Same button as Add to cart — the storefront's primary button, lime with
+    // the dark icon plate on the right.
+    foot.innerHTML = '<button class="jg-reco-cta newsletter-submit button primary" type="button" data-jg-reco-open>'
+      + '<span class="button-label">Recommend My Size</span>'
+      + '<span class="button-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="20" height="8" rx="1"></rect><line x1="6.5" y1="8" x2="6.5" y2="12"></line><line x1="11" y1="8" x2="11" y2="12"></line><line x1="15.5" y1="8" x2="15.5" y2="12"></line><line x1="20" y1="8" x2="20" y2="12"></line></svg></span>'
+      + '</button>';
   }
 
   function openReco() {
@@ -218,6 +222,8 @@
   function open(garmentId) {
     if (!dialog) build();
     active = garmentId || DATA.garments[0].id;
+    // Title carries the garment: "Size Guide — Long Sleeve Jersey".
+    dialog.querySelector('#jersey-guide-title').textContent = META.title + ' ' + BY_ID[active].heading;
     dialog.querySelector('[data-jg-body]').scrollTop = 0;
     render();
     renderFoot();
