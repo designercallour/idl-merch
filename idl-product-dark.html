@@ -5477,11 +5477,11 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 /* How to measure yourself — product photo with wrap-around tape marks */
 .jg-measure { margin: 2px 0 6px; }
 .jg-measure-photo {
-  position: relative; aspect-ratio: 4 / 5; overflow: hidden;
+  position: relative; aspect-ratio: 1 / 1; overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 4px;
-  background: #0d222d; margin: 2px 0 14px;
+  background: #0d222d; margin: 2px 0 18px;
 }
-.jg-measure-img { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 190%; background-position: 50% 26%; }
+.jg-measure-img { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 120%; background-position: 50% 40%; }
 .jg-tape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .jg-tape-front, .jg-tape-back, .jg-tape-arrow, .jg-tape-tick {
   fill: none; stroke: var(--idl-go-gold, #c0e700); vector-effect: non-scaling-stroke;
@@ -5505,11 +5505,6 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 }
 .jg-ms-title { margin: 0 0 4px; color: #ffffff; font: 500 13px/16px NeueHaas, Arial, sans-serif; letter-spacing: 0.3px; }
 .jg-ms-desc { margin: 0; color: #c9d2d8; font-size: 13px; line-height: 19px; }
-@media (min-width: 620px) {
-  .jg-measure { display: grid; grid-template-columns: 1fr 240px; gap: 22px; align-items: center; }
-  .jg-measure-photo { order: 2; margin: 0; }
-  .jg-measure-steps { order: 1; }
-}
 
 .jg-footer { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.12); color: #8f9aa2; font-size: 12px; line-height: 18px; }
 .jg-footer a { color: var(--idl-go-gold, #c0e700); }
@@ -6109,7 +6104,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 
   <script src="product-catalog.js?v=2"></script>
 <script src="jersey-sizing.js?v=2"></script>
-<script src="jersey-size-guide.js?v=3"></script>
+<script src="jersey-size-guide.js?v=6"></script>
   <script src="product-image-zoom.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>

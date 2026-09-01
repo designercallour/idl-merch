@@ -114,18 +114,18 @@
   //   chip: [x, y]          the A–E label
   var MARKS = {
     'ss-jersey': {
-      A: { v: [26, 40, 80], chip: [26, 60] },
-      B: { h: [53, 36, 64], chip: [33, 53] },
-      C: { h: [41, 39, 61], chip: [63, 40] },
-      D: { l: [63, 44, 73, 61], chip: [77, 50] },
-      E: { h: [62, 68, 78], chip: [82, 62] }
+      A: { v: [24, 33, 69], chip: [24, 56] },
+      B: { h: [45, 32, 66], chip: [36, 45] },
+      C: { h: [33, 32, 65], chip: [68, 32] },
+      D: { l: [63, 37, 68, 50], chip: [73, 44] },
+      E: { h: [50, 62, 70], chip: [74, 50] }
     },
     'ls-jersey': {
-      A: { v: [27, 39, 82], chip: [27, 61] },
-      B: { h: [52, 38, 62], chip: [35, 52] },
-      C: { h: [41, 40, 60], chip: [62, 40] },
-      D: { l: [61, 44, 66, 86], chip: [70, 66] },
-      E: { h: [87, 61, 71], chip: [75, 87] }
+      A: { v: [26, 32, 66], chip: [26, 55] },
+      B: { h: [44, 33, 64], chip: [35, 44] },
+      C: { h: [31, 33, 63], chip: [66, 31] },
+      D: { l: [62, 36, 67, 70], chip: [72, 54] },
+      E: { h: [70, 62, 71], chip: [75, 70] }
     }
   };
 
@@ -161,7 +161,7 @@
     var steps = META.measureKey.map(function (r) {
       return '<div class="jg-ms-row">'
         + '<span class="jg-ms-chip">' + esc(r[0]) + '</span>'
-        + '<div class="jg-ms-txt"><p class="jg-ms-title">' + esc(r[0]) + ': ' + esc(r[1]).toUpperCase() + '</p>'
+        + '<div class="jg-ms-txt"><p class="jg-ms-title">' + esc(r[1]).toUpperCase() + '</p>'
         + '<p class="jg-ms-desc">' + esc(r[2]) + '</p></div>'
         + '</div>';
     }).join('');
