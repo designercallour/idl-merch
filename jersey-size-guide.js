@@ -323,10 +323,10 @@
 
   function init() {
     // Intercept the size-guide trigger before the page's own handler, but only
-    // for the jerseys — everything else keeps its generic guide.
+    // for the jerseys — everything else keeps its generic guide. "Recommend my
+    // size" is handled by the fit finder (jersey-fit-finder.js), not here.
     document.addEventListener('click', function (e) {
-      var reco = e.target.closest('[data-recommend-size]');
-      var trigger = reco || e.target.closest('[data-size-guide]');
+      var trigger = e.target.closest('[data-size-guide]');
       if (!trigger) return;
       var key = currentKey();
       var gid = garmentFor(key);
@@ -334,8 +334,6 @@
       e.preventDefault();
       e.stopImmediatePropagation();
       open(gid, key);
-      // "Recommend my size" lands straight on the chest input.
-      if (reco) openReco();
     }, true);
   }
 
