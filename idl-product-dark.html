@@ -5557,14 +5557,35 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-big .ff-unit { margin-left: 4px; font-size: 22px; font-weight: 500; color: #9aa6ad; vertical-align: baseline; }
 .ff-hint { margin: 14px 0 10px; color: #8f9aa2; font-size: 12px; }
 .ff-ruler { position: relative; width: 100%; margin-top: 2px; touch-action: none; cursor: pointer; outline: none; }
-.ff-ruler-box { position: relative; height: 52px; border: 1px solid rgba(255, 255, 255, 0.18); }
+.ff-ruler-box { position: relative; height: 52px; border: 1px solid rgba(255, 255, 255, 0.18); cursor: grab; }
+.ff-ruler-box:active { cursor: grabbing; }
 .ff-ruler-scale { position: absolute; inset: 0; overflow: hidden; }
 .ff-tick { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 1px; height: 10px; background: #465862; }
 .ff-tick.is-major { height: 18px; background: #93a0a8; }
-.ff-ruler-handle { position: absolute; top: 4px; bottom: 4px; width: 3px; background: #fff; transform: translateX(-50%); pointer-events: none; }
+.ff-ruler-handle { position: absolute; top: 4px; bottom: 4px; width: 3px; background: #fff; transform: translateX(-50%); pointer-events: none; transition: left 90ms ease-out; }
+/* Attaquer-style grab affordance: chevrons flank the handle, appearing and
+   nudging out on hover / focus / drag (always on for touch). */
+.ff-ruler-handle::before, .ff-ruler-handle::after {
+  content: ""; position: absolute; top: 50%; width: 5px; height: 5px;
+  border-top: 1.5px solid #fff; border-right: 1.5px solid #fff;
+  opacity: 0; transition: opacity 0.14s, margin 0.14s;
+}
+.ff-ruler-handle::before { right: 7px; margin-right: 0; transform: translateY(-50%) rotate(-135deg); }
+.ff-ruler-handle::after { left: 7px; margin-left: 0; transform: translateY(-50%) rotate(45deg); }
+.ff-ruler:hover .ff-ruler-handle::before, .ff-ruler:hover .ff-ruler-handle::after,
+.ff-ruler:focus .ff-ruler-handle::before, .ff-ruler:focus .ff-ruler-handle::after,
+.ff-ruler-box:active .ff-ruler-handle::before, .ff-ruler-box:active .ff-ruler-handle::after { opacity: 1; }
+.ff-ruler:hover .ff-ruler-handle::before, .ff-ruler:focus .ff-ruler-handle::before,
+.ff-ruler-box:active .ff-ruler-handle::before { margin-right: 3px; }
+.ff-ruler:hover .ff-ruler-handle::after, .ff-ruler:focus .ff-ruler-handle::after,
+.ff-ruler-box:active .ff-ruler-handle::after { margin-left: 3px; }
 .ff-ruler-labels { position: relative; height: 16px; margin-top: 8px; }
 .ff-ruler-lbl { position: absolute; transform: translateX(-50%); color: #8f9aa2; font: 500 12px/1 CarbonPlus, monospace; }
-.ff-ruler:focus-visible .ff-ruler-box { border-color: rgba(192, 231, 0, 0.6); }
+.ff-ruler:focus-visible .ff-ruler-handle { outline: 1px solid #fff; outline-offset: 3px; }
+@media (hover: none) {
+  .ff-ruler-handle::before { opacity: 1; margin-right: 3px; }
+  .ff-ruler-handle::after { opacity: 1; margin-left: 3px; }
+}
 .ff-cards { width: 100%; display: grid; gap: 10px; margin-top: 4px; }
 .ff-card { text-align: left; padding: 16px 18px; border: 1px solid #26343b; background: transparent; color: #fff; cursor: pointer; display: grid; gap: 4px; }
 .ff-card.is-on { border-color: #fff; }
