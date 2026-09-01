@@ -217,9 +217,9 @@
 
   function fitStep() {
     var opts = [
-      ['true', 'True to design', BY_ID[gid].id === 'ss-jersey' ? 'The oversized look in the photos.' : 'The athletic look in the photos.'],
-      ['closer', 'Closer', 'Size down for a tighter fit.'],
-      ['roomier', 'Roomier', 'Size up for a little more room.']
+      ['closer', 'Slim', 'Sits close to the body — size down.'],
+      ['true', 'Regular', 'How this jersey is meant to fit.'],
+      ['roomier', 'Oversized', 'Loose and roomy — size up.']
     ];
     return '<div class="ff-q">'
       + '<h2 class="ff-title">How do you want it to fit?</h2>'
