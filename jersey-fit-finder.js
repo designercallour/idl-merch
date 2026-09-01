@@ -302,8 +302,8 @@
     } else {
       primary = primaryBtn('Continue', 'data-ff-next', ICON_ARROW);
     }
-    var split = state.step > 0 && primary ? ' ff-foot-row--split' : '';
-    return '<div class="ff-foot-row' + split + '">' + backBtn() + primary + '</div>' + links;
+    var split = left && primary ? ' ff-foot-row--split' : '';
+    return '<div class="ff-foot-row' + split + '">' + left + primary + '</div>' + links;
   }
 
   function dots() {
