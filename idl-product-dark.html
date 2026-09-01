@@ -5599,7 +5599,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-result-eyebrow { margin: 6px 0 0; text-align: center; color: #8f9aa2; font: 500 12px/1 CarbonPlus, monospace; letter-spacing: 2px; text-transform: uppercase; }
 .ff-result-size { margin: 6px 0 20px; text-align: center; color: #fff; font: 700 72px/1 NeueHaas, Arial, sans-serif; }
 .ff-result-line { margin: 0 0 12px; color: #d7dee2; font-size: 15px; line-height: 22px; }
-.ff-result-line:last-child { color: #8f9aa2; font-size: 13px; line-height: 19px; }
+.ff-result-note { margin: 0; color: #8f9aa2; font-size: 13px; line-height: 19px; }
 .ff-foot { border-top: 1px solid rgba(255,255,255,0.12); padding: 14px 20px; background: #061015; display: grid; gap: 10px; }
 .ff-foot-row { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: stretch; }
 .ff-foot-row--split { grid-template-columns: 1fr 1fr; }
@@ -5613,6 +5613,8 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-dot.is-on { background: var(--idl-go-gold, #c0e700); }
 @media (max-width: 560px) {
   .fitfinder { width: auto; inset: 0; border: 0; }
+  .ff-foot-row--split { grid-template-columns: 1fr; }
+  .ff-foot-row--split .ff-cta { order: -1; }
 }
 </style>
 </head>
@@ -6190,7 +6192,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   <script src="product-catalog.js?v=2"></script>
 <script src="jersey-sizing.js?v=3"></script>
 <script src="jersey-size-guide.js?v=9"></script>
-<script src="jersey-fit-finder.js?v=13"></script>
+<script src="jersey-fit-finder.js?v=16"></script>
   <script src="product-image-zoom.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>

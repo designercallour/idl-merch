@@ -241,25 +241,20 @@
 
   function resultStep() {
     var r = recommend();
-    var sizes = g.sizes;
-    var lines = [];
-    if (r.cIdx != null) {
-      lines.push('A ' + frac(state.chestIn) + '" chest sits in ' + sizeLabel(sizes[r.cIdx]) + '. We size on the chest, because that is what has to fit.');
-    } else {
-      lines.push('Your weight puts you around ' + sizeLabel(sizes[r.wIdx]) + ', and your height around ' + sizeLabel(sizes[r.hIdx]) + '.');
-    }
-    if (r.waistIdx != null && r.waistIdx < r.idx) {
-      lines.push('Your waist sits in ' + sizeLabel(sizes[r.waistIdx]) + ', so ' + sizeLabel(r.size) + ' will be a touch roomier through the waist.');
-    }
-    if (r.fitAdj !== 0) {
-      lines.push(r.fitAdj < 0 ? 'You asked for a closer fit, so we sized down.' : 'You asked for more room, so we sized up.');
-    }
-    if (gid === 'ss-jersey') lines.push('Wearing ' + sizeLabel(r.size) + ' here? You will want one size up in the long sleeve — it is cut athletic.');
+    var size = sizeLabel(r.size);
+    var src = r.cIdx != null ? 'Your ' + frac(state.chestIn) + '" chest' : 'Your height and weight';
+    // One plain sentence: what we based it on, and the fit tweak if any.
+    var main = r.fitAdj === 0
+      ? src + ' puts you in ' + size + '.'
+      : src + ' is a ' + sizeLabel(g.sizes[r.base]) + ', but for '
+          + (r.fitAdj < 0 ? 'a closer fit' : 'more room') + ' we recommend ' + size + '.';
+    var note = gid === 'ss-jersey' ? 'Going for the long sleeve too? Size up — it runs slimmer.' : '';
 
     return '<div class="ff-result">'
       + '<p class="ff-result-eyebrow">Your size</p>'
       + '<p class="ff-result-size">' + esc(sizeLabel(r.size)) + '</p>'
-      + lines.map(function (l) { return '<p class="ff-result-line">' + l + '</p>'; }).join('')
+      + '<p class="ff-result-line">' + main + '</p>'
+      + (note ? '<p class="ff-result-note">' + note + '</p>' : '')
       + '</div>';
   }
 
@@ -294,11 +289,10 @@
       : '';
   }
   function footer() {
-    var key = currentStepKey(), primary = '', links = '';
+    var key = currentStepKey(), primary = '', links = '', left = backBtn();
     if (key === 'result') {
       primary = primaryBtn('Select ' + sizeLabel(recommend().size), 'data-ff-select', ICON_CHECK);
-      links = '<button class="ff-link" type="button" data-ff-chart>See the full size chart</button>'
-        + '<button class="ff-link" type="button" data-ff-restart>Start again</button>';
+      left = '<button class="ff-btn-back" type="button" data-ff-restart>Start again</button>';
     } else if (key === 'chest') {
       primary = primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW);
       links = '<button class="ff-link" type="button" data-ff-skip>I do not know it</button>';
