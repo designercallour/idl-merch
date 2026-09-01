@@ -114,18 +114,18 @@
   //   chip: [x, y]          the A–E label
   var MARKS = {
     'ss-jersey': {
-      A: { v: [24, 33, 69], chip: [24, 56] },
-      B: { h: [45, 32, 66], chip: [36, 45] },
-      C: { h: [33, 32, 65], chip: [68, 32] },
-      D: { l: [63, 37, 68, 50], chip: [73, 44] },
-      E: { h: [50, 62, 70], chip: [74, 50] }
+      A: { v: [30, 33, 68], chip: [13, 41], lead: [30, 41] },
+      B: { h: [46, 33, 66], chip: [13, 55], lead: [33, 49] },
+      C: { h: [34, 38, 60], chip: [88, 33], lead: [60, 34] },
+      D: { l: [64, 38, 70, 50], chip: [88, 47], lead: [70, 49] },
+      E: { h: [51, 63, 71], chip: [88, 61], lead: [71, 52] }
     },
     'ls-jersey': {
-      A: { v: [26, 32, 66], chip: [26, 55] },
-      B: { h: [44, 33, 64], chip: [35, 44] },
-      C: { h: [31, 33, 63], chip: [66, 31] },
-      D: { l: [62, 36, 67, 70], chip: [72, 54] },
-      E: { h: [70, 62, 71], chip: [75, 70] }
+      A: { v: [30, 32, 66], chip: [13, 41], lead: [30, 41] },
+      B: { h: [45, 33, 64], chip: [13, 55], lead: [33, 47] },
+      C: { h: [32, 37, 60], chip: [88, 31], lead: [60, 33] },
+      D: { l: [62, 37, 67, 68], chip: [88, 50], lead: [65, 52] },
+      E: { h: [70, 62, 71], chip: [88, 64], lead: [71, 70] }
     }
   };
 
@@ -137,12 +137,16 @@
         + ' M' + (x - 3) + ',' + y2 + ' L' + (x + 3) + ',' + y2 + '"/>';
     }
     if (cfg.h) {
+      // A dimension line with a tick at each end — reads as a span, and (unlike
+      // an arrow) points at nothing, so lines never appear to collide.
       var y = cfg.h[0], a = cfg.h[1], b = cfg.h[2];
       return '<path class="jg-tape-front" d="M' + a + ',' + y + ' L' + b + ',' + y + '"/>'
-        + '<path class="jg-tape-arrow" d="M' + (b - 3) + ',' + (y - 2.2) + ' L' + b + ',' + y + ' L' + (b - 3) + ',' + (y + 2.2) + '"/>';
+        + '<path class="jg-tape-tick" d="M' + a + ',' + (y - 2.4) + ' L' + a + ',' + (y + 2.4)
+        + ' M' + b + ',' + (y - 2.4) + ' L' + b + ',' + (y + 2.4) + '"/>';
     }
     var lx1 = cfg.l[0], ly1 = cfg.l[1], lx2 = cfg.l[2], ly2 = cfg.l[3];
-    return '<path class="jg-tape-front" d="M' + lx1 + ',' + ly1 + ' L' + lx2 + ',' + ly2 + '"/>';
+    return '<path class="jg-tape-front" d="M' + lx1 + ',' + ly1 + ' L' + lx2 + ',' + ly2 + '"/>'
+      + '<path class="jg-tape-tick" d="M' + (lx2 - 3) + ',' + (ly2 - 2) + ' L' + (lx2 + 3) + ',' + (ly2 + 2) + '"/>';
   }
 
   function measurePhoto() {
@@ -155,6 +159,11 @@
     META.measureKey.forEach(function (r) {
       var letter = r[0], cfg = marks[letter];
       if (!cfg) return;
+      // Leader from the margin chip to the measurement, so labels sit in the
+      // clear space beside the figure and never collide with the marks.
+      if (cfg.lead) {
+        svg += '<path class="jg-tape-lead" d="M' + cfg.chip[0] + ',' + cfg.chip[1] + ' L' + cfg.lead[0] + ',' + cfg.lead[1] + '"/>';
+      }
       svg += '<g class="jg-tape-g">' + drawMark(cfg) + '</g>';
       chips += '<span class="jg-tape-lbl" style="left:' + cfg.chip[0] + '%;top:' + cfg.chip[1] + '%">' + esc(letter) + '</span>';
     });
@@ -185,6 +194,7 @@
       + flatTable(g)
       // How to measure yourself — a real photo with wrap-around tape marks.
       + '<h3 class="jg-h3">' + esc(META.measureHeading) + '</h3>'
+      + '<p class="jg-measure-body">' + esc(META.measureBody) + '</p>'
       + measurePhoto();
   }
 
