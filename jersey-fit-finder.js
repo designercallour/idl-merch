@@ -304,7 +304,6 @@
   function render() {
     var back = state.step > 0 && currentStepKey() !== 'result';
     dialog.querySelector('[data-ff-back]').style.visibility = back ? 'visible' : 'hidden';
-    dialog.querySelector('[data-ff-photo]').style.display = currentStepKey() === 'result' ? 'none' : '';
     dialog.querySelector('[data-ff-body]').innerHTML = stepBody();
     dialog.querySelector('[data-ff-foot]').innerHTML = footer();
     dialog.querySelector('[data-ff-dots]').innerHTML = dots();
@@ -360,7 +359,6 @@
       + '<button class="ff-close" type="button" data-ff-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>'
       + '</div>'
       + '<div class="ff-scroll">'
-      + '<div class="ff-photo" data-ff-photo><div class="ff-photo-img" data-ff-photo-img></div><p class="ff-anchor" data-ff-anchor></p></div>'
       + '<div class="ff-body" data-ff-body></div>'
       + '</div>'
       + '<div class="ff-foot" data-ff-foot></div>'
@@ -427,9 +425,6 @@
     gid = garmentId; productKey = key || currentKey();
     g = BY_ID[gid]; bands = BANDS[gid];
     state = freshState();
-    var img = dialog.querySelector('[data-ff-photo-img]');
-    img.style.backgroundImage = photoSrc() ? "url('" + photoSrc() + "')" : '';
-    dialog.querySelector('[data-ff-anchor]').textContent = 'Model wears ' + sizeLabel('M') + ' — see how it sits before you measure.';
     render();
     if (!dialog.open) dialog.showModal();
     document.body.classList.add('locked');
