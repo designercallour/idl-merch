@@ -82,10 +82,12 @@
   function freshState() {
     return {
       step: 0,
-      heightCm: 178,
-      weightKg: 75,
-      chestIn: null, chestVal: 39,
-      waistIn: null, waistVal: 33,
+      heightCm: 178,        // canonical
+      weightKg: 75,         // canonical
+      chestInVal: 39,       // canonical (inches), working value
+      waistInVal: 33,       // canonical (inches)
+      chestIn: null,        // committed (inches) or null when skipped
+      waistIn: null,
       fit: 'true',
       units: { height: 'cm', weight: 'kg', chest: 'in', waist: 'in' }
     };
@@ -137,25 +139,76 @@
     }
     if (kind === 'chest') {
       return state.units.chest === 'in'
-        ? state.chestVal + '<span class="ff-unit">"</span>'
-        : inToCm(state.chestVal) + '<span class="ff-unit">cm</span>';
+        ? round(state.chestInVal) + '<span class="ff-unit">"</span>'
+        : inToCm(state.chestInVal) + '<span class="ff-unit">cm</span>';
     }
     if (kind === 'waist') {
       return state.units.waist === 'in'
-        ? state.waistVal + '<span class="ff-unit">"</span>'
-        : inToCm(state.waistVal) + '<span class="ff-unit">cm</span>';
+        ? round(state.waistInVal) + '<span class="ff-unit">"</span>'
+        : inToCm(state.waistInVal) + '<span class="ff-unit">cm</span>';
     }
     return '';
   }
 
-  // Native range slider driving the canonical (metric/inch) value.
-  function slider(kind) {
-    var min, max, val, step = '1';
-    if (kind === 'height') { min = 150; max = 205; val = state.heightCm; }
-    else if (kind === 'weight') { min = 45; max = 130; val = state.weightKg; }
-    else if (kind === 'chest') { min = 30; max = 52; val = state.chestVal; }
-    else { min = 24; max = 46; val = state.waistVal; }
-    return '<input class="ff-slider" type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '" data-ff-slider="' + kind + '" aria-label="' + kind + '">';
+  // ---- ruler (custom, Attaquer-style) -------------------------------------
+  function canonical(kind) {
+    if (kind === 'height') return state.heightCm;
+    if (kind === 'weight') return state.weightKg;
+    if (kind === 'chest') return state.chestInVal;
+    return state.waistInVal;
+  }
+  function setCanonical(kind, v) {
+    if (kind === 'height') state.heightCm = v;
+    else if (kind === 'weight') state.weightKg = v;
+    else if (kind === 'chest') state.chestInVal = v;
+    else state.waistInVal = v;
+  }
+
+  // Range + labelled major marks, in the CANONICAL unit but labelled in the
+  // display unit (feet marks, kg vs lb, etc.).
+  function rulerConfig(kind) {
+    var c, v;
+    if (kind === 'height') {
+      c = { min: 150, max: 205, majors: [] };
+      if (state.units.height === 'cm') { for (v = 150; v <= 200; v += 10) c.majors.push({ v: v, label: v }); }
+      else { for (v = 5; v <= 6; v += 1) { var cm = Math.round(v * 12 * 2.54); c.majors.push({ v: cm, label: v + "'" }); } }
+      return c;
+    }
+    if (kind === 'weight') {
+      c = { min: 45, max: 130, majors: [] };
+      if (state.units.weight === 'kg') { for (v = 50; v <= 130; v += 10) c.majors.push({ v: v, label: v }); }
+      else { for (var lb = 100; lb <= 280; lb += 20) { var kg = lbToKg(lb); if (kg >= 45 && kg <= 130) c.majors.push({ v: kg, label: lb }); } }
+      return c;
+    }
+    if (kind === 'chest') {
+      c = { min: 30, max: 52, majors: [] };
+      if (state.units.chest === 'in') { for (v = 30; v <= 52; v += 4) c.majors.push({ v: v, label: v }); }
+      else { for (var cc = 80; cc <= 130; cc += 10) { var inc = cc / 2.54; if (inc >= 30 && inc <= 52) c.majors.push({ v: inc, label: cc }); } }
+      return c;
+    }
+    c = { min: 24, max: 46, majors: [] };
+    if (state.units.waist === 'in') { for (v = 24; v <= 46; v += 4) c.majors.push({ v: v, label: v }); }
+    else { for (var wc = 65; wc <= 115; wc += 10) { var wi = wc / 2.54; if (wi >= 24 && wi <= 46) c.majors.push({ v: wi, label: wc }); } }
+    return c;
+  }
+
+  function ruler(kind) {
+    var c = rulerConfig(kind), span = c.max - c.min, val = canonical(kind), v;
+    var minor = '';
+    for (v = c.min; v <= c.max; v += 1) { var x = ((v - c.min) / span * 1000).toFixed(1); minor += '<line x1="' + x + '" y1="16" x2="' + x + '" y2="26"/>'; }
+    var major = '', labels = '';
+    c.majors.forEach(function (m) {
+      var x = ((m.v - c.min) / span * 1000).toFixed(1), xp = ((m.v - c.min) / span * 100).toFixed(2);
+      major += '<line x1="' + x + '" y1="8" x2="' + x + '" y2="28"/>';
+      labels += '<span class="ff-ruler-lbl" style="left:' + xp + '%">' + m.label + '</span>';
+    });
+    var hp = ((val - c.min) / span * 100).toFixed(2);
+    return '<div class="ff-ruler" data-ff-ruler="' + kind + '" tabindex="0" role="slider" aria-valuemin="' + c.min + '" aria-valuemax="' + c.max + '" aria-valuenow="' + round(val) + '">'
+      + '<svg class="ff-ruler-ticks" viewBox="0 0 1000 32" preserveAspectRatio="none" aria-hidden="true">'
+      + '<g class="ff-ruler-minor">' + minor + '</g><g class="ff-ruler-major">' + major + '</g></svg>'
+      + '<div class="ff-ruler-handle" data-ff-handle style="left:' + hp + '%"></div>'
+      + '<div class="ff-ruler-labels">' + labels + '</div>'
+      + '</div>';
   }
 
   function metricStep(opts) {
@@ -164,8 +217,8 @@
       + '<p class="ff-sub">' + opts.sub + '</p>'
       + unitToggle(opts.kind, opts.a, opts.b)
       + '<div class="ff-big" data-ff-big="' + opts.kind + '">' + bigValue(opts.kind) + '</div>'
-      + '<p class="ff-hint">Drag the handle to set it.</p>'
-      + slider(opts.kind)
+      + '<p class="ff-hint">Drag the ruler to set it.</p>'
+      + ruler(opts.kind)
       + '</div>';
   }
 
@@ -269,20 +322,30 @@
   }
 
   // ---- interactions -------------------------------------------------------
-  function setSlider(kind, v) {
-    v = parseFloat(v);
-    if (kind === 'height') state.heightCm = v;
-    else if (kind === 'weight') state.weightKg = v;
-    else if (kind === 'chest') { state.chestVal = v; state.chestIn = state.units.chest === 'in' ? v : v / 2.54; }
-    else { state.waistVal = v; state.waistIn = state.units.waist === 'in' ? v : v / 2.54; }
+  function setRuler(kind, v) {
+    var c = rulerConfig(kind);
+    v = clamp(Math.round(v), c.min, c.max);
+    setCanonical(kind, v);
     var big = dialog.querySelector('[data-ff-big="' + kind + '"]');
     if (big) big.innerHTML = bigValue(kind);
+    var rl = dialog.querySelector('[data-ff-ruler="' + kind + '"]');
+    if (rl) {
+      var h = rl.querySelector('[data-ff-handle]');
+      if (h) h.style.left = ((v - c.min) / (c.max - c.min) * 100).toFixed(2) + '%';
+      rl.setAttribute('aria-valuenow', v);
+    }
+  }
+  function valueFromPointer(kind, clientX) {
+    var rl = dialog.querySelector('[data-ff-ruler="' + kind + '"]');
+    if (!rl) return null;
+    var c = rulerConfig(kind), rect = rl.getBoundingClientRect();
+    return c.min + ((clientX - rect.left) / rect.width) * (c.max - c.min);
   }
 
   function commitStep() {
     var key = currentStepKey();
-    if (key === 'chest') state.chestIn = state.units.chest === 'in' ? state.chestVal : state.chestVal / 2.54;
-    if (key === 'waist') state.waistIn = state.units.waist === 'in' ? state.waistVal : state.waistVal / 2.54;
+    if (key === 'chest') state.chestIn = state.chestInVal;
+    if (key === 'waist') state.waistIn = state.waistInVal;
   }
   function next() {
     if (state.step < STEPS.length - 1) { state.step += 1; render(); }
@@ -322,13 +385,8 @@
       var unitBtn = e.target.closest('[data-ff-unit]');
       if (unitBtn) {
         var kind = unitBtn.dataset.ffUnit, val = unitBtn.dataset.ffUnitVal;
-        if (state.units[kind] !== val) {
-          // For chest/waist the slider value follows the unit (in <-> cm).
-          if (kind === 'chest') state.chestVal = val === 'in' ? Math.round(state.chestVal / 2.54) : inToCm(state.chestVal);
-          if (kind === 'waist') state.waistVal = val === 'in' ? Math.round(state.waistVal / 2.54) : inToCm(state.waistVal);
-          state.units[kind] = val;
-          render();
-        }
+        // Values are stored canonically, so a unit switch only re-labels.
+        if (state.units[kind] !== val) { state.units[kind] = val; render(); }
         return;
       }
       var fitBtn = e.target.closest('[data-ff-fit]');
@@ -336,9 +394,27 @@
       if (e.target.closest('[data-ff-select]')) { selectSize(); return; }
       if (e.target === dialog) dialog.close();
     });
-    dialog.addEventListener('input', function (e) {
-      var s = e.target.closest('[data-ff-slider]');
-      if (s) setSlider(s.dataset.ffSlider, s.value);
+    var drag = null;
+    dialog.addEventListener('pointerdown', function (e) {
+      var rl = e.target.closest('[data-ff-ruler]');
+      if (!rl) return;
+      drag = rl.dataset.ffRuler;
+      try { rl.setPointerCapture(e.pointerId); } catch (err) {}
+      var v = valueFromPointer(drag, e.clientX); if (v != null) setRuler(drag, v);
+      e.preventDefault();
+    });
+    dialog.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var v = valueFromPointer(drag, e.clientX); if (v != null) setRuler(drag, v);
+    });
+    dialog.addEventListener('pointerup', function () { drag = null; });
+    dialog.addEventListener('pointercancel', function () { drag = null; });
+    dialog.addEventListener('keydown', function (e) {
+      var rl = e.target.closest('[data-ff-ruler]');
+      if (!rl) return;
+      var kind = rl.dataset.ffRuler;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setRuler(kind, canonical(kind) - 1); e.preventDefault(); }
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setRuler(kind, canonical(kind) + 1); e.preventDefault(); }
     });
     dialog.addEventListener('close', function () { document.body.classList.remove('locked'); });
   }

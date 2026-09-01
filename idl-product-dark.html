@@ -5556,9 +5556,15 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-big { color: #fff; font: 700 52px/1 NeueHaas, Arial, sans-serif; letter-spacing: -0.02em; }
 .ff-big .ff-unit { margin-left: 4px; font-size: 22px; font-weight: 500; color: #9aa6ad; vertical-align: baseline; }
 .ff-hint { margin: 14px 0 10px; color: #8f9aa2; font-size: 12px; }
-.ff-slider { -webkit-appearance: none; appearance: none; width: 100%; max-width: 460px; height: 3px; background: #26343b; outline: none; cursor: pointer; }
-.ff-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--idl-go-gold, #c0e700); border: 0; cursor: pointer; }
-.ff-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--idl-go-gold, #c0e700); border: 0; cursor: pointer; }
+.ff-ruler { position: relative; width: 100%; max-width: 460px; height: 56px; margin-top: 2px; touch-action: none; cursor: pointer; outline: none; }
+.ff-ruler-ticks { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 32px; overflow: visible; }
+.ff-ruler-minor line { stroke: #37474f; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ff-ruler-major line { stroke: #8b98a0; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ff-ruler-handle { position: absolute; top: -3px; height: 40px; width: 2px; background: var(--idl-go-gold, #c0e700); transform: translateX(-50%); pointer-events: none; }
+.ff-ruler-handle::after { content: ''; position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 13px; height: 13px; border-radius: 50%; background: var(--idl-go-gold, #c0e700); }
+.ff-ruler-labels { position: absolute; left: 0; right: 0; top: 37px; height: 16px; }
+.ff-ruler-lbl { position: absolute; transform: translateX(-50%); color: #8f9aa2; font: 500 11px/1 CarbonPlus, monospace; }
+.ff-ruler:focus-visible .ff-ruler-handle { box-shadow: 0 0 0 3px rgba(192, 231, 0, 0.35); }
 .ff-cards { width: 100%; display: grid; gap: 10px; margin-top: 4px; }
 .ff-card { text-align: left; padding: 16px 18px; border: 1px solid #26343b; background: transparent; color: #fff; cursor: pointer; display: grid; gap: 4px; }
 .ff-card.is-on { border-color: #fff; }
@@ -6156,7 +6162,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   <script src="product-catalog.js?v=2"></script>
 <script src="jersey-sizing.js?v=3"></script>
 <script src="jersey-size-guide.js?v=9"></script>
-<script src="jersey-fit-finder.js?v=2"></script>
+<script src="jersey-fit-finder.js?v=3"></script>
   <script src="product-image-zoom.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>
