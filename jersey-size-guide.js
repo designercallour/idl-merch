@@ -101,7 +101,6 @@
       // Garment measurements, laid flat — shown in the open, no disclosure.
       + '<h3 class="jg-h3 jg-h3--first">' + esc(META.flatHeading) + '</h3>'
       + flatTable(g)
-      + '<p class="jg-note">' + esc(META.flatNote) + '</p>'
       // How to measure, visible like the reference — the supplied diagram plays
       // the part its model photo does.
       + '<h3 class="jg-h3">' + esc(META.measureHeading) + '</h3>'
