@@ -202,13 +202,16 @@
   }
 
   function metricStep(opts) {
+    // Title + sub pin to the top; the controls centre in the space below.
     return '<div class="ff-q">'
       + '<h2 class="ff-title">' + esc(opts.title) + '</h2>'
       + '<p class="ff-sub">' + opts.sub + '</p>'
+      + '<div class="ff-controls">'
       + unitToggle(opts.kind, opts.a, opts.b)
       + '<div class="ff-big" data-ff-big="' + opts.kind + '">' + bigValue(opts.kind) + '</div>'
       + '<p class="ff-hint">Drag the ruler to set it.</p>'
       + ruler(opts.kind)
+      + '</div>'
       + '</div>';
   }
 

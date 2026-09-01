@@ -5546,8 +5546,11 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-photo { position: relative; margin: 16px 0 6px; }
 .ff-photo-img { aspect-ratio: 16/9; background-size: 120%; background-position: 50% 22%; background-repeat: no-repeat; border: 1px solid rgba(255,255,255,0.12); background-color: #0d222d; }
 .ff-anchor { margin: 8px 0 0; color: #8f9aa2; font-size: 12px; line-height: 17px; }
-.ff-body { margin: auto 0; padding: 16px 0; width: 100%; }
-.ff-q { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ff-body { flex: 1 1 auto; display: flex; flex-direction: column; padding: 20px 0 12px; width: 100%; }
+.ff-q { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ff-controls { display: flex; flex-direction: column; align-items: center; width: 100%; margin: auto 0; }
+.ff-result { margin: auto 0; }
+.ff-cards { margin: auto 0; }
 .ff-title { align-self: stretch; text-align: left; margin: 6px 0 4px; color: #fff; font: 600 26px/30px NeueHaas, Arial, sans-serif; }
 .ff-sub { align-self: stretch; text-align: left; margin: 0 0 20px; max-width: 48ch; color: #9aa6ad; font-size: 14px; line-height: 20px; }
 .ff-units { display: inline-flex; gap: 6px; margin: 0 0 22px; }
@@ -6184,7 +6187,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   <script src="product-catalog.js?v=2"></script>
 <script src="jersey-sizing.js?v=3"></script>
 <script src="jersey-size-guide.js?v=9"></script>
-<script src="jersey-fit-finder.js?v=8"></script>
+<script src="jersey-fit-finder.js?v=9"></script>
   <script src="product-image-zoom.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>
