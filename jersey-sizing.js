@@ -22,8 +22,20 @@ window.IDL_JERSEY_SIZING = {
     "findNote": "Measure around the fullest part of your chest, tape level, arms down.",
     "flatHeading": "Garment measurements, laid flat",
     "flatNote": "Garment laid flat. Chest and sleeve opening are measured across, so double them for the measurement around.",
-    "measureHeading": "How We Measure",
+    "measureHeading": "How To Measure Yourself",
     "measureBody": "Take a jersey or tee you already own, lay it flat, and compare. It's the most reliable way to get this right.",
+    "bodyMeasure": [
+      [
+        "A",
+        "Chest",
+        "Wrap the measuring tape horizontally around the fullest part of your chest, from armpit to armpit."
+      ],
+      [
+        "B",
+        "Waist",
+        "Wrap the measuring tape horizontally around the narrowest part of your waist."
+      ]
+    ],
     "measureKey": [
       [
         "A",

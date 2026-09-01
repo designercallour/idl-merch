@@ -23,7 +23,13 @@
 
   var unit = 'in';                       // inches default
   var active = DATA.garments[0].id;      // which garment's chart is shown
+  var productKey = null;                  // the product being viewed (for the photo)
   var dialog = null;
+
+  // How-to-measure photo: the main full-body studio shot (arms at sides), cropped
+  // to the torso by CSS. The tape lines below sit at these heights of that crop.
+  var TAPE_CHEST = 39;   // % from top of the framed photo
+  var TAPE_WAIST = 64;
 
   // The chart carries 2XL; the size buttons on the page say XXL. A shopper is
   // matching a row to a button, so the guide speaks the button's language.
@@ -91,6 +97,48 @@
     }).join('') + '</ul>';
   }
 
+  // How-to-measure: a real photo of the jersey on the body with two wrap-around
+  // tape marks (chest, waist), matching the reference storefronts. The photo is
+  // the product on screen, so it stays on-brand per colourway.
+  function photoSrc() {
+    var key = productKey || currentKey();
+    return key ? 'standout-assets/shop-products/' + key + '.jpg' : '';
+  }
+
+  function tapeMark(y, side) {
+    // A flat dashed ellipse reads as tape wrapping the body; the lower (front)
+    // arc is the visible one, the upper (back) arc is faint.
+    return '<g class="jg-tape-g jg-tape-g--' + side + '">'
+      + '<ellipse cx="50" cy="' + y + '" rx="30" ry="3.4" class="jg-tape-back"/>'
+      + '<path d="M20,' + y + ' A30,3.4 0 0 0 80,' + y + '" class="jg-tape-front"/>'
+      + '<path class="jg-tape-arrow" d="M78,' + (y - 2.4) + ' L82,' + y + ' L78,' + (y + 2.4) + '"/>'
+      + '</g>';
+  }
+
+  function measurePhoto() {
+    var src = photoSrc();
+    var img = src
+      ? '<div class="jg-measure-img" role="img" aria-label="How to measure your body for jersey sizing" style="background-image:url(\'' + esc(src) + '\')"></div>'
+      : '';
+    var steps = (META.bodyMeasure || []).map(function (r) {
+      return '<div class="jg-ms-row">'
+        + '<span class="jg-ms-chip">' + esc(r[0]) + '</span>'
+        + '<div class="jg-ms-txt"><p class="jg-ms-title">' + esc(r[0]) + ': ' + esc(r[1]).toUpperCase() + '</p>'
+        + '<p class="jg-ms-desc">' + esc(r[2]) + '</p></div>'
+        + '</div>';
+    }).join('');
+    return '<div class="jg-measure">'
+      + '<div class="jg-measure-photo">' + img
+      + '<svg class="jg-tape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'
+      + tapeMark(TAPE_CHEST, 'a') + tapeMark(TAPE_WAIST, 'b')
+      + '</svg>'
+      + '<span class="jg-tape-lbl jg-tape-lbl--a" style="top:' + TAPE_CHEST + '%">A</span>'
+      + '<span class="jg-tape-lbl jg-tape-lbl--b" style="top:' + TAPE_WAIST + '%">B</span>'
+      + '</div>'
+      + '<div class="jg-measure-steps">' + steps + '</div>'
+      + '</div>';
+  }
+
   // ---- body --------------------------------------------------------------
   function body() {
     var g = BY_ID[active];
@@ -100,12 +148,9 @@
       // Garment measurements, laid flat — shown in the open, no disclosure.
       + '<h3 class="jg-h3 jg-h3--first">' + esc(META.flatHeading) + '</h3>'
       + flatTable(g)
-      // How to measure, visible like the reference — the supplied diagram plays
-      // the part its model photo does.
+      // How to measure yourself — a real photo with wrap-around tape marks.
       + '<h3 class="jg-h3">' + esc(META.measureHeading) + '</h3>'
-      + '<p class="jg-measure-body">' + esc(META.measureBody) + '</p>'
-      + '<img class="jg-diagram" src="' + esc(META.diagram) + '" alt="Flat drawings of the short sleeve and long sleeve jerseys, one true scale, with the five measurement points A to E." loading="lazy">'
-      + measureKey();
+      + measurePhoto();
   }
 
   function render() {
@@ -217,9 +262,10 @@
     dialog.addEventListener('close', function () { document.body.classList.remove('locked'); });
   }
 
-  function open(garmentId) {
+  function open(garmentId, key) {
     if (!dialog) build();
     active = garmentId || DATA.garments[0].id;
+    productKey = key || currentKey();
     // Title carries the garment: "Size Guide — Long Sleeve Jersey".
     dialog.querySelector('#jersey-guide-title').textContent = META.title + ' ' + BY_ID[active].heading;
     dialog.querySelector('[data-jg-body]').scrollTop = 0;
@@ -236,11 +282,12 @@
       var reco = e.target.closest('[data-recommend-size]');
       var trigger = reco || e.target.closest('[data-size-guide]');
       if (!trigger) return;
-      var gid = garmentFor(currentKey());
+      var key = currentKey();
+      var gid = garmentFor(key);
       if (!gid) return;
       e.preventDefault();
       e.stopImmediatePropagation();
-      open(gid);
+      open(gid, key);
       // "Recommend my size" lands straight on the chest input.
       if (reco) openReco();
     }, true);
