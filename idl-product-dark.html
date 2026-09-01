@@ -5602,7 +5602,10 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-result-line { margin: 0 0 12px; color: #d7dee2; font-size: 15px; line-height: 22px; }
 .ff-result-line:last-child { color: #8f9aa2; font-size: 13px; line-height: 19px; }
 .ff-foot { border-top: 1px solid rgba(255,255,255,0.12); padding: 14px 20px; background: #061015; display: grid; gap: 10px; }
-.ff-foot .ff-cta { width: 100%; }
+.ff-foot-row { display: flex; gap: 10px; }
+.ff-foot-row .ff-cta { flex: 1 1 0; min-width: 0; width: auto; }
+.ff-btn-back { flex: 0 0 auto; height: 44px; min-height: 44px; padding: 0 22px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font: 700 16px/18px CarbonPlus, monospace; text-transform: uppercase; cursor: pointer; transition: border-color 120ms ease; }
+.ff-btn-back:hover { border-color: #fff; }
 .ff-link { background: transparent; border: 0; color: #9aa6ad; font: 400 13px/16px NeueHaas, Arial, sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .ff-link:hover { color: #fff; }
 .ff-dots { display: flex; gap: 4px; padding: 16px 22px 4px; background: #061015; }
@@ -6187,7 +6190,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   <script src="product-catalog.js?v=2"></script>
 <script src="jersey-sizing.js?v=3"></script>
 <script src="jersey-size-guide.js?v=9"></script>
-<script src="jersey-fit-finder.js?v=9"></script>
+<script src="jersey-fit-finder.js?v=10"></script>
   <script src="product-image-zoom.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>

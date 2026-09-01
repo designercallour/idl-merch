@@ -288,23 +288,29 @@
       + '<span class="button-icon">' + icon + '</span></button>';
   }
 
+  function backBtn() {
+    return state.step > 0
+      ? '<button class="ff-btn-back" type="button" data-ff-back>Back</button>'
+      : '';
+  }
   function footer() {
-    var key = currentStepKey();
+    var key = currentStepKey(), primary = '', links = '';
     if (key === 'result') {
-      return primaryBtn('Select ' + sizeLabel(recommend().size), 'data-ff-select', ICON_CHECK)
-        + '<button class="ff-link" type="button" data-ff-chart>See the full size chart</button>'
+      primary = primaryBtn('Select ' + sizeLabel(recommend().size), 'data-ff-select', ICON_CHECK);
+      links = '<button class="ff-link" type="button" data-ff-chart>See the full size chart</button>'
         + '<button class="ff-link" type="button" data-ff-restart>Start again</button>';
+    } else if (key === 'chest') {
+      primary = primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW);
+      links = '<button class="ff-link" type="button" data-ff-skip>I do not know it</button>';
+    } else if (key === 'waist') {
+      primary = primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW);
+      links = '<button class="ff-link" type="button" data-ff-skip>Skip this one</button>';
+    } else if (key === 'fit') {
+      primary = '';
+    } else {
+      primary = primaryBtn('Continue', 'data-ff-next', ICON_ARROW);
     }
-    if (key === 'chest') {
-      return primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW)
-        + '<button class="ff-link" type="button" data-ff-skip>I do not know it</button>';
-    }
-    if (key === 'waist') {
-      return primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW)
-        + '<button class="ff-link" type="button" data-ff-skip>Skip this one</button>';
-    }
-    if (key === 'fit') return '';
-    return primaryBtn('Continue', 'data-ff-next', ICON_ARROW);
+    return '<div class="ff-foot-row">' + backBtn() + primary + '</div>' + links;
   }
 
   function dots() {
@@ -314,8 +320,6 @@
   }
 
   function render() {
-    var back = state.step > 0 && currentStepKey() !== 'result';
-    dialog.querySelector('[data-ff-back]').style.display = back ? '' : 'none';
     dialog.querySelector('[data-ff-body]').innerHTML = stepBody();
     dialog.querySelector('[data-ff-foot]').innerHTML = footer();
     dialog.querySelector('[data-ff-dots]').innerHTML = dots();
@@ -366,7 +370,6 @@
     dialog.setAttribute('aria-label', 'Recommend my size');
     dialog.innerHTML =
       '<div class="ff-head">'
-      + '<button class="ff-back" type="button" data-ff-back aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>'
       + '<h2 class="ff-head-title">Recommend My Size</h2>'
       + '<button class="ff-close" type="button" data-ff-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>'
       + '</div>'
