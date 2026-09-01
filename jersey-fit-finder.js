@@ -305,9 +305,9 @@
   }
 
   function dots() {
-    return '<div class="ff-dots">' + STEPS.map(function (_, i) {
+    return STEPS.map(function (_, i) {
       return '<span class="ff-dot' + (i <= state.step ? ' is-on' : '') + '"></span>';
-    }).join('') + '</div>';
+    }).join('');
   }
 
   function render() {
@@ -367,11 +367,11 @@
       + '<h2 class="ff-head-title">Recommend My Size</h2>'
       + '<button class="ff-close" type="button" data-ff-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>'
       + '</div>'
+      + '<div class="ff-dots" data-ff-dots></div>'
       + '<div class="ff-scroll">'
       + '<div class="ff-body" data-ff-body></div>'
       + '</div>'
-      + '<div class="ff-foot" data-ff-foot></div>'
-      + '<div class="ff-dots" data-ff-dots></div>';
+      + '<div class="ff-foot" data-ff-foot></div>';
     document.body.appendChild(dialog);
 
     dialog.addEventListener('click', function (e) {

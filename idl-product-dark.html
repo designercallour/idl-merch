@@ -5534,7 +5534,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   width: min(680px, calc(100% - 40px)); max-width: none; height: auto; max-height: none;
   position: fixed; top: 20px; right: 20px; bottom: 20px; left: auto; margin: 0; padding: 0;
   border: 1px solid rgba(255,255,255,0.08); background: #061015; color: #fff; overflow: hidden;
-  display: grid; grid-template-rows: auto minmax(0,1fr) auto auto;
+  display: grid; grid-template-rows: auto auto minmax(0,1fr) auto;
 }
 .fitfinder:not([open]) { display: none; }
 .fitfinder::backdrop { background: rgba(0,0,0,0.7); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
@@ -5551,8 +5551,9 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-title { align-self: stretch; text-align: left; margin: 6px 0 4px; color: #fff; font: 600 26px/30px NeueHaas, Arial, sans-serif; }
 .ff-sub { align-self: stretch; text-align: left; margin: 0 0 20px; max-width: 48ch; color: #9aa6ad; font-size: 14px; line-height: 20px; }
 .ff-units { display: inline-flex; gap: 6px; margin: 0 0 22px; }
-.ff-units button { height: 44px; min-width: 84px; padding: 0 16px; border: 1px solid #26343b; background: transparent; color: #C9D2D8; font: 500 14px/1 CarbonPlus, monospace; text-transform: uppercase; letter-spacing: .01em; cursor: pointer; }
-.ff-units button.is-on { border-color: #fff; background: #fff; color: #0c0f13; }
+.ff-units button { height: 40px; min-width: 71px; padding: 0 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #26343b; border-radius: 3px; background: transparent; color: #C9D2D8; font: 500 14px/18px CarbonPlus, monospace; letter-spacing: 0.01em; text-transform: uppercase; cursor: pointer; transition: border-color 160ms ease, color 160ms ease; }
+.ff-units button:hover { border-color: #999; color: #C9D2D8; }
+.ff-units button.is-on { border-color: #ffffff; color: #ffffff; }
 .ff-big { color: #fff; font: 700 52px/1 NeueHaas, Arial, sans-serif; letter-spacing: -0.02em; }
 .ff-big .ff-unit { margin-left: 4px; font-size: 22px; font-weight: 500; color: #9aa6ad; vertical-align: baseline; }
 .ff-hint { margin: 14px 0 10px; color: #8f9aa2; font-size: 12px; }
@@ -5601,8 +5602,8 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-foot .ff-cta { width: 100%; }
 .ff-link { background: transparent; border: 0; color: #9aa6ad; font: 400 13px/16px NeueHaas, Arial, sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .ff-link:hover { color: #fff; }
-.ff-dots { display: flex; justify-content: center; gap: 7px; padding: 12px 0 14px; background: #061015; }
-.ff-dot { width: 22px; height: 3px; background: #26343b; }
+.ff-dots { display: flex; gap: 4px; padding: 16px 22px 4px; background: #061015; }
+.ff-dot { flex: 1 1 0; height: 3px; background: #26343b; }
 .ff-dot.is-on { background: var(--idl-go-gold, #c0e700); }
 @media (max-width: 560px) {
   .fitfinder { width: auto; inset: 0; border: 0; }
@@ -6183,7 +6184,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   <script src="product-catalog.js?v=2"></script>
 <script src="jersey-sizing.js?v=3"></script>
 <script src="jersey-size-guide.js?v=9"></script>
-<script src="jersey-fit-finder.js?v=7"></script>
+<script src="jersey-fit-finder.js?v=8"></script>
   <script src="product-image-zoom.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>
