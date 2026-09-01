@@ -105,22 +105,60 @@
     return key ? 'standout-assets/shop-products/' + key + '.jpg' : '';
   }
 
-  function tapeMark(y, side) {
-    // A flat dashed ellipse reads as tape wrapping the body; the lower (front)
-    // arc is the visible one, the upper (back) arc is faint.
-    return '<g class="jg-tape-g jg-tape-g--' + side + '">'
-      + '<ellipse cx="50" cy="' + y + '" rx="30" ry="3.4" class="jg-tape-back"/>'
-      + '<path d="M20,' + y + ' A30,3.4 0 0 0 80,' + y + '" class="jg-tape-front"/>'
-      + '<path class="jg-tape-arrow" d="M78,' + (y - 2.4) + ' L82,' + y + ' L78,' + (y + 2.4) + '"/>'
-      + '</g>';
+  // Where each measurement mark sits on the framed photo (% of the crop box),
+  // one set per cut because the sleeves differ. Keyed by the measureKey letter
+  // so the marks stay in lock-step with the table rows and the step list.
+  //   v: [x, y1, y2]        vertical line + end ticks
+  //   h: [y, x1, x2]        horizontal line + arrow at x2
+  //   l: [x1, y1, x2, y2]   free line along a sleeve
+  //   chip: [x, y]          the A–E label
+  var MARKS = {
+    'ss-jersey': {
+      A: { v: [26, 40, 80], chip: [26, 60] },
+      B: { h: [53, 36, 64], chip: [33, 53] },
+      C: { h: [41, 39, 61], chip: [63, 40] },
+      D: { l: [63, 44, 73, 61], chip: [77, 50] },
+      E: { h: [62, 68, 78], chip: [82, 62] }
+    },
+    'ls-jersey': {
+      A: { v: [27, 39, 82], chip: [27, 61] },
+      B: { h: [52, 38, 62], chip: [35, 52] },
+      C: { h: [41, 40, 60], chip: [62, 40] },
+      D: { l: [61, 44, 66, 86], chip: [70, 66] },
+      E: { h: [87, 61, 71], chip: [75, 87] }
+    }
+  };
+
+  function drawMark(cfg) {
+    if (cfg.v) {
+      var x = cfg.v[0], y1 = cfg.v[1], y2 = cfg.v[2];
+      return '<path class="jg-tape-front" d="M' + x + ',' + y1 + ' L' + x + ',' + y2 + '"/>'
+        + '<path class="jg-tape-tick" d="M' + (x - 3) + ',' + y1 + ' L' + (x + 3) + ',' + y1
+        + ' M' + (x - 3) + ',' + y2 + ' L' + (x + 3) + ',' + y2 + '"/>';
+    }
+    if (cfg.h) {
+      var y = cfg.h[0], a = cfg.h[1], b = cfg.h[2];
+      return '<path class="jg-tape-front" d="M' + a + ',' + y + ' L' + b + ',' + y + '"/>'
+        + '<path class="jg-tape-arrow" d="M' + (b - 3) + ',' + (y - 2.2) + ' L' + b + ',' + y + ' L' + (b - 3) + ',' + (y + 2.2) + '"/>';
+    }
+    var lx1 = cfg.l[0], ly1 = cfg.l[1], lx2 = cfg.l[2], ly2 = cfg.l[3];
+    return '<path class="jg-tape-front" d="M' + lx1 + ',' + ly1 + ' L' + lx2 + ',' + ly2 + '"/>';
   }
 
   function measurePhoto() {
     var src = photoSrc();
     var img = src
-      ? '<div class="jg-measure-img" role="img" aria-label="How to measure your body for jersey sizing" style="background-image:url(\'' + esc(src) + '\')"></div>'
+      ? '<div class="jg-measure-img" role="img" aria-label="How to measure the jersey for sizing" style="background-image:url(\'' + esc(src) + '\')"></div>'
       : '';
-    var steps = (META.bodyMeasure || []).map(function (r) {
+    var marks = MARKS[active] || MARKS[DATA.garments[0].id];
+    var svg = '', chips = '';
+    META.measureKey.forEach(function (r) {
+      var letter = r[0], cfg = marks[letter];
+      if (!cfg) return;
+      svg += '<g class="jg-tape-g">' + drawMark(cfg) + '</g>';
+      chips += '<span class="jg-tape-lbl" style="left:' + cfg.chip[0] + '%;top:' + cfg.chip[1] + '%">' + esc(letter) + '</span>';
+    });
+    var steps = META.measureKey.map(function (r) {
       return '<div class="jg-ms-row">'
         + '<span class="jg-ms-chip">' + esc(r[0]) + '</span>'
         + '<div class="jg-ms-txt"><p class="jg-ms-title">' + esc(r[0]) + ': ' + esc(r[1]).toUpperCase() + '</p>'
@@ -129,11 +167,8 @@
     }).join('');
     return '<div class="jg-measure">'
       + '<div class="jg-measure-photo">' + img
-      + '<svg class="jg-tape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'
-      + tapeMark(TAPE_CHEST, 'a') + tapeMark(TAPE_WAIST, 'b')
-      + '</svg>'
-      + '<span class="jg-tape-lbl jg-tape-lbl--a" style="top:' + TAPE_CHEST + '%">A</span>'
-      + '<span class="jg-tape-lbl jg-tape-lbl--b" style="top:' + TAPE_WAIST + '%">B</span>'
+      + '<svg class="jg-tape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + svg + '</svg>'
+      + chips
       + '</div>'
       + '<div class="jg-measure-steps">' + steps + '</div>'
       + '</div>';
