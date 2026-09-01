@@ -5557,8 +5557,9 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .ff-big .ff-unit { margin-left: 4px; font-size: 22px; font-weight: 500; color: #9aa6ad; vertical-align: baseline; }
 .ff-hint { margin: 14px 0 10px; color: #8f9aa2; font-size: 12px; }
 .ff-ruler { position: relative; width: 100%; margin-top: 2px; touch-action: none; cursor: pointer; outline: none; }
-.ff-ruler-box { position: relative; height: 52px; border: 1px solid rgba(255, 255, 255, 0.18); cursor: grab; }
+.ff-ruler-box { position: relative; height: 52px; border: 1px solid rgba(255, 255, 255, 0.18); cursor: grab; transition: border-color 0.14s; }
 .ff-ruler-box:active { cursor: grabbing; }
+.ff-ruler:hover .ff-ruler-box, .ff-ruler:focus .ff-ruler-box, .ff-ruler-box:active { border-color: #ffffff; }
 .ff-ruler-scale { position: absolute; inset: 0; overflow: hidden; }
 .ff-tick { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 1px; height: 10px; background: #465862; }
 .ff-tick.is-major { height: 18px; background: #93a0a8; }
