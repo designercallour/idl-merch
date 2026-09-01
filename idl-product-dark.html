@@ -5405,16 +5405,19 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 .jg-cross { margin: 0 0 18px; color: #8f9aa2; font-size: 13px; line-height: 19px; }
 .jg-cross b { color: #c9d2d8; }
 
-.jg-units { display: flex; align-items: center; justify-content: flex-start; gap: 6px; margin: 2px 0 16px; }
-.jg-units-sep { color: rgba(255, 255, 255, 0.3); font: 400 13px/1 CarbonPlus, monospace; }
+.jg-units { display: flex; align-items: center; justify-content: flex-start; gap: 6px; margin: 2px 0 18px; }
+/* Pills styled exactly like the storefront team-filter tabs. */
+.jg-units-sep { display: none; }
 .jg-units button {
-  padding: 4px 6px;
-  border: 0; border-radius: 0; background: transparent; color: #6f7c85;
-  font: 700 12px/14px CarbonPlus, monospace; letter-spacing: 1.4px; text-transform: uppercase; cursor: pointer;
-  transition: color 140ms ease;
+  height: 48px; padding: 0 12px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #26343b; border-radius: 3px; background: transparent;
+  color: #C9D2D8;
+  font: 500 14px/18px CarbonPlus, monospace; letter-spacing: 0.01em; text-transform: uppercase;
+  cursor: pointer; transition: border-color 160ms ease, color 160ms ease;
 }
-.jg-units button:hover { color: #c9d2d8; }
-.jg-units button.is-on { color: var(--idl-go-gold, #c0e700); }
+.jg-units button:hover { border-color: #999; color: #C9D2D8; }
+.jg-units button.is-on { border-color: #FFFFFF; color: #FFFFFF; }
 
 /* Requirement: table scrolls inside its own container, never the page. */
 .jg-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
