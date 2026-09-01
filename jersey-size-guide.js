@@ -188,9 +188,10 @@
     var g = BY_ID[active];
     // No garment toggle and no garment heading here: the header title carries
     // the garment name ("Size Guide — Long Sleeve Jersey").
-    return units()
-      // Garment measurements, laid flat — shown in the open, no disclosure.
-      + '<h3 class="jg-h3 jg-h3--first">' + esc(META.flatHeading) + '</h3>'
+    // Units sit directly under the table's heading — they govern the table's
+    // numbers, so they belong with it, not floating at the top of the guide.
+    return '<h3 class="jg-h3 jg-h3--first">' + esc(META.flatHeading) + '</h3>'
+      + units()
       + flatTable(g)
       // How to measure yourself — a real photo with wrap-around tape marks.
       + '<h3 class="jg-h3">' + esc(META.measureHeading) + '</h3>'
