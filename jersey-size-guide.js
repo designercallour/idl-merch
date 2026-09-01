@@ -97,7 +97,6 @@
     // No garment toggle and no garment heading here: the header title carries
     // the garment name ("Size Guide — Long Sleeve Jersey").
     return units()
-      + (g.extraNote ? '<p class="jg-note jg-note--flag">' + esc(g.extraNote) + '</p>' : '')
       // Garment measurements, laid flat — shown in the open, no disclosure.
       + '<h3 class="jg-h3 jg-h3--first">' + esc(META.flatHeading) + '</h3>'
       + flatTable(g)
