@@ -164,49 +164,39 @@
     else state.waistInVal = v;
   }
 
-  // Range + labelled major marks, in the CANONICAL unit but labelled in the
-  // display unit (feet marks, kg vs lb, etc.).
+  // The ruler works in the DISPLAY unit (1 tick = 1 inch in ft mode, 1 cm in cm
+  // mode, ...), exactly like Attaquer: min/max/step and majors are all in the
+  // shown unit, with toDisp/toCanon bridging to the canonical stored value.
+  function mk(a, b, step) { var arr = [], v; for (v = a; v <= b; v += step) arr.push({ v: v, l: '' + v }); return arr; }
   function rulerConfig(kind) {
-    var c, v;
     if (kind === 'height') {
-      c = { min: 150, max: 205, majors: [] };
-      if (state.units.height === 'cm') { for (v = 150; v <= 200; v += 10) c.majors.push({ v: v, label: v }); }
-      else { for (v = 5; v <= 6; v += 1) { var cm = Math.round(v * 12 * 2.54); c.majors.push({ v: cm, label: v + "'" }); } }
-      return c;
+      if (state.units.height === 'ft') return { min: 55, max: 83, step: 1, majors: [{ v: 60, l: "5'" }, { v: 72, l: "6'" }], toDisp: function (cm) { return cm / 2.54; }, toCanon: function (i) { return Math.round(i * 2.54); } };
+      return { min: 140, max: 210, step: 1, majors: mk(140, 210, 10), toDisp: function (cm) { return cm; }, toCanon: function (cm) { return cm; } };
     }
     if (kind === 'weight') {
-      c = { min: 45, max: 130, majors: [] };
-      if (state.units.weight === 'kg') { for (v = 50; v <= 130; v += 10) c.majors.push({ v: v, label: v }); }
-      else { for (var lb = 100; lb <= 280; lb += 20) { var kg = lbToKg(lb); if (kg >= 45 && kg <= 130) c.majors.push({ v: kg, label: lb }); } }
-      return c;
+      if (state.units.weight === 'lb') return { min: 100, max: 285, step: 1, majors: mk(100, 280, 20), toDisp: function (kg) { return kgToLb(kg); }, toCanon: function (lb) { return lbToKg(lb); } };
+      return { min: 45, max: 130, step: 1, majors: mk(50, 130, 10), toDisp: function (kg) { return kg; }, toCanon: function (kg) { return kg; } };
     }
     if (kind === 'chest') {
-      c = { min: 30, max: 52, majors: [] };
-      if (state.units.chest === 'in') { for (v = 30; v <= 52; v += 4) c.majors.push({ v: v, label: v }); }
-      else { for (var cc = 80; cc <= 130; cc += 10) { var inc = cc / 2.54; if (inc >= 30 && inc <= 52) c.majors.push({ v: inc, label: cc }); } }
-      return c;
+      if (state.units.chest === 'cm') return { min: 76, max: 132, step: 1, majors: mk(80, 130, 10), toDisp: function (i) { return Math.round(i * 2.54); }, toCanon: function (cm) { return cm / 2.54; } };
+      return { min: 30, max: 52, step: 1, majors: mk(30, 52, 4), toDisp: function (i) { return i; }, toCanon: function (i) { return i; } };
     }
-    c = { min: 24, max: 46, majors: [] };
-    if (state.units.waist === 'in') { for (v = 24; v <= 46; v += 4) c.majors.push({ v: v, label: v }); }
-    else { for (var wc = 65; wc <= 115; wc += 10) { var wi = wc / 2.54; if (wi >= 24 && wi <= 46) c.majors.push({ v: wi, label: wc }); } }
-    return c;
+    if (state.units.waist === 'cm') return { min: 61, max: 117, step: 1, majors: mk(65, 115, 10), toDisp: function (i) { return Math.round(i * 2.54); }, toCanon: function (cm) { return cm / 2.54; } };
+    return { min: 24, max: 46, step: 1, majors: mk(24, 46, 4), toDisp: function (i) { return i; }, toCanon: function (i) { return i; } };
   }
 
   function ruler(kind) {
-    var c = rulerConfig(kind), span = c.max - c.min, val = canonical(kind), v;
-    var minor = '';
-    for (v = c.min; v <= c.max; v += 1) { var x = ((v - c.min) / span * 1000).toFixed(1); minor += '<line x1="' + x + '" y1="16" x2="' + x + '" y2="26"/>'; }
-    var major = '', labels = '';
-    c.majors.forEach(function (m) {
-      var x = ((m.v - c.min) / span * 1000).toFixed(1), xp = ((m.v - c.min) / span * 100).toFixed(2);
-      major += '<line x1="' + x + '" y1="8" x2="' + x + '" y2="28"/>';
-      labels += '<span class="ff-ruler-lbl" style="left:' + xp + '%">' + m.label + '</span>';
-    });
-    var hp = ((val - c.min) / span * 100).toFixed(2);
-    return '<div class="ff-ruler" data-ff-ruler="' + kind + '" tabindex="0" role="slider" aria-valuemin="' + c.min + '" aria-valuemax="' + c.max + '" aria-valuenow="' + round(val) + '">'
-      + '<svg class="ff-ruler-ticks" viewBox="0 0 1000 32" preserveAspectRatio="none" aria-hidden="true">'
-      + '<g class="ff-ruler-minor">' + minor + '</g><g class="ff-ruler-major">' + major + '</g></svg>'
-      + '<div class="ff-ruler-handle" data-ff-handle style="left:' + hp + '%"></div>'
+    var c = rulerConfig(kind), span = c.max - c.min, dv = c.toDisp(canonical(kind)), v;
+    var majorAt = {}; c.majors.forEach(function (m) { majorAt[m.v] = 1; });
+    var ticks = '';
+    for (v = c.min; v <= c.max + 0.0001; v += c.step) {
+      var xp = ((v - c.min) / span * 100).toFixed(4);
+      ticks += '<span class="ff-tick' + (majorAt[Math.round(v)] ? ' is-major' : '') + '" style="left:' + xp + '%"></span>';
+    }
+    var hp = ((clamp(dv, c.min, c.max) - c.min) / span * 100).toFixed(3);
+    var labels = c.majors.map(function (m) { return '<span class="ff-ruler-lbl" style="left:' + ((m.v - c.min) / span * 100).toFixed(4) + '%">' + m.l + '</span>'; }).join('');
+    return '<div class="ff-ruler" data-ff-ruler="' + kind + '" tabindex="0" role="slider" aria-valuemin="' + c.min + '" aria-valuemax="' + c.max + '" aria-valuenow="' + round(dv) + '">'
+      + '<div class="ff-ruler-box"><div class="ff-ruler-scale">' + ticks + '<div class="ff-ruler-handle" data-ff-handle style="left:' + hp + '%"></div></div></div>'
       + '<div class="ff-ruler-labels">' + labels + '</div>'
       + '</div>';
   }
@@ -322,23 +312,26 @@
   }
 
   // ---- interactions -------------------------------------------------------
-  function setRuler(kind, v) {
+  // dv is in the display unit.
+  function setRuler(kind, dv) {
     var c = rulerConfig(kind);
-    v = clamp(Math.round(v), c.min, c.max);
-    setCanonical(kind, v);
+    dv = clamp(Math.round(dv / c.step) * c.step, c.min, c.max);
+    setCanonical(kind, c.toCanon(dv));
     var big = dialog.querySelector('[data-ff-big="' + kind + '"]');
     if (big) big.innerHTML = bigValue(kind);
     var rl = dialog.querySelector('[data-ff-ruler="' + kind + '"]');
     if (rl) {
       var h = rl.querySelector('[data-ff-handle]');
-      if (h) h.style.left = ((v - c.min) / (c.max - c.min) * 100).toFixed(2) + '%';
-      rl.setAttribute('aria-valuenow', v);
+      if (h) h.style.left = ((dv - c.min) / (c.max - c.min) * 100).toFixed(3) + '%';
+      rl.setAttribute('aria-valuenow', Math.round(dv));
     }
   }
   function valueFromPointer(kind, clientX) {
     var rl = dialog.querySelector('[data-ff-ruler="' + kind + '"]');
     if (!rl) return null;
-    var c = rulerConfig(kind), rect = rl.getBoundingClientRect();
+    // Measure against the box, not the whole ruler (labels add height only).
+    var box = rl.querySelector('.ff-ruler-box') || rl;
+    var c = rulerConfig(kind), rect = box.getBoundingClientRect();
     return c.min + ((clientX - rect.left) / rect.width) * (c.max - c.min);
   }
 
@@ -412,9 +405,9 @@
     dialog.addEventListener('keydown', function (e) {
       var rl = e.target.closest('[data-ff-ruler]');
       if (!rl) return;
-      var kind = rl.dataset.ffRuler;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setRuler(kind, canonical(kind) - 1); e.preventDefault(); }
-      else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setRuler(kind, canonical(kind) + 1); e.preventDefault(); }
+      var kind = rl.dataset.ffRuler, dv = rulerConfig(kind).toDisp(canonical(kind));
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setRuler(kind, dv - 1); e.preventDefault(); }
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setRuler(kind, dv + 1); e.preventDefault(); }
     });
     dialog.addEventListener('close', function () { document.body.classList.remove('locked'); });
   }
