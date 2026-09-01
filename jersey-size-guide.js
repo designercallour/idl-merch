@@ -76,7 +76,7 @@
   }
 
   function flatTable(g) {
-    var head = '<tr><th scope="col"><span class="jg-sr">Measurement</span></th>'
+    var head = '<tr><th scope="col">Product Label</th>'
       + g.sizes.map(function (s) { return '<th scope="col">' + esc(sizeLabel(s)) + '</th>'; }).join('') + '</tr>';
     var rows = g.measurements.map(function (m) {
       return '<tr><th scope="row">' + esc(m.name) + '</th>'
