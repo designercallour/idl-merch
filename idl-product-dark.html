@@ -5348,7 +5348,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
 .jersey-guide:not([open]) { display: none; }
-.jersey-guide::backdrop { background: rgba(0, 0, 0, 0.72); }
+.jersey-guide::backdrop { background: rgba(0, 0, 0, 0.7); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
 
 .jg-head {
   display: flex;
@@ -5537,7 +5537,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   display: grid; grid-template-rows: auto minmax(0,1fr) auto auto;
 }
 .fitfinder:not([open]) { display: none; }
-.fitfinder::backdrop { background: rgba(0,0,0,0.72); }
+.fitfinder::backdrop { background: rgba(0,0,0,0.7); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
 .ff-head { display: flex; align-items: center; gap: 12px; height: 56px; min-height: 56px; padding: 0 18px; border-bottom: 1px solid rgba(255,255,255,0.12); }
 .ff-head-title { flex: 1 1 auto; margin: 0; color: #fff; font: 500 16px/16px NeueHaas, Arial, sans-serif; }
 .ff-back, .ff-close { flex: 0 0 auto; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; }
