@@ -285,7 +285,13 @@
 
     dialog.addEventListener('click', function (e) {
       if (e.target.closest('[data-jg-close]')) { dialog.close(); return; }
-      if (e.target.closest('[data-jg-reco-open]')) { openReco(); return; }
+      // The footer CTA opens the full fit-finder wizard (same as the PDP link),
+      // not the old inline chest input.
+      if (e.target.closest('[data-jg-reco-open]')) {
+        if (window.IDLFitFinder) { dialog.close(); window.IDLFitFinder.open(active, productKey); }
+        else { openReco(); }
+        return;
+      }
       if (e.target.closest('[data-jg-reco-cancel]')) { renderFoot(); return; }
       var unitBtn = e.target.closest('[data-jg-unit]');
       // Switching units would reinterpret a typed number, so the recommender
