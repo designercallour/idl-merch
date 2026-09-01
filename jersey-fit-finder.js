@@ -305,8 +305,6 @@
     } else if (key === 'waist') {
       primary = primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW);
       links = '<button class="ff-link" type="button" data-ff-skip>Skip this one</button>';
-    } else if (key === 'fit') {
-      primary = '';
     } else {
       primary = primaryBtn('Continue', 'data-ff-next', ICON_ARROW);
     }
@@ -397,7 +395,7 @@
         return;
       }
       var fitBtn = e.target.closest('[data-ff-fit]');
-      if (fitBtn) { state.fit = fitBtn.dataset.ffFit; next(); return; }
+      if (fitBtn) { state.fit = fitBtn.dataset.ffFit; render(); return; }
       if (e.target.closest('[data-ff-select]')) { selectSize(); return; }
       if (e.target === dialog) dialog.close();
     });
