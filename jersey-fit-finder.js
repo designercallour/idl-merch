@@ -276,23 +276,32 @@
     return resultStep();
   }
 
+  // Same primary button as Add to cart: lime bar, uppercase label, icon plate.
+  var ICON_ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+  var ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  function primaryBtn(label, attr, icon) {
+    return '<button class="ff-cta pdp-add newsletter-submit button primary" type="button" ' + attr + '>'
+      + '<span class="button-label">' + esc(label) + '</span>'
+      + '<span class="button-icon">' + icon + '</span></button>';
+  }
+
   function footer() {
     var key = currentStepKey();
     if (key === 'result') {
-      return '<button class="ff-cta" type="button" data-ff-select>Select ' + esc(sizeLabel(recommend().size)) + '</button>'
+      return primaryBtn('Select ' + sizeLabel(recommend().size), 'data-ff-select', ICON_CHECK)
         + '<button class="ff-link" type="button" data-ff-chart>See the full size chart</button>'
         + '<button class="ff-link" type="button" data-ff-restart>Start again</button>';
     }
     if (key === 'chest') {
-      return '<button class="ff-cta" type="button" data-ff-next>Use this measurement</button>'
+      return primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW)
         + '<button class="ff-link" type="button" data-ff-skip>I do not know it</button>';
     }
     if (key === 'waist') {
-      return '<button class="ff-cta" type="button" data-ff-next>Use this measurement</button>'
+      return primaryBtn('Use this measurement', 'data-ff-next', ICON_ARROW)
         + '<button class="ff-link" type="button" data-ff-skip>Skip this one</button>';
     }
     if (key === 'fit') return '';
-    return '<button class="ff-cta" type="button" data-ff-next>Continue</button>';
+    return primaryBtn('Continue', 'data-ff-next', ICON_ARROW);
   }
 
   function dots() {
@@ -303,7 +312,7 @@
 
   function render() {
     var back = state.step > 0 && currentStepKey() !== 'result';
-    dialog.querySelector('[data-ff-back]').style.visibility = back ? 'visible' : 'hidden';
+    dialog.querySelector('[data-ff-back]').style.display = back ? '' : 'none';
     dialog.querySelector('[data-ff-body]').innerHTML = stepBody();
     dialog.querySelector('[data-ff-foot]').innerHTML = footer();
     dialog.querySelector('[data-ff-dots]').innerHTML = dots();
