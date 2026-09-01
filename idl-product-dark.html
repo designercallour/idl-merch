@@ -5355,7 +5355,10 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 20px;
+  /* Height + horizontal padding matched to the cart drawer header (.drawer-header). */
+  height: 56px;
+  min-height: 56px;
+  padding: 0 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 .jg-head h2 {
@@ -5473,7 +5476,7 @@ body.header-is-light.team-menu-open .team-menu-team-media{ background:#0b1820 !i
 
 @media (max-width: 560px) {
   .jersey-guide { width: auto; height: auto; max-height: none; inset: 0; margin: 0; border: 0; }
-  .jg-head { padding: 16px 16px; }
+  .jg-head { padding: 0 16px; }
   .jg-body-scroll { padding: 16px 16px 22px; }
 }
 
