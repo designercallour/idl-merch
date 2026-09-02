@@ -4833,6 +4833,7 @@
     }
     .pdp-size-guide:hover { color: var(--pdp-ink); }
     .pdp-size-guide__icon { width: 18px; height: 18px; flex: 0 0 auto; }
+    .pdp-size-links { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
 
     .pdp-cuts { display: flex; gap: 10px; }
     .pdp-cut {
@@ -5215,9 +5216,13 @@
    Dark in both product pages: the supplied how-to-measure diagram carries its
    own dark background, so the modal stays dark to frame it. */
 .jersey-guide {
-  width: min(560px, calc(100% - 40px));
+  width: min(680px, calc(100% - 40px));
   max-width: none;
-  max-height: min(760px, calc(100vh - 56px));
+  height: auto;
+  max-height: none;
+  position: fixed;
+  top: 20px; right: 20px; bottom: 20px; left: auto;
+  margin: 0;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: #061015;
@@ -5227,20 +5232,24 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
 .jersey-guide:not([open]) { display: none; }
-.jersey-guide::backdrop { background: rgba(0, 0, 0, 0.72); }
+.jersey-guide::backdrop { background: rgba(0, 0, 0, 0.7); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
 
 .jg-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 20px;
+  /* Height + horizontal padding matched to the cart drawer header (.drawer-header). */
+  height: 56px;
+  min-height: 56px;
+  padding: 0 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 .jg-head h2 {
   margin: 0;
   color: #ffffff;
-  font: 400 22px/22px NeueHaas, Arial, sans-serif;
+  /* size / line-height / weight matched to the cart drawer title (#bag-title). */
+  font: 500 16px/16px NeueHaas, Arial, sans-serif;
   letter-spacing: 0.2px;
   text-transform: uppercase;
 }
@@ -5251,9 +5260,7 @@
   padding: 0;
   border: 0; border-radius: 0; background: transparent;
   color: #ffffff; cursor: pointer;
-  transition: color 140ms ease;
 }
-.jg-close:hover { color: var(--idl-go-gold, #c0e700); }
 .jg-close svg { width: 18px; height: 18px; }
 
 .jg-body-scroll { overflow-y: auto; padding: 18px 20px 22px; }
@@ -5280,16 +5287,19 @@
 .jg-cross { margin: 0 0 18px; color: #8f9aa2; font-size: 13px; line-height: 19px; }
 .jg-cross b { color: #c9d2d8; }
 
-.jg-units { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 2px 0 16px; }
-.jg-units-sep { color: rgba(255, 255, 255, 0.3); font: 400 13px/1 CarbonPlus, monospace; }
+.jg-units { display: flex; align-items: center; justify-content: flex-start; gap: 6px; margin: 2px 0 18px; }
+/* Pills styled exactly like the storefront team-filter tabs. */
+.jg-units-sep { display: none; }
 .jg-units button {
-  padding: 4px 6px;
-  border: 0; border-radius: 0; background: transparent; color: #6f7c85;
-  font: 700 12px/14px CarbonPlus, monospace; letter-spacing: 1.4px; text-transform: uppercase; cursor: pointer;
-  transition: color 140ms ease;
+  height: 40px; padding: 0 12px; min-width: 71px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #26343b; border-radius: 3px; background: transparent;
+  color: #C9D2D8;
+  font: 500 14px/18px CarbonPlus, monospace; letter-spacing: 0.01em; text-transform: uppercase;
+  cursor: pointer; transition: border-color 160ms ease, color 160ms ease;
 }
-.jg-units button:hover { color: #c9d2d8; }
-.jg-units button.is-on { color: var(--idl-go-gold, #c0e700); }
+.jg-units button:hover { border-color: #999; color: #C9D2D8; }
+.jg-units button.is-on { border-color: #FFFFFF; color: #FFFFFF; }
 
 /* Requirement: table scrolls inside its own container, never the page. */
 .jg-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -5308,10 +5318,10 @@
   color: #8f9aa2; font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
   background: rgba(255, 255, 255, 0.03);
 }
-.jg-table tbody th { color: var(--idl-go-gold, #c0e700); font-weight: 700; }
+.jg-table tbody th { color: #ffffff; font-weight: 700; }
 .jg-table tbody td { color: #eaf0f2; }
 
-.jg-h3 { margin: 26px 0 8px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; font: 400 18px/20px NeueHaas, Arial, sans-serif; letter-spacing: 0.4px; text-transform: uppercase; }
+.jg-h3 { margin: 26px 0 8px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; font: 500 14px/20px NeueHaas, Arial, sans-serif; letter-spacing: 0.4px; text-transform: uppercase; }
 .jg-h3--first { border-top: 0; padding-top: 0; margin-top: 10px; }
 .jg-measure-body { margin: 0 0 14px; color: #c9d2d8; font-size: 13px; line-height: 20px; }
 .jg-note { margin: 12px 0 0; color: #8f9aa2; font-size: 12px; line-height: 18px; }
@@ -5346,12 +5356,45 @@
   background: var(--idl-go-gold, #c0e700); color: #0c0f13; font: 700 11px/1 CarbonPlus, monospace;
 }
 
+/* How to measure yourself — product photo with wrap-around tape marks */
+.jg-measure { margin: 2px 0 6px; }
+.jg-measure-photo {
+  position: relative; aspect-ratio: 1 / 1; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 4px;
+  background: #0d222d; margin: 2px 0 18px;
+}
+.jg-measure-img { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 120%; background-position: 50% 40%; }
+.jg-tape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.jg-tape-front, .jg-tape-back, .jg-tape-arrow, .jg-tape-tick, .jg-tape-lead {
+  fill: none; stroke: var(--idl-go-gold, #c0e700); vector-effect: non-scaling-stroke;
+}
+.jg-tape-lead { stroke-width: 1; stroke-dasharray: 1.5 2.5; opacity: 0.55; }
+.jg-tape-front { stroke-width: 2; stroke-dasharray: 2 3.5; stroke-linecap: round; }
+.jg-tape-back { stroke-width: 1.5; stroke-dasharray: 2 4; opacity: 0.32; }
+.jg-tape-arrow { stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.jg-tape-tick { stroke-width: 2; stroke-linecap: round; }
+.jg-tape-lbl {
+  position: absolute; left: 15%; transform: translate(-50%, -50%);
+  width: 22px; height: 22px; display: grid; place-items: center;
+  background: var(--idl-go-gold, #c0e700); color: #0c0f13;
+  font: 700 12px/1 CarbonPlus, monospace;
+}
+.jg-measure-steps { display: grid; gap: 16px; }
+.jg-ms-row { display: flex; gap: 10px; align-items: flex-start; }
+.jg-ms-chip {
+  flex: 0 0 auto; width: 22px; height: 22px; display: grid; place-items: center;
+  background: var(--idl-go-gold, #c0e700); color: #0c0f13;
+  font: 700 12px/1 CarbonPlus, monospace;
+}
+.jg-ms-title { margin: 0 0 4px; color: #ffffff; font: 500 13px/16px NeueHaas, Arial, sans-serif; letter-spacing: 0.3px; }
+.jg-ms-desc { margin: 0; color: #c9d2d8; font-size: 13px; line-height: 19px; }
+
 .jg-footer { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.12); color: #8f9aa2; font-size: 12px; line-height: 18px; }
 .jg-footer a { color: var(--idl-go-gold, #c0e700); }
 
 @media (max-width: 560px) {
   .jersey-guide { width: auto; height: auto; max-height: none; inset: 0; margin: 0; border: 0; }
-  .jg-head { padding: 16px 16px; }
+  .jg-head { padding: 0 16px; }
   .jg-body-scroll { padding: 16px 16px 22px; }
 }
 
@@ -5369,6 +5412,94 @@
 .jg-reco-out { margin: 10px 0 0; color: #8f9aa2; font-size: 12px; line-height: 18px; }
 .jg-reco-out--hit { color: #ffffff; font-size: 15px; line-height: 21px; }
 .jg-reco-out--hit b { color: var(--idl-go-gold, #c0e700); font-weight: 700; }
+
+/* ---- Fit finder wizard ---- */
+.fitfinder {
+  width: min(680px, calc(100% - 40px)); max-width: none; height: auto; max-height: none;
+  position: fixed; top: 20px; right: 20px; bottom: 20px; left: auto; margin: 0; padding: 0;
+  border: 1px solid rgba(255,255,255,0.08); background: #061015; color: #fff; overflow: hidden;
+  display: grid; grid-template-rows: auto auto minmax(0,1fr) auto;
+}
+.fitfinder:not([open]) { display: none; }
+.fitfinder::backdrop { background: rgba(0,0,0,0.7); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+.ff-head { display: flex; align-items: center; gap: 12px; height: 56px; min-height: 56px; padding: 0 18px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.ff-head-title { flex: 1 1 auto; margin: 0; color: #fff; font: 500 16px/16px NeueHaas, Arial, sans-serif; text-transform: uppercase; }
+.ff-back, .ff-close { flex: 0 0 auto; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; }
+.ff-back svg, .ff-close svg { width: 18px; height: 18px; }
+.ff-scroll { overflow-y: auto; padding: 0 22px 8px; display: flex; flex-direction: column; }
+.ff-photo { position: relative; margin: 16px 0 6px; }
+.ff-photo-img { aspect-ratio: 16/9; background-size: 120%; background-position: 50% 22%; background-repeat: no-repeat; border: 1px solid rgba(255,255,255,0.12); background-color: #0d222d; }
+.ff-anchor { margin: 8px 0 0; color: #8f9aa2; font-size: 12px; line-height: 17px; }
+.ff-body { flex: 1 1 auto; display: flex; flex-direction: column; padding: 20px 0 12px; width: 100%; }
+.ff-q { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ff-controls { display: flex; flex-direction: column; align-items: center; width: 100%; margin: auto 0; }
+.ff-result { margin: auto 0; }
+.ff-title { align-self: stretch; text-align: left; margin: 6px 0 4px; color: #fff; font: 600 26px/30px NeueHaas, Arial, sans-serif; }
+.ff-sub { align-self: stretch; text-align: left; margin: 0 0 20px; max-width: 48ch; color: #9aa6ad; font-size: 14px; line-height: 20px; }
+.ff-units { display: inline-flex; gap: 6px; margin: 0 0 22px; }
+.ff-units button { height: 40px; min-width: 71px; padding: 0 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #26343b; border-radius: 3px; background: transparent; color: #C9D2D8; font: 500 14px/18px CarbonPlus, monospace; letter-spacing: 0.01em; text-transform: uppercase; cursor: pointer; transition: border-color 160ms ease, color 160ms ease; }
+.ff-units button:hover { border-color: #999; color: #C9D2D8; }
+.ff-units button.is-on { border-color: #ffffff; color: #ffffff; }
+.ff-big { color: #fff; font: 700 52px/1 NeueHaas, Arial, sans-serif; letter-spacing: -0.02em; }
+.ff-big .ff-unit { margin-left: 4px; font-size: 22px; font-weight: 500; color: #9aa6ad; vertical-align: baseline; }
+.ff-hint { margin: 14px 0 10px; color: #8f9aa2; font-size: 12px; }
+.ff-ruler { position: relative; width: 100%; margin-top: 2px; touch-action: none; cursor: pointer; outline: none; }
+.ff-ruler-box { position: relative; height: 52px; border: 1px solid rgba(255, 255, 255, 0.18); cursor: grab; transition: border-color 0.14s; }
+.ff-ruler-box:active { cursor: grabbing; }
+.ff-ruler:hover .ff-ruler-box, .ff-ruler:focus .ff-ruler-box, .ff-ruler-box:active { border-color: #ffffff; }
+.ff-ruler-scale { position: absolute; inset: 0; overflow: hidden; }
+.ff-tick { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 1px; height: 10px; background: #465862; }
+.ff-tick.is-major { height: 18px; background: #93a0a8; }
+.ff-ruler-handle { position: absolute; top: 4px; bottom: 4px; width: 3px; background: #fff; transform: translateX(-50%); pointer-events: none; transition: left 90ms ease-out; }
+/* Attaquer-style grab affordance: chevrons flank the handle, appearing and
+   nudging out on hover / focus / drag (always on for touch). */
+.ff-ruler-handle::before, .ff-ruler-handle::after {
+  content: ""; position: absolute; top: 50%; width: 5px; height: 5px;
+  border-top: 1.5px solid #fff; border-right: 1.5px solid #fff;
+  opacity: 0; transition: opacity 0.14s, margin 0.14s;
+}
+.ff-ruler-handle::before { right: 7px; margin-right: 0; transform: translateY(-50%) rotate(-135deg); }
+.ff-ruler-handle::after { left: 7px; margin-left: 0; transform: translateY(-50%) rotate(45deg); }
+.ff-ruler:hover .ff-ruler-handle::before, .ff-ruler:hover .ff-ruler-handle::after,
+.ff-ruler:focus .ff-ruler-handle::before, .ff-ruler:focus .ff-ruler-handle::after,
+.ff-ruler-box:active .ff-ruler-handle::before, .ff-ruler-box:active .ff-ruler-handle::after { opacity: 1; }
+.ff-ruler:hover .ff-ruler-handle::before, .ff-ruler:focus .ff-ruler-handle::before,
+.ff-ruler-box:active .ff-ruler-handle::before { margin-right: 3px; }
+.ff-ruler:hover .ff-ruler-handle::after, .ff-ruler:focus .ff-ruler-handle::after,
+.ff-ruler-box:active .ff-ruler-handle::after { margin-left: 3px; }
+.ff-ruler-labels { position: relative; height: 16px; margin-top: 8px; }
+.ff-ruler-lbl { position: absolute; transform: translateX(-50%); color: #8f9aa2; font: 500 12px/1 CarbonPlus, monospace; }
+.ff-ruler:focus-visible .ff-ruler-handle { outline: 1px solid #fff; outline-offset: 3px; }
+@media (hover: none) {
+  .ff-ruler-handle::before { opacity: 1; margin-right: 3px; }
+  .ff-ruler-handle::after { opacity: 1; margin-left: 3px; }
+}
+.ff-cards { width: 100%; display: grid; gap: 10px; margin: auto 0; }
+.ff-card { text-align: left; padding: 16px 18px; border: 1px solid #26343b; background: transparent; color: #fff; cursor: pointer; display: grid; gap: 4px; }
+.ff-card.is-on { border-color: #fff; }
+.ff-card-t { font: 600 16px/18px NeueHaas, Arial, sans-serif; }
+.ff-card-d { color: #9aa6ad; font-size: 13px; line-height: 18px; }
+.ff-result { padding: 12px 0 4px; text-align: center; }
+.ff-result-eyebrow { margin: 6px 0 0; text-align: center; color: #8f9aa2; font: 500 12px/1 CarbonPlus, monospace; letter-spacing: 2px; text-transform: uppercase; }
+.ff-result-size { margin: 6px 0 20px; text-align: center; color: #fff; font: 700 72px/1 NeueHaas, Arial, sans-serif; }
+.ff-result-line { margin: 0 0 12px; color: #d7dee2; font-size: 15px; line-height: 22px; }
+.ff-result-note { margin: 0; color: #8f9aa2; font-size: 13px; line-height: 19px; }
+.ff-foot { border-top: 1px solid rgba(255,255,255,0.12); padding: 14px 20px; background: #061015; display: grid; gap: 10px; }
+.ff-foot-row { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: stretch; }
+.ff-foot-row--split { grid-template-columns: 1fr 1fr; }
+.ff-foot-row .ff-cta { width: auto; min-width: 0; }
+.ff-btn-back { min-width: 0; min-height: 44px; padding: 0 22px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font: 700 16px/18px CarbonPlus, monospace; text-transform: uppercase; cursor: pointer; transition: border-color 120ms ease; }
+.ff-btn-back:hover { border-color: #fff; }
+.ff-link { background: transparent; border: 0; color: #9aa6ad; font: 400 13px/16px NeueHaas, Arial, sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ff-link:hover { color: #fff; }
+.ff-dots { display: flex; gap: 4px; padding: 16px 22px 4px; background: #061015; }
+.ff-dot { flex: 1 1 0; height: 3px; background: #26343b; }
+.ff-dot.is-on { background: var(--idl-go-gold, #c0e700); }
+@media (max-width: 560px) {
+  .fitfinder { width: auto; inset: 0; border: 0; }
+  .ff-foot-row--split { grid-template-columns: 1fr; }
+  .ff-foot-row--split .ff-cta { order: -1; }
+}
 </style>
 </head>
 <body class="product-page">
@@ -5633,7 +5764,10 @@
                 <div class="pdp-block">
                   <div class="pdp-block-head">
                     <h2>Size:</h2>
-                    <button class="pdp-size-guide" type="button" data-size-guide><svg class="pdp-size-guide__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="20" height="8" rx="1"></rect><line x1="6.5" y1="8" x2="6.5" y2="12"></line><line x1="11" y1="8" x2="11" y2="12"></line><line x1="15.5" y1="8" x2="15.5" y2="12"></line><line x1="20" y1="8" x2="20" y2="12"></line></svg><span class="pdp-size-guide__text">Size guide</span></button>
+                    <div class="pdp-size-links">
+                      <button class="pdp-size-guide" type="button" data-recommend-size><svg class="pdp-size-guide__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg><span class="pdp-size-guide__text">Recommend my size</span></button>
+                      <button class="pdp-size-guide" type="button" data-size-guide><svg class="pdp-size-guide__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="20" height="8" rx="1"></rect><line x1="6.5" y1="8" x2="6.5" y2="12"></line><line x1="11" y1="8" x2="11" y2="12"></line><line x1="15.5" y1="8" x2="15.5" y2="12"></line><line x1="20" y1="8" x2="20" y2="12"></line></svg><span class="pdp-size-guide__text">Size guide</span></button>
+                    </div>
                   </div>
                   <!-- Sold-out sizes stay in the list rather than disappearing:
                        a gap in the run is the clearest way to say what is gone. -->
@@ -5940,8 +6074,9 @@
   <button class="discount-close" type="button" aria-label="Close discount offer"><i data-lucide="x" aria-hidden="true"></i></button>
 
   <script src="product-catalog.js?v=2"></script>
-<script src="jersey-sizing.js"></script>
-<script src="jersey-size-guide.js"></script>
+<script src="jersey-sizing.js?v=3"></script>
+<script src="jersey-size-guide.js?v=10"></script>
+<script src="jersey-fit-finder.js?v=17"></script>
   <script src="product-image-zoom.js"></script>
   <script src="capsule-slider.js"></script>
   <script src="discount-teaser-grid.js"></script>
