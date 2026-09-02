@@ -78,7 +78,16 @@
     }
 
     var body = document.body;
-    var catalog = window.IDL_CATALOG || null;
+    // Product data goes through window.IDL (idl-data.js); falls back to the raw
+    // catalog. In Shopify only the provider changes, not this file.
+    var prod = function (key) {
+      if (window.IDL && window.IDL.product) return window.IDL.product(key);
+      return (window.IDL_CATALOG && window.IDL_CATALOG.products) ? (window.IDL_CATALOG.products[key] || null) : null;
+    };
+    var catOrder = function () {
+      if (window.IDL && window.IDL.order) return window.IDL.order();
+      return (window.IDL_CATALOG && window.IDL_CATALOG.order) ? window.IDL_CATALOG.order : [];
+    };
     var currencyApi = window.IDLCurrency || null;
 
     var bagButton = document.querySelector('.bag-button');
@@ -131,13 +140,13 @@
     }
 
     function cutMarkup(item) {
-      var product = catalog && catalog.products[item.key];
+      var product = prod(item.key);
       if (!product || !product.cut) return '';
       return '<span>Cut: ' + product.cut + '</span>';
     }
 
     function metaMarkup(item) {
-      var product = catalog && catalog.products[item.key];
+      var product = prod(item.key);
       var sizeLine = '<span>Size: ' + (item.size || (product ? product.sizes[0] : '')) + '</span>';
       return '<div class="drawer-item-meta">' + sizeLine + cutMarkup(item) + '</div>';
     }
@@ -169,21 +178,21 @@
     }
 
     function renderUpsell() {
-      if (!upsellEl || !catalog) { if (upsellEl) upsellEl.hidden = true; return; }
+      if (!upsellEl || !catOrder().length) { if (upsellEl) upsellEl.hidden = true; return; }
       if (!cart.length) { upsellEl.hidden = true; return; }
       var inCart = {};
       cart.forEach(function (i) { inCart[i.key] = true; });
       var productKey = currentProductKey();
-      var current = productKey ? catalog.products[productKey] : null;
+      var current = productKey ? prod(productKey) : null;
       var ranked = [current && current.pair]
-        .concat(catalog.order.filter(function (k) { return catalog.products[k].group === (current && current.group); }))
-        .concat(catalog.order);
+        .concat(catOrder().filter(function (k) { var pp = prod(k); return pp && pp.group === (current && current.group); }))
+        .concat(catOrder());
       var seen = {};
       var picks = [];
       for (var i = 0; i < ranked.length; i++) {
         var k = ranked[i];
         if (!k || seen[k] || inCart[k] || k === productKey) continue;
-        var p = catalog.products[k];
+        var p = prod(k);
         if (!p || p.soldOut) continue;
         seen[k] = true;
         picks.push(k);
@@ -192,7 +201,7 @@
       if (!picks.length) { upsellEl.hidden = true; return; }
       upsellEl.hidden = false;
       upsellTrack.innerHTML = picks.map(function (k) {
-        var p = catalog.products[k];
+        var p = prod(k);
         var sizes = inStockSizes(p);
         var oneSize = p.sizes.length === 1;
         var metaLine = oneSize
@@ -292,7 +301,7 @@
       var addButton = event.target.closest('[data-upsell-add]');
       if (addButton) {
         var key = addButton.dataset.upsellAdd;
-        var product = catalog && catalog.products[key];
+        var product = prod(key);
         if (!product) return;
         var select = addButton.closest('.upsell-card').querySelector('[data-upsell-size]');
         var size = select ? select.value : (inStockSizes(product)[0] || null);

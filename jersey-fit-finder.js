@@ -30,15 +30,18 @@
   };
 
   // ---- product / garment resolution (mirrors the size guide) --------------
+  // Product data goes through window.IDL (idl-data.js); falls back to the raw
+  // catalog so archived pages without the provider still work.
   function currentKey() {
+    if (window.IDL && window.IDL.currentKey) return window.IDL.currentKey();
     var picked = document.querySelector('.pdp-cut.is-selected');
     if (picked && picked.dataset.cutKey) return picked.dataset.cutKey;
     return new URLSearchParams(window.location.search).get('product');
   }
   function garmentFor(key) {
     if (!key || !window.IDL_JERSEY_GARMENT) return null;
-    var cat = window.IDL_CATALOG;
-    var product = cat && cat.products ? cat.products[key] : null;
+    var product = (window.IDL && window.IDL.product) ? window.IDL.product(key)
+      : (window.IDL_CATALOG && window.IDL_CATALOG.products ? window.IDL_CATALOG.products[key] : null);
     return window.IDL_JERSEY_GARMENT(key, product);
   }
 
