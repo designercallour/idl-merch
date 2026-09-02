@@ -284,6 +284,15 @@
 
     // One delegated listener: quantity/remove, upsell add, carousel arrows.
     bagDrawer.addEventListener('click', function (event) {
+      // Checkout → a real Shopify cart permalink built from the items' variant
+      // IDs (window.IDL.checkoutUrl). Prototype limit: without per-size variant
+      // IDs it uses each product's default variant — Shopify fixes that.
+      if (event.target.closest('.cart-checkout')) {
+        if (!cart.length) return;
+        var url = (window.IDL && window.IDL.checkoutUrl) ? window.IDL.checkoutUrl(cart) : null;
+        if (url) window.location.href = url;
+        return;
+      }
       var itemEl = event.target.closest('.drawer-item');
       if (event.target.closest('[data-qty-inc]') && itemEl) {
         var inc = cart[Number(itemEl.dataset.index)];
