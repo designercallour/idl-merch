@@ -281,10 +281,8 @@
       + '<button class="jg-close" type="button" data-jg-close aria-label="Close size guide">'
       + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>'
       + '</button></div>'
-      + '<div class="jg-body-scroll" data-jg-body></div>'
-      + '<div class="jg-foot" data-jg-foot></div>';
+      + '<div class="jg-body-scroll" data-jg-body></div>';
     document.body.appendChild(dialog);
-    renderFoot();
 
     dialog.addEventListener('click', function (e) {
       if (e.target.closest('[data-jg-close]')) { dialog.close(); return; }
