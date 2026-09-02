@@ -14,18 +14,32 @@
   var BY_ID = {};
   SIZING.garments.forEach(function (g) { BY_ID[g.id] = g; });
 
-  // Provisional body bands per garment. Each array is the UPPER bound of that
-  // size (like the chest bands' "up to X"): value <= bands[i] -> size i.
+  // Body bands per garment — the UPPER bound of each size (like the chest bands'
+  // "up to X": value <= bands[i] -> size i).
+  //
+  // IDL's tech pack records NO height/weight ("no model height/size recorded"),
+  // so these are DERIVED from the one real anchor we do have — the factory
+  // body-chest bands — via a standard adult-male apparel mapping applied to each
+  // size's chest upper bound:
+  //   weight(kg) ~= 58 + 4.33/in of chest   (36in->67, 40in->84, 44in->101)
+  //   height(cm) ~= 170 + 2/in of chest      (loose; only a light cross-check)
+  //   waist(in)  ~= chest - 6
+  // Upper bounds are the value at each size's chest UPPER bound, so a weight-only
+  // answer and a chest answer agree at every size (verified: 0 mismatch across
+  // the full chest sweep). Because the LS chest bands run ~2-3" smaller than SS,
+  // the LS bands fall one size earlier — reproducing the tech pack's own rule
+  // (76kg -> SS M and LS L). Validate against real per-size body ranges if IDL
+  // ever captures them; height stays the weakest signal by design.
   var BANDS = {
     'ss-jersey': {
-      weightKg: [60, 70, 80, 90, 100, 112],
-      heightCm: [168, 174, 182, 188, 194, 210],
-      waistIn:  [28, 31, 34, 37, 40, 44]
+      weightKg: [67, 75, 84, 93, 101, 112],
+      heightCm: [174, 178, 182, 186, 190, 210],
+      waistIn:  [30, 32, 34, 36, 38, 44]
     },
     'ls-jersey': {
-      weightKg: [70, 80, 90, 100, 112],
-      heightCm: [174, 182, 188, 194, 210],
-      waistIn:  [31, 34, 37, 40, 44]
+      weightKg: [62, 71, 80, 88, 112],
+      heightCm: [172, 176, 180, 184, 210],
+      waistIn:  [29, 31, 33, 35, 42]
     }
   };
 
@@ -245,10 +259,12 @@
   function resultStep() {
     var r = recommend();
     var size = sizeLabel(r.size);
-    var src = r.cIdx != null ? 'Your ' + frac(state.chestIn) + '" chest' : 'Your height and weight';
+    var hasChest = r.cIdx != null;
+    var src = hasChest ? 'Your ' + frac(state.chestIn) + '" chest' : 'Your height and weight';
+    var verb = hasChest ? 'puts' : 'put';
     // One plain sentence: what we based it on, and the fit tweak if any.
     var main = r.fitAdj === 0
-      ? src + ' puts you in ' + size + '.'
+      ? src + ' ' + verb + ' you in ' + size + '.'
       : src + ' is a ' + sizeLabel(g.sizes[r.base]) + ', but for '
           + (r.fitAdj < 0 ? 'a closer fit' : 'more room') + ' we recommend ' + size + '.';
     var note = gid === 'ss-jersey' ? 'Going for the long sleeve too? Size up — it runs slimmer.' : '';
